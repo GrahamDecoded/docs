@@ -1,0 +1,867 @@
+---
+title: 'Real-Time Streaming'
+description: 'Access real-time data streams for live ERP updates, analytics, and event notifications across all modules.'
+---
+
+# Real-Time Streaming
+
+The Decoded Ventures ERP API provides real-time data streaming capabilities for live updates, analytics, and event notifications. Stream data directly to your applications for instant insights and automated workflows.
+
+## 🔄 Streaming Overview
+
+### **What is Real-Time Streaming?**
+
+Real-time streaming allows you to receive live data updates as they happen in the ERP system. Instead of polling the API, you can subscribe to specific data streams and receive instant notifications.
+
+### **Benefits**
+- **Instant Updates**: Real-time data as events occur
+- **Reduced Latency**: No polling delays
+- **Efficient Resource Usage**: Lower bandwidth and CPU usage
+- **Live Dashboards**: Real-time analytics and monitoring
+- **Automated Workflows**: Instant trigger-based actions
+
+## 🏗️ Streaming Architecture
+
+### **How Events Are Delivered**
+
+The ERP streaming system uses a multi-layered approach to ensure reliable, real-time event delivery:
+
+#### **1. Firestore Real-Time Listeners**
+```typescript
+// Direct Firestore listeners for immediate updates
+const unsubscribe = admin.firestore()
+  .collection('stream_events')
+  .where('teamId', '==', teamId)
+  .where('stream', 'in', streams)
+  .onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === 'added' || change.type === 'modified') {
+        const event = change.doc.data();
+        // Process real-time event
+        handleStreamEvent(event);
+      }
+    });
+  });
+```
+
+**Benefits:**
+- **Immediate Updates**: Events delivered as soon as they're written to Firestore
+- **Automatic Reconnection**: Built-in connection management
+- **Offline Support**: Events queued and delivered when connection restored
+- **Scalable**: Handles thousands of concurrent listeners
+
+#### **2. Google Cloud Pub/Sub**
+```typescript
+// Asynchronous message queue for reliable delivery
+await publishToQueue({
+  type: 'stream.event.published',
+  data: event
+}, 'stream-events');
+```
+
+**Benefits:**
+- **Reliable Delivery**: Guaranteed at-least-once delivery
+- **Scalable**: Handles high-volume event processing
+- **Decoupled**: Services can process events independently
+- **Retry Logic**: Automatic retry for failed deliveries
+
+#### **3. WebSocket Server**
+```typescript
+// Direct WebSocket connections for low-latency delivery
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', (ws, req) => {
+  const apiKey = extractApiKey(req);
+  
+  ws.on('message', (message) => {
+    const { action, streams, filters } = JSON.parse(message);
+    
+    if (action === 'subscribe') {
+      // Store client subscription and send events
+      subscribeClient(ws, apiKey, streams, filters);
+    }
+  });
+});
+```
+
+**Benefits:**
+- **Lowest Latency**: Direct TCP connection
+- **Bidirectional**: Client can send commands and receive events
+- **Efficient**: No HTTP overhead
+- **Real-time**: Immediate event delivery
+
+#### **4. Server-Sent Events (SSE)**
+```typescript
+// HTTP-based streaming for browser compatibility
+app.get('/stream/sse', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  
+  // Send events as they occur
+  const unsubscribe = firestoreListener.onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      res.write(`data: ${JSON.stringify(change.doc.data())}\n\n`);
+    });
+  });
+});
+```
+
+**Benefits:**
+- **Browser Native**: No additional libraries needed
+- **HTTP-based**: Works through firewalls and proxies
+- **Automatic Reconnection**: Built-in retry mechanism
+- **Simple**: Easy to implement and debug
+
+### **Event Flow Architecture**
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   ERP Service   │───▶│  Firestore DB   │───▶│ Firestore Listener│
+│   (creates event)│    │   (stores event) │    │  (triggers)      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  WebSocket      │◀───│  Event Router   │───▶│   Pub/Sub       │
+│   Clients       │    │  (distributes)  │    │   (queues)      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   SSE Clients   │
+                       │   (browsers)    │
+                       └─────────────────┘
+```
+
+### **Delivery Methods Comparison**
+
+| Method | Latency | Reliability | Scalability | Use Case |
+|--------|---------|-------------|-------------|----------|
+| **Firestore Listeners** | ~100ms | High | Medium | Real-time dashboards |
+| **WebSocket** | ~10ms | High | High | High-frequency trading |
+| **Pub/Sub** | ~500ms | Very High | Very High | Background processing |
+| **SSE** | ~200ms | Medium | Medium | Browser applications |
+
+## 🏗️ Streaming Tiers
+
+### **Standard Plan**
+- **WebSocket Connections**: 5 concurrent connections
+- **Stream Types**: Basic ERP events (payments, invoices, leads)
+- **Data Retention**: 24 hours
+- **Rate Limits**: 1,000 events per minute
+
+### **Professional Plan**
+- **WebSocket Connections**: 25 concurrent connections
+- **Stream Types**: All ERP events + analytics streams
+- **Data Retention**: 7 days
+- **Rate Limits**: 10,000 events per minute
+- **Custom Filters**: Advanced filtering capabilities
+
+### **Enterprise Plan**
+- **WebSocket Connections**: 100 concurrent connections
+- **Stream Types**: All streams + custom data streams
+- **Data Retention**: 30 days
+- **Rate Limits**: 100,000 events per minute
+- **Custom Filters**: Full filtering and aggregation
+- **Dedicated Infrastructure**: Isolated streaming servers
+
+## 🔌 Streaming Protocols
+
+### **WebSocket (Recommended)**
+
+Primary streaming protocol for real-time data:
+
+```javascript
+// Connect to WebSocket stream
+const ws = new WebSocket('wss://api.decoded.africa/stream?apiKey=your-api-key');
+
+ws.onopen = () => {
+  console.log('Connected to ERP stream');
+  
+  // Subscribe to specific streams
+  ws.send(JSON.stringify({
+    action: 'subscribe',
+    streams: ['finance', 'payments', 'sales']
+  }));
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Received stream data:', data);
+  
+  // Handle different event types
+  switch (data.type) {
+    case 'payment.completed':
+      handlePaymentCompleted(data);
+      break;
+    case 'invoice.paid':
+      handleInvoicePaid(data);
+      break;
+    case 'lead.qualified':
+      handleLeadQualified(data);
+      break;
+  }
+};
+
+ws.onclose = () => {
+  console.log('Stream connection closed');
+  // Implement reconnection logic
+};
+```
+
+### **Server-Sent Events (SSE)**
+
+Alternative for browser-based applications:
+
+```javascript
+// Connect to SSE stream
+const eventSource = new EventSource('https://api.decoded.africa/stream/sse?apiKey=your-api-key');
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Received SSE data:', data);
+};
+
+eventSource.onerror = (error) => {
+  console.error('SSE error:', error);
+  eventSource.close();
+};
+```
+
+### **gRPC Streaming**
+
+High-performance streaming for server applications:
+
+```javascript
+// gRPC streaming client
+const { ERPStreamClient } = require('@decodedventures/erp-grpc');
+
+const client = new ERPStreamClient('api.decoded.africa:443');
+
+const stream = client.subscribe({
+  apiKey: 'your-api-key',
+  streams: ['finance', 'payments', 'sales'],
+  filters: {
+    teamId: 'team_123',
+    eventTypes: ['payment.completed', 'invoice.paid']
+  }
+});
+
+stream.on('data', (data) => {
+  console.log('Received gRPC stream data:', data);
+});
+
+stream.on('error', (error) => {
+  console.error('gRPC stream error:', error);
+});
+```
+
+## 📊 Available Streams
+
+### **Finance Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `finance.transactions` | Real-time financial transactions | `transaction.created`, `transaction.updated` |
+| `finance.invoices` | Invoice lifecycle events | `invoice.created`, `invoice.paid`, `invoice.overdue` |
+| `finance.disbursements` | Disbursement events | `disbursement.created`, `disbursement.completed` |
+| `finance.analytics` | Live financial analytics | `revenue.update`, `expense.update`, `profit.update` |
+
+### **Payment Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `payments.mpesa` | M-Pesa payment events | `payment.initiated`, `payment.completed`, `payment.failed` |
+| `payments.flick` | Flick card payment events | `payment.initiated`, `payment.completed`, `payment.failed` |
+| `payments.flutterwave` | Flutterwave payment events | `payment.initiated`, `payment.completed`, `payment.failed` |
+| `payments.airtel` | Airtel Money payment events | `payment.initiated`, `payment.completed`, `payment.failed` |
+| `payments.mtn` | MTN Money payment events | `payment.initiated`, `payment.completed`, `payment.failed` |
+| `payments.orange` | Orange Money payment events | `payment.initiated`, `payment.completed`, `payment.failed` |
+| `payments.analytics` | Payment analytics | `success.rate.update`, `volume.update`, `revenue.update` |
+
+### **Sales Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `sales.leads` | Lead management events | `lead.created`, `lead.qualified`, `lead.converted` |
+| `sales.opportunities` | Opportunity events | `opportunity.created`, `opportunity.won`, `opportunity.lost` |
+| `sales.orders` | Sales order events | `order.created`, `order.fulfilled`, `order.cancelled` |
+| `sales.analytics` | Sales analytics | `pipeline.update`, `conversion.update`, `revenue.update` |
+
+### **HR Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `hr.employees` | Employee events | `employee.created`, `employee.updated`, `employee.terminated` |
+| `hr.leave` | Leave request events | `leave.requested`, `leave.approved`, `leave.rejected` |
+| `hr.payroll` | Payroll events | `payroll.processed`, `payroll.paid`, `payroll.error` |
+| `hr.analytics` | HR analytics | `headcount.update`, `attendance.update`, `performance.update` |
+
+### **Support Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `support.tickets` | Support ticket events | `ticket.created`, `ticket.updated`, `ticket.resolved` |
+| `support.messages` | Support message events | `message.received`, `message.sent`, `message.escalated` |
+| `support.analytics` | Support analytics | `response.time.update`, `satisfaction.update`, `volume.update` |
+
+### **AI Agent Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `agents.sessions` | AI agent session events | `session.started`, `session.completed`, `session.error` |
+| `agents.actions` | AI agent action events | `action.executed`, `action.failed`, `action.completed` |
+| `agents.analytics` | AI agent analytics | `performance.update`, `accuracy.update`, `usage.update` |
+
+### **Agriculture Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `agriculture.crops` | Crop management events | `crop.planted`, `crop.harvested`, `crop.damaged` |
+| `agriculture.weather` | Weather events | `weather.alert`, `weather.update`, `weather.forecast` |
+| `agriculture.market` | Market data events | `price.update`, `demand.update`, `supply.update` |
+| `agriculture.analytics` | Agriculture analytics | `yield.update`, `efficiency.update`, `profit.update` |
+
+### **Manufacturing Streams**
+
+| Stream | Description | Events |
+|--------|-------------|--------|
+| `manufacturing.production` | Production events | `production.started`, `production.completed`, `production.error` |
+| `manufacturing.quality` | Quality control events | `quality.check`, `quality.pass`, `quality.fail` |
+| `manufacturing.maintenance` | Maintenance events | `maintenance.scheduled`, `maintenance.completed`, `maintenance.overdue` |
+| `manufacturing.analytics` | Manufacturing analytics | `efficiency.update`, `output.update`, `cost.update` |
+
+## 🔧 Stream Configuration
+
+### **Subscribe to Streams**
+
+```javascript
+// Subscribe to multiple streams
+const subscription = {
+  action: 'subscribe',
+  streams: ['finance.transactions', 'payments.mpesa', 'sales.leads'],
+  filters: {
+    teamId: 'team_123',
+    eventTypes: ['payment.completed', 'invoice.paid', 'lead.qualified']
+  },
+  options: {
+    includeMetadata: true,
+    includeAnalytics: true,
+    batchSize: 10
+  }
+};
+
+ws.send(JSON.stringify(subscription));
+```
+
+### **Advanced Filtering**
+
+```javascript
+// Advanced stream filtering
+const advancedSubscription = {
+  action: 'subscribe',
+  streams: ['finance.analytics'],
+  filters: {
+    teamId: 'team_123',
+    dateRange: {
+      start: '2024-01-01T00:00:00Z',
+      end: '2024-12-31T23:59:59Z'
+    },
+    amountRange: {
+      min: 1000,
+      max: 100000
+    },
+    categories: ['sales', 'services'],
+    status: ['completed', 'pending']
+  },
+  aggregation: {
+    groupBy: ['category', 'status'],
+    metrics: ['count', 'sum', 'average'],
+    window: '5m'
+  }
+};
+```
+
+### **Custom Data Streams (Enterprise)**
+
+```javascript
+// Create custom data stream
+const customStream = {
+  action: 'create_stream',
+  name: 'custom_business_metrics',
+  query: `
+    SELECT 
+      category,
+      SUM(amount) as total_amount,
+      COUNT(*) as transaction_count,
+      AVG(amount) as avg_amount
+    FROM finance_transactions 
+    WHERE team_id = 'team_123'
+    GROUP BY category
+    WINDOW 5m
+  `,
+  schedule: 'realtime',
+  retention: '7d'
+};
+
+ws.send(JSON.stringify(customStream));
+```
+
+## 📈 Stream Analytics
+
+### **Real-Time Analytics**
+
+```javascript
+// Subscribe to analytics streams
+const analyticsSubscription = {
+  action: 'subscribe',
+  streams: ['finance.analytics', 'sales.analytics', 'payments.analytics'],
+  aggregation: {
+    window: '1m',
+    metrics: ['sum', 'count', 'average', 'min', 'max'],
+    groupBy: ['category', 'status', 'payment_method']
+  }
+};
+
+ws.send(JSON.stringify(analyticsSubscription));
+```
+
+### **Analytics Data Format**
+
+```json
+{
+  "type": "analytics.update",
+  "stream": "finance.analytics",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "data": {
+    "window": "1m",
+    "metrics": {
+      "total_revenue": 150000,
+      "transaction_count": 25,
+      "average_amount": 6000,
+      "success_rate": 96.0
+    },
+    "breakdown": {
+      "by_category": {
+        "sales": {
+          "revenue": 100000,
+          "count": 15
+        },
+        "services": {
+          "revenue": 50000,
+          "count": 10
+        }
+      },
+      "by_payment_method": {
+        "mpesa": {
+          "revenue": 120000,
+          "count": 20
+        },
+        "card": {
+          "revenue": 30000,
+          "count": 5
+        }
+      }
+    }
+  }
+}
+```
+
+## 🔄 Stream Management
+
+### **Connection Management**
+
+```javascript
+class ERPStreamManager {
+  constructor(apiKey, options = {}) {
+    this.apiKey = apiKey;
+    this.options = {
+      reconnectInterval: 5000,
+      maxReconnectAttempts: 10,
+      ...options
+    };
+    this.ws = null;
+    this.subscriptions = new Set();
+    this.reconnectAttempts = 0;
+  }
+  
+  connect() {
+    this.ws = new WebSocket(`wss://api.decoded.africa/stream?apiKey=${this.apiKey}`);
+    
+    this.ws.onopen = () => {
+      console.log('Connected to ERP stream');
+      this.reconnectAttempts = 0;
+      
+      // Resubscribe to previous streams
+      this.subscriptions.forEach(subscription => {
+        this.ws.send(JSON.stringify(subscription));
+      });
+    };
+    
+    this.ws.onclose = () => {
+      console.log('Stream connection closed');
+      this.handleReconnect();
+    };
+    
+    this.ws.onerror = (error) => {
+      console.error('Stream error:', error);
+    };
+  }
+  
+  subscribe(subscription) {
+    this.subscriptions.add(subscription);
+    
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(subscription));
+    }
+  }
+  
+  unsubscribe(streamName) {
+    const unsubscribeMsg = {
+      action: 'unsubscribe',
+      stream: streamName
+    };
+    
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(unsubscribeMsg));
+    }
+  }
+  
+  handleReconnect() {
+    if (this.reconnectAttempts < this.options.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Reconnecting... Attempt ${this.reconnectAttempts}`);
+      
+      setTimeout(() => {
+        this.connect();
+      }, this.options.reconnectInterval);
+    } else {
+      console.error('Max reconnection attempts reached');
+    }
+  }
+  
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+    }
+  }
+}
+
+// Usage
+const streamManager = new ERPStreamManager('your-api-key', {
+  reconnectInterval: 5000,
+  maxReconnectAttempts: 10
+});
+
+// Subscribe to finance streams
+streamManager.subscribe('finance.transactions', {
+  filters: {
+    teamId: 'team_123',
+    amountRange: { min: 1000 }
+  },
+  onData: (data) => {
+    console.log('Finance transaction:', data);
+    updateDashboard(data);
+  }
+});
+
+// Subscribe to payment analytics
+streamManager.subscribe('payments.analytics', {
+  aggregation: {
+    window: '5m',
+    metrics: ['sum', 'count']
+  },
+  onData: (data) => {
+    console.log('Payment analytics:', data);
+    updatePaymentChart(data);
+  }
+});
+```
+
+### **Python**
+
+```python
+import asyncio
+import websockets
+import json
+from decodedventures import ERPStreamClient
+
+async def handle_stream():
+    client = ERPStreamClient(api_key='your-api-key')
+    
+    # Subscribe to multiple streams
+    await client.subscribe([
+        'finance.transactions',
+        'payments.mpesa',
+        'sales.leads'
+    ], {
+        'filters': {
+            'teamId': 'team_123'
+        },
+        'on_data': handle_stream_data
+    })
+
+def handle_stream_data(data):
+    print(f"Received stream data: {data}")
+    
+    if data['type'] == 'payment.completed':
+        handle_payment_completed(data)
+    elif data['type'] == 'invoice.paid':
+        handle_invoice_paid(data)
+
+# Run the stream
+asyncio.run(handle_stream())
+```
+
+### **React/Next.js**
+
+```javascript
+import { useEffect, useState } from 'react';
+import { useERPStream } from '@decodedventures/react-streaming';
+
+function Dashboard() {
+  const [transactions, setTransactions] = useState([]);
+  const [analytics, setAnalytics] = useState({});
+  
+  // Subscribe to finance transactions
+  useERPStream('finance.transactions', {
+    apiKey: 'your-api-key',
+    filters: { teamId: 'team_123' },
+    onData: (data) => {
+      setTransactions(prev => [...prev, data].slice(-50));
+    }
+  });
+  
+  // Subscribe to analytics
+  useERPStream('finance.analytics', {
+    apiKey: 'your-api-key',
+    aggregation: { window: '1m' },
+    onData: (data) => {
+      setAnalytics(data);
+    }
+  });
+  
+  return (
+    <div>
+      <h2>Real-Time Dashboard</h2>
+      <div>
+        <h3>Recent Transactions</h3>
+        {transactions.map(tx => (
+          <div key={tx.id}>
+            {tx.amount} - {tx.description}
+          </div>
+        ))}
+      </div>
+      <div>
+        <h3>Live Analytics</h3>
+        <p>Total Revenue: {analytics.total_revenue}</p>
+        <p>Transaction Count: {analytics.transaction_count}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+## 🚀 Use Cases
+
+### **Real-Time Dashboards**
+
+```javascript
+// Live business dashboard
+const dashboardStreams = [
+  'finance.analytics',
+  'sales.analytics',
+  'payments.analytics',
+  'hr.analytics'
+];
+
+dashboardStreams.forEach(stream => {
+  streamClient.subscribe(stream, {
+    aggregation: { window: '1m' },
+    onData: (data) => {
+      updateDashboardWidget(stream, data);
+    }
+  });
+});
+```
+
+### **Automated Workflows**
+
+```javascript
+// Automated invoice processing
+streamClient.subscribe('finance.invoices', {
+  filters: { status: 'paid' },
+  onData: (data) => {
+    if (data.type === 'invoice.paid') {
+      // Automatically send receipt
+      sendReceipt(data.invoiceId);
+      
+      // Update accounting system
+      updateAccountingSystem(data);
+      
+      // Trigger next workflow step
+      triggerNextWorkflow(data);
+    }
+  }
+});
+```
+
+### **Alert Systems**
+
+```javascript
+// Real-time alerts
+streamClient.subscribe('finance.transactions', {
+  filters: { amountRange: { min: 10000 } },
+  onData: (data) => {
+    if (data.amount > 10000) {
+      sendAlert({
+        type: 'high_value_transaction',
+        amount: data.amount,
+        description: data.description,
+        timestamp: data.timestamp
+      });
+    }
+  }
+});
+```
+
+### **High-Frequency Trading**
+
+```javascript
+// Ultra-low latency trading
+const tradingStream = new WebSocket('wss://api.decoded.africa/stream/trading');
+
+tradingStream.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  
+  // Execute trades based on real-time data
+  if (data.type === 'price.update' && data.price > threshold) {
+    executeTrade(data.symbol, 'buy', data.price);
+  }
+};
+```
+
+## 🔧 Best Practices
+
+### **Connection Management**
+
+1. **Implement Reconnection Logic**
+```javascript
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 10;
+
+function reconnect() {
+  if (reconnectAttempts < maxReconnectAttempts) {
+    setTimeout(() => {
+      connect();
+      reconnectAttempts++;
+    }, Math.pow(2, reconnectAttempts) * 1000); // Exponential backoff
+  }
+}
+```
+
+2. **Handle Connection States**
+```javascript
+ws.onclose = (event) => {
+  if (event.code === 1000) {
+    console.log('Connection closed normally');
+  } else {
+    console.log('Connection closed unexpectedly');
+    reconnect();
+  }
+};
+```
+
+### **Event Processing**
+
+1. **Batch Processing**
+```javascript
+let eventBuffer = [];
+const batchSize = 10;
+
+function processEvent(event) {
+  eventBuffer.push(event);
+  
+  if (eventBuffer.length >= batchSize) {
+    processBatch(eventBuffer);
+    eventBuffer = [];
+  }
+}
+```
+
+2. **Error Handling**
+```javascript
+function handleStreamError(error) {
+  console.error('Stream error:', error);
+  
+  // Log error for monitoring
+  logError(error);
+  
+  // Attempt recovery
+  if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    setTimeout(() => reconnect(), 60000);
+  }
+}
+```
+
+### **Performance Optimization**
+
+1. **Filter at Source**
+```javascript
+// Subscribe only to relevant events
+const subscription = {
+  streams: ['finance.transactions'],
+  filters: {
+    amountRange: { min: 1000 },
+    categories: ['sales', 'services']
+  }
+};
+```
+
+2. **Use Appropriate Protocol**
+```javascript
+// High-frequency: WebSocket
+// Browser: SSE
+// Background: Pub/Sub
+// Analytics: gRPC
+```
+
+## 📊 Monitoring & Analytics
+
+### **Stream Health Monitoring**
+
+```javascript
+// Monitor stream health
+const healthCheck = setInterval(async () => {
+  const health = await api.streaming.getHealth();
+  
+  if (health.status !== 'healthy') {
+    console.warn('Stream health issue:', health);
+    sendAlert('stream_health_warning', health);
+  }
+}, 30000);
+```
+
+### **Delivery Analytics**
+
+```javascript
+// Track delivery success rates
+function trackDelivery(eventId, status) {
+  analytics.track('stream_delivery', {
+    eventId,
+    status,
+    timestamp: Date.now(),
+    clientId: clientId
+  });
+}
+```
+
+## 🔗 Related Documentation
+
+- [Authentication](/authentication) - Set up API authentication
+- [Webhooks](/webhooks) - Alternative to streaming for notifications
+- [Error Handling](/errors) - Handle streaming errors effectively
+- [Rate Limits](/rate-limits) - Understand streaming rate limits

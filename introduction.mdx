@@ -1,0 +1,325 @@
+---
+title: 'Introduction'
+description: 'Welcome to the Decoded Ventures ERP API - A comprehensive enterprise resource planning solution with AI-powered agents, multi-provider payment processing, and specialized support for agricultural and manufacturing value chains.'
+---
+
+# Welcome to Decoded Ventures ERP API
+
+The Decoded Ventures ERP API is a comprehensive enterprise resource planning solution that combines traditional ERP functionality with cutting-edge AI-powered agents and multi-provider payment processing. Our API provides everything you need to build powerful business applications, with specialized support for **agricultural value chains** and **manufacturing value chains**.
+
+## 🚀 Key Features
+
+### **Complete ERP Functionality**
+- **Finance Management**: Invoicing, expense tracking, financial analytics
+- **Sales & Marketing**: Lead management, pipeline tracking, sales forecasting
+- **Human Resources**: Employee management, recruitment, performance tracking
+- **Customer Support**: Ticket management, customer service automation
+- **Logistics**: Shipment tracking, supply chain management
+- **Legal**: Document management, compliance tracking
+
+### **Specialized Value Chain Support**
+
+#### **🌾 Agricultural Value Chain**
+- **Farm Management**: Crop planning, field monitoring, yield tracking
+- **Supply Chain**: Seed-to-market traceability, quality control
+- **Market Intelligence**: Price forecasting, demand prediction
+- **Financial Management**: Crop financing, insurance integration
+- **Sustainability**: Carbon footprint tracking, organic certification
+
+#### **🏭 Manufacturing Value Chain**
+- **Production Planning**: Capacity planning, resource allocation
+- **Quality Control**: Quality assurance, compliance monitoring
+- **Inventory Management**: Raw materials, work-in-progress, finished goods
+- **Supply Chain**: Supplier management, procurement automation
+- **Maintenance**: Predictive maintenance, equipment monitoring
+
+### **AI-Powered Agents**
+- **Voice Agent**: Natural language voice interactions
+- **Sales Agent**: Lead scoring and sales forecasting
+- **Finance Agent**: Financial analysis and cash flow prediction
+- **HR Agent**: Candidate screening and performance analysis
+- **Support Agent**: Intelligent ticket creation and resolution
+- **Logistics Agent**: Route optimization and demand forecasting
+- **Customer Success Agent**: Customer health scoring and churn prediction
+- **Agriculture Agent**: Crop optimization and yield prediction
+- **Manufacturing Agent**: Production optimization and quality control
+
+### **Multi-Provider Payment Processing**
+- **M-Pesa**: Complete mobile money integration for Kenya
+- **Flick**: International card payment processing
+- **Flutterwave**: Global payments, payouts, and virtual cards
+
+### **Secure Credential Management**
+- **Google Secret Manager**: Enterprise-grade credential storage
+- **Multi-Provider Support**: OpenAI, Claude, Google AI, Twilio, SendGrid
+- **Automatic Verification**: Real-time credential validation
+- **Audit Trail**: Complete credential change history
+
+## 🏗️ Architecture
+
+Our API is built on a modern, scalable architecture:
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Web App       │    │  Mobile App     │    │  Third-party    │
+│   (Next.js)     │    │ (React Native)  │    │   Integrations  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   ERP API       │
+                    │ (Firebase       │
+                    │  Functions)     │
+                    └─────────────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         │                       │                       │
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  AI Agents      │    │  Payment        │    │  Credential     │
+│  Service        │    │  Providers      │    │  Manager        │
+│ (Cloud Run)     │    │ (M-Pesa/Flick/  │    │ (Secret Manager)│
+│                 │    │  Flutterwave)   │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+## 🔐 Authentication
+
+All API requests require authentication using API keys. Include your API key in the request headers:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 📊 Rate Limits
+
+- **Standard Plan**: 1,000 requests per hour
+- **Professional Plan**: 10,000 requests per hour
+- **Enterprise Plan**: 100,000 requests per hour
+
+## 🌍 Base URLs
+
+- **Production**: `https://api.decoded.africa`
+- **Staging**: `https://api-staging.decoded.africa`
+
+## 📱 SDKs & Libraries
+
+We provide official SDKs for popular programming languages:
+
+- [JavaScript/TypeScript SDK](/sdks/javascript)
+- [Python SDK](/sdks/python)
+- [PHP SDK](/sdks/php)
+- [Java SDK](/sdks/java)
+
+## 🚀 Quick Start
+
+### 1. Get Your API Key
+
+Sign up for an account at [erp.decoded.africa](https://erp.decoded.africa) and generate your API key from the dashboard.
+
+### 2. Install SDK (Optional)
+
+```bash
+npm install @decodedventures/erp-api
+```
+
+### 3. Make Your First Request
+
+```javascript
+import { DecodedVenturesAPI } from '@decodedventures/erp-api';
+
+const api = new DecodedVenturesAPI({
+  apiKey: 'your-api-key',
+  environment: 'production'
+});
+
+// Get dashboard analytics
+const analytics = await api.dashboard.getAnalytics({
+  teamId: 'your-team-id'
+});
+
+console.log(analytics);
+```
+
+### 4. Set Up Payment Providers
+
+```javascript
+// Store M-Pesa credentials
+await api.credentials.store({
+  clientId: 'your-client-id',
+  credentialType: 'mpesa_consumer_key',
+  credentialValue: 'your-mpesa-consumer-key',
+  notifyOnUpdate: true
+});
+
+// Store Flick credentials
+await api.credentials.store({
+  clientId: 'your-client-id',
+  credentialType: 'flick_api_key',
+  credentialValue: 'your-flick-api-key',
+  notifyOnUpdate: true
+});
+
+// Store Flutterwave credentials
+await api.credentials.store({
+  clientId: 'your-client-id',
+  credentialType: 'flutterwave_secret_key',
+  credentialValue: 'your-flutterwave-secret-key',
+  notifyOnUpdate: true
+});
+```
+
+### 5. Process Payments
+
+```javascript
+// M-Pesa STK Push
+const mpesaPayment = await api.payments.initiateSTKPush({
+  phoneNumber: '254700000000',
+  amount: 1000,
+  reference: 'INV-001',
+  description: 'Payment for invoice'
+});
+
+// Flick Card Payment
+const flickPayment = await api.payments.initiateFlickCheckoutV2({
+  amount: '1000',
+  currency: 'NGN',
+  email: 'customer@example.com',
+  phoneNumber: '07000000000',
+  reference: 'INV-002'
+});
+
+// Flutterwave Checkout
+const flutterwavePayment = await api.payments.initiateFlutterwaveCheckout({
+  amount: '1000',
+  currency: 'NGN',
+  email: 'customer@example.com',
+  txRef: 'INV-003',
+  redirectUrl: 'https://your-app.com/callback'
+});
+```
+
+### 6. Agricultural Value Chain Example
+
+```javascript
+// Farm management
+const farmData = await api.agriculture.getFarmData({
+  farmId: 'farm_123',
+  include: ['crops', 'soil', 'weather', 'yield']
+});
+
+// Crop planning
+const cropPlan = await api.agriculture.createCropPlan({
+  farmId: 'farm_123',
+  crop: 'maize',
+  season: '2024',
+  area: 50, // hectares
+  expectedYield: 2000 // kg per hectare
+});
+
+// Market intelligence
+const marketData = await api.agriculture.getMarketIntelligence({
+  crop: 'maize',
+  location: 'Nairobi',
+  timeframe: '3months'
+});
+```
+
+### 7. Manufacturing Value Chain Example
+
+```javascript
+// Production planning
+const productionPlan = await api.manufacturing.createProductionPlan({
+  productId: 'product_123',
+  quantity: 1000,
+  startDate: '2024-01-01',
+  endDate: '2024-01-31'
+});
+
+// Quality control
+const qualityCheck = await api.manufacturing.performQualityCheck({
+  batchId: 'batch_123',
+  parameters: ['weight', 'size', 'color', 'durability']
+});
+
+// Inventory management
+const inventory = await api.manufacturing.getInventory({
+  warehouseId: 'warehouse_123',
+  include: ['raw_materials', 'wip', 'finished_goods']
+});
+```
+
+## 🔗 Webhooks
+
+Set up webhooks to receive real-time updates:
+
+```javascript
+// Payment webhook
+app.post('/webhooks/payment', (req, res) => {
+  const { event, data } = req.body;
+  
+  switch (event) {
+    case 'payment.completed':
+      // Handle successful payment
+      break;
+    case 'payment.failed':
+      // Handle failed payment
+      break;
+  }
+  
+  res.status(200).json({ received: true });
+});
+
+// Agriculture webhook
+app.post('/webhooks/agriculture', (req, res) => {
+  const { event, data } = req.body;
+  
+  switch (event) {
+    case 'crop.harvested':
+      // Handle crop harvest
+      break;
+    case 'weather.alert':
+      // Handle weather alerts
+      break;
+  }
+  
+  res.status(200).json({ received: true });
+});
+
+// Manufacturing webhook
+app.post('/webhooks/manufacturing', (req, res) => {
+  const { event, data } = req.body;
+  
+  switch (event) {
+    case 'production.completed':
+      // Handle production completion
+      break;
+    case 'quality.alert':
+      // Handle quality alerts
+      break;
+  }
+  
+  res.status(200).json({ received: true });
+});
+```
+
+## 📚 What's Next?
+
+- [Authentication Guide](/authentication) - Learn about API authentication
+- [Payment APIs](/payments/mpesa) - Integrate payment processing
+- [ERP Modules](/modules/finance) - Access ERP functionality
+- [Agriculture Module](/modules/agriculture) - Agricultural value chain features
+- [Manufacturing Module](/modules/manufacturing) - Manufacturing value chain features
+- [AI Agents](/agents/overview) - Leverage AI-powered features
+- [Examples](/examples/quickstart) - See real-world examples
+
+## 🆘 Support
+
+- **Documentation**: This site
+- **Email**: support@decoded.africa
+- **Discord**: [Join our community](https://discord.gg/decodedventures)
+- **Status**: [API Status Page](https://status.decoded.africa)
+
+---
+
+**Ready to get started?** [Sign up for an account](https://erp.decoded.africa/onboarding) and start building with our powerful ERP API!

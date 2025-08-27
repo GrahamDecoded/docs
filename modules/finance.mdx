@@ -1,0 +1,785 @@
+---
+title: 'Finance Module'
+description: 'Complete financial management with invoicing, expense tracking, disbursements, and financial analytics.'
+---
+
+# Finance Module
+
+The Finance module provides comprehensive financial management capabilities including invoicing, expense tracking, disbursements, receipts, and financial analytics. All endpoints require authentication and appropriate permissions.
+
+## 🏦 Overview
+
+### **Key Features**
+- **Invoice Management**: Create, track, and manage invoices
+- **Expense Tracking**: Record and categorize expenses
+- **Disbursements**: Process payments and transfers
+- **Receipts**: Generate and manage payment receipts
+- **Financial Analytics**: Comprehensive reporting and insights
+- **Payment Integration**: Seamless integration with M-Pesa, Flick, and Flutterwave
+
+### **Collections**
+- `financeRecords`: Financial transactions and records
+- `invoices`: Invoice management
+- `receipts`: Payment receipts
+- `disbursements`: Payment disbursements
+- `expenses`: Expense tracking
+
+## 📊 Financial Records
+
+### **Create Finance Record**
+
+Create a new financial record (income or expense).
+
+```http
+POST /createFinanceRecord
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "type": "income",
+  "amount": 10000,
+  "currency": "KES",
+  "category": "sales",
+  "description": "Product sale",
+  "date": "2024-01-01",
+  "reference": "INV-001",
+  "metadata": {
+    "customerId": "customer_123",
+    "productId": "product_456"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Finance record created successfully",
+  "data": {
+    "id": "finance_123",
+    "teamId": "team_123",
+    "type": "income",
+    "amount": 10000,
+    "currency": "KES",
+    "category": "sales",
+    "description": "Product sale",
+    "date": "2024-01-01T00:00:00Z",
+    "reference": "INV-001",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### **Get Finance Records**
+
+Retrieve finance records with optional filtering.
+
+```http
+GET /getFinanceRecords?teamId=team_123&type=income&startDate=2024-01-01&endDate=2024-12-31
+```
+
+**Query Parameters:**
+- `teamId` (required): Team identifier
+- `type` (optional): `income` or `expense`
+- `category` (optional): Category filter
+- `startDate` (optional): Start date (YYYY-MM-DD)
+- `endDate` (optional): End date (YYYY-MM-DD)
+- `limit` (optional): Number of records to return (default: 50)
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Finance records retrieved successfully",
+  "data": {
+    "records": [
+      {
+        "id": "finance_123",
+        "teamId": "team_123",
+        "type": "income",
+        "amount": 10000,
+        "currency": "KES",
+        "category": "sales",
+        "description": "Product sale",
+        "date": "2024-01-01T00:00:00Z",
+        "reference": "INV-001",
+        "createdAt": "2024-01-01T00:00:00Z"
+      }
+    ],
+    "total": 1,
+    "summary": {
+      "totalIncome": 10000,
+      "totalExpenses": 0,
+      "netAmount": 10000
+    }
+  }
+}
+```
+
+### **Update Finance Record**
+
+Update an existing finance record.
+
+```http
+PUT /updateFinanceRecord
+```
+
+**Request Body:**
+```json
+{
+  "id": "finance_123",
+  "amount": 12000,
+  "description": "Updated product sale",
+  "metadata": {
+    "customerId": "customer_123",
+    "productId": "product_456",
+    "updatedBy": "user_123"
+  }
+}
+```
+
+### **Delete Finance Record**
+
+Delete a finance record.
+
+```http
+DELETE /deleteFinanceRecord
+```
+
+**Request Body:**
+```json
+{
+  "id": "finance_123"
+}
+```
+
+## 🧾 Invoice Management
+
+### **Create Invoice**
+
+Create a new invoice with automatic scheduling.
+
+```http
+POST /createInvoice
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "customerId": "customer_123",
+  "amount": 15000,
+  "currency": "KES",
+  "description": "Web development services",
+  "dueDate": "2024-02-01",
+  "items": [
+    {
+      "name": "Website Design",
+      "quantity": 1,
+      "unitPrice": 10000,
+      "total": 10000
+    },
+    {
+      "name": "SEO Optimization",
+      "quantity": 1,
+      "unitPrice": 5000,
+      "total": 5000
+    }
+  ],
+  "paymentTerms": "net_30",
+  "sendReminders": true
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Invoice created successfully",
+  "data": {
+    "id": "invoice_123",
+    "invoiceNumber": "INV-2024-001",
+    "teamId": "team_123",
+    "customerId": "customer_123",
+    "amount": 15000,
+    "currency": "KES",
+    "status": "pending",
+    "dueDate": "2024-02-01T00:00:00Z",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "reminderScheduled": true
+  }
+}
+```
+
+### **Update Invoice Status**
+
+Update invoice status (paid, unpaid, overdue, cancelled).
+
+```http
+PUT /updateInvoiceStatus
+```
+
+**Request Body:**
+```json
+{
+  "id": "invoice_123",
+  "status": "paid",
+  "paymentDate": "2024-01-15",
+  "paymentMethod": "mpesa",
+  "transactionId": "mpesa_123456"
+}
+```
+
+### **List Invoices**
+
+Retrieve invoices with filtering options.
+
+```http
+GET /listInvoices?teamId=team_123&status=pending&startDate=2024-01-01&endDate=2024-12-31
+```
+
+**Query Parameters:**
+- `teamId` (required): Team identifier
+- `status` (optional): `pending`, `paid`, `overdue`, `cancelled`
+- `customerId` (optional): Customer filter
+- `startDate` (optional): Start date (YYYY-MM-DD)
+- `endDate` (optional): End date (YYYY-MM-DD)
+
+### **Trigger Invoice Reminder**
+
+Send a reminder for an overdue invoice.
+
+```http
+POST /triggerInvoiceReminder
+```
+
+**Request Body:**
+```json
+{
+  "invoiceId": "invoice_123",
+  "reminderType": "email",
+  "message": "Friendly reminder about your overdue invoice"
+}
+```
+
+### **Escalate Invoice Collection**
+
+Escalate collection for severely overdue invoices.
+
+```http
+POST /escalateInvoiceCollection
+```
+
+**Request Body:**
+```json
+{
+  "invoiceId": "invoice_123",
+  "escalationType": "legal_notice",
+  "message": "Legal notice for overdue payment"
+}
+```
+
+## 💰 Disbursements
+
+### **Create Disbursement**
+
+Create a disbursement request.
+
+```http
+POST /createDisbursement
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "recipientId": "recipient_123",
+  "amount": 5000,
+  "currency": "KES",
+  "type": "salary",
+  "description": "January salary payment",
+  "paymentMethod": "mpesa",
+  "recipientPhone": "+254700000000",
+  "metadata": {
+    "employeeId": "emp_123",
+    "payrollPeriod": "2024-01"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Disbursement created successfully",
+  "data": {
+    "id": "disbursement_123",
+    "teamId": "team_123",
+    "recipientId": "recipient_123",
+    "amount": 5000,
+    "currency": "KES",
+    "type": "salary",
+    "status": "pending",
+    "paymentMethod": "mpesa",
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### **Approve Disbursement**
+
+Approve and execute a disbursement.
+
+```http
+PUT /approveDisbursement
+```
+
+**Request Body:**
+```json
+{
+  "id": "disbursement_123",
+  "approvedBy": "user_123",
+  "approvalNotes": "Approved for payment"
+}
+```
+
+### **List Disbursements**
+
+Retrieve disbursements with filtering.
+
+```http
+GET /listDisbursements?teamId=team_123&status=pending&startDate=2024-01-01&endDate=2024-12-31
+```
+
+## 📄 Receipts
+
+### **Issue Receipt**
+
+Generate a receipt for a payment.
+
+```http
+POST /issueReceipt
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "invoiceId": "invoice_123",
+  "amount": 15000,
+  "currency": "KES",
+  "paymentMethod": "mpesa",
+  "transactionId": "mpesa_123456",
+  "customerId": "customer_123",
+  "items": [
+    {
+      "name": "Website Design",
+      "quantity": 1,
+      "unitPrice": 10000,
+      "total": 10000
+    },
+    {
+      "name": "SEO Optimization",
+      "quantity": 1,
+      "unitPrice": 5000,
+      "total": 5000
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Receipt issued successfully",
+  "data": {
+    "id": "receipt_123",
+    "receiptNumber": "RCP-2024-001",
+    "teamId": "team_123",
+    "invoiceId": "invoice_123",
+    "amount": 15000,
+    "currency": "KES",
+    "paymentMethod": "mpesa",
+    "transactionId": "mpesa_123456",
+    "issuedAt": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### **List Receipts**
+
+Retrieve receipts with filtering.
+
+```http
+GET /listReceipts?teamId=team_123&startDate=2024-01-01&endDate=2024-12-31
+```
+
+## 📈 Financial Analytics
+
+### **Get Finance Analytics**
+
+Get comprehensive financial analytics and reports.
+
+```http
+POST /getFinanceAnalytics
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "period": "monthly",
+  "startDate": "2024-01-01",
+  "endDate": "2024-12-31",
+  "includeProjections": true,
+  "groupBy": "category"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Financial analytics generated successfully",
+  "data": {
+    "period": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31"
+    },
+    "summary": {
+      "totalIncome": 500000,
+      "totalExpenses": 300000,
+      "netProfit": 200000,
+      "profitMargin": 40
+    },
+    "breakdown": {
+      "byCategory": {
+        "sales": 400000,
+        "services": 100000,
+        "operational": 200000,
+        "marketing": 100000
+      },
+      "byMonth": {
+        "2024-01": 50000,
+        "2024-02": 55000
+      }
+    },
+    "projections": {
+      "nextMonth": 60000,
+      "nextQuarter": 180000
+    },
+    "trends": {
+      "growthRate": 10,
+      "trend": "increasing"
+    }
+  }
+}
+```
+
+## 🤖 AI-Powered Features
+
+### **Finance Agent Analysis**
+
+Get AI-powered financial analysis and insights.
+
+```http
+POST /financeAgentAnalyze
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "analysisType": "cash_flow",
+  "period": "quarterly",
+  "includeRecommendations": true
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Financial analysis completed",
+  "data": {
+    "analysis": {
+      "cashFlow": {
+        "operating": 150000,
+        "investing": -50000,
+        "financing": -30000,
+        "netChange": 70000
+      },
+      "ratios": {
+        "currentRatio": 2.5,
+        "quickRatio": 1.8,
+        "debtToEquity": 0.3
+      },
+      "trends": {
+        "revenueGrowth": 15,
+        "expenseGrowth": 8,
+        "profitabilityTrend": "improving"
+      }
+    },
+    "recommendations": [
+      {
+        "type": "cost_reduction",
+        "priority": "high",
+        "description": "Consider reducing marketing expenses by 10%",
+        "potentialSavings": 10000
+      },
+      {
+        "type": "revenue_optimization",
+        "priority": "medium",
+        "description": "Focus on high-margin products",
+        "potentialIncrease": 25000
+      }
+    ],
+    "risks": [
+      {
+        "type": "cash_flow",
+        "severity": "medium",
+        "description": "Seasonal cash flow fluctuations",
+        "mitigation": "Build cash reserves"
+      }
+    ]
+  }
+}
+```
+
+### **Finance Agent Predictions**
+
+Get AI-powered financial predictions and forecasting.
+
+```http
+POST /financeAgentPredict
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "predictionType": "cash_flow",
+  "forecastPeriod": 90,
+  "includeScenarios": true
+}
+```
+
+## 🔗 Payment Integration
+
+### **Payment Processing**
+
+The Finance module integrates seamlessly with our payment providers:
+
+#### **M-Pesa Integration**
+```javascript
+// Process M-Pesa payment for invoice
+const payment = await api.payments.initiateSTKPush({
+  phoneNumber: '254700000000',
+  amount: 15000,
+  reference: 'INV-2024-001',
+  description: 'Invoice payment'
+});
+```
+
+#### **Flick Integration**
+```javascript
+// Process card payment for invoice
+const payment = await api.payments.initiateFlickCheckoutV2({
+  amount: '15000',
+  currency: 'KES',
+  email: 'customer@example.com',
+  phoneNumber: '0700000000',
+  reference: 'INV-2024-001'
+});
+```
+
+#### **Flutterwave Integration**
+```javascript
+// Process international payment
+const payment = await api.payments.initiateFlutterwaveCheckout({
+  amount: '15000',
+  currency: 'KES',
+  email: 'customer@example.com',
+  txRef: 'INV-2024-001',
+  redirectUrl: 'https://your-app.com/callback'
+});
+```
+
+## 📊 Webhooks
+
+### **Finance Webhooks**
+
+Set up webhooks to receive real-time finance updates:
+
+```javascript
+// Finance webhook handler
+app.post('/webhooks/finance', (req, res) => {
+  const { event, data } = req.body;
+  
+  switch (event) {
+    case 'invoice.paid':
+      // Handle invoice payment
+      console.log('Invoice paid:', data.invoiceId);
+      break;
+    case 'disbursement.completed':
+      // Handle disbursement completion
+      console.log('Disbursement completed:', data.disbursementId);
+      break;
+    case 'receipt.issued':
+      // Handle receipt issuance
+      console.log('Receipt issued:', data.receiptId);
+      break;
+  }
+  
+  res.status(200).json({ received: true });
+});
+```
+
+### **Webhook Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `invoice.created` | New invoice created | `{ invoiceId, amount, customerId }` |
+| `invoice.paid` | Invoice payment received | `{ invoiceId, amount, paymentMethod }` |
+| `invoice.overdue` | Invoice past due date | `{ invoiceId, daysOverdue }` |
+| `disbursement.created` | New disbursement created | `{ disbursementId, amount, recipientId }` |
+| `disbursement.completed` | Disbursement processed | `{ disbursementId, transactionId }` |
+| `receipt.issued` | Receipt generated | `{ receiptId, invoiceId, amount }` |
+
+## 🚫 Error Handling
+
+### **Common Error Responses**
+
+#### **400 Bad Request**
+```json
+{
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "Invalid request data",
+    "details": "Amount must be a positive number"
+  }
+}
+```
+
+#### **404 Not Found**
+```json
+{
+  "error": {
+    "code": "RECORD_NOT_FOUND",
+    "message": "Finance record not found",
+    "details": "The specified finance record does not exist"
+  }
+}
+```
+
+#### **422 Unprocessable Entity**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "amount": "Amount must be greater than 0",
+      "currency": "Currency must be a valid ISO code"
+    }
+  }
+}
+```
+
+## 📚 Code Examples
+
+### **JavaScript/TypeScript**
+
+```javascript
+import { DecodedVenturesAPI } from '@decodedventures/erp-api';
+
+const api = new DecodedVenturesAPI({
+  apiKey: 'your-api-key'
+});
+
+// Create an invoice
+const invoice = await api.finance.createInvoice({
+  teamId: 'team_123',
+  customerId: 'customer_123',
+  amount: 15000,
+  currency: 'KES',
+  description: 'Web development services',
+  dueDate: '2024-02-01'
+});
+
+// Get financial analytics
+const analytics = await api.finance.getAnalytics({
+  teamId: 'team_123',
+  period: 'monthly',
+  startDate: '2024-01-01',
+  endDate: '2024-12-31'
+});
+
+// AI-powered analysis
+const analysis = await api.finance.analyze({
+  teamId: 'team_123',
+  analysisType: 'cash_flow',
+  period: 'quarterly'
+});
+```
+
+### **Python**
+
+```python
+from decodedventures import DecodedVenturesAPI
+
+api = DecodedVenturesAPI(api_key='your-api-key')
+
+# Create finance record
+finance_record = api.finance.create_record(
+    team_id='team_123',
+    type='income',
+    amount=10000,
+    currency='KES',
+    category='sales',
+    description='Product sale'
+)
+
+# Get finance records
+records = api.finance.get_records(
+    team_id='team_123',
+    type='income',
+    start_date='2024-01-01',
+    end_date='2024-12-31'
+)
+```
+
+### **PHP**
+
+```php
+use DecodedVentures\DecodedVenturesAPI;
+
+$api = new DecodedVenturesAPI('your-api-key');
+
+// Create disbursement
+$disbursement = $api->finance->createDisbursement([
+    'teamId' => 'team_123',
+    'recipientId' => 'recipient_123',
+    'amount' => 5000,
+    'currency' => 'KES',
+    'type' => 'salary',
+    'description' => 'January salary'
+]);
+
+// List invoices
+$invoices = $api->finance->listInvoices([
+    'teamId' => 'team_123',
+    'status' => 'pending'
+]);
+```
+
+## 📖 Related Documentation
+
+- [Authentication](/authentication) - Learn about API authentication
+- [Payment APIs](/payments/mpesa) - Payment processing integration
+- [AI Agents](/agents/finance) - AI-powered financial analysis
+- [Webhooks](/webhooks) - Real-time event notifications

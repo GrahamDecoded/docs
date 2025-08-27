@@ -1,0 +1,475 @@
+# Tender Management
+
+The Tender Management module provides comprehensive functionality for managing RFP (Request for Proposal) and tender submissions with AI-powered document analysis and workflow automation.
+
+## Overview
+
+This module enables ERP clients to:
+- Upload and analyze RFP documents using AI
+- Automatically extract requirements and create submission workflows
+- Track tender progress and manage team assignments
+- Submit tenders with automated validation
+- Monitor win probability and risk assessment
+
+## Key Features
+
+- **AI Document Analysis**: Automatically extract requirements from RFP documents
+- **Workflow Automation**: Create task-based workflows for tender submissions
+- **Team Collaboration**: Assign requirements to team members
+- **Progress Tracking**: Monitor tender status and deadlines
+- **Risk Assessment**: AI-powered win probability and risk analysis
+- **Submission Management**: Automated validation and submission tracking
+
+## Collections
+
+- `tenders` - Main tender records
+- `submission_requirements` - Requirements extracted from RFP documents
+- `tender_tasks` - Tasks created for requirement completion
+- `tender_submissions` - Final submission records
+- `tender_milestones` - Project milestones and deadlines
+- `tender_teams` - Team assignments and roles
+
+## API Endpoints
+
+### Create Tender
+
+Create a new tender/RFP with document upload and AI analysis.
+
+```http
+POST /api/tenders/create
+```
+
+**Request Body**:
+```json
+{
+  "organizationId": "org_123",
+  "title": "IT Infrastructure Upgrade",
+  "description": "Upgrade of corporate IT infrastructure",
+  "documentType": "rfp",
+  "clientName": "Government Agency",
+  "clientEmail": "procurement@agency.gov.ke",
+  "clientPhone": "+254700000000",
+  "submissionDeadline": "2024-02-15T23:59:59Z",
+  "estimatedValue": 500000,
+  "currency": "USD",
+  "location": {
+    "country": "Kenya",
+    "state": "Nairobi",
+    "city": "Nairobi"
+  },
+  "industry": "Technology",
+  "tags": ["infrastructure", "upgrade", "government"],
+  "documentUrl": "https://storage.googleapis.com/documents/rfp-123.pdf",
+  "filename": "rfp-123.pdf",
+  "fileSize": 2048576
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "tenderId": "tender_abc123",
+  "message": "Tender created successfully. AI analysis in progress."
+}
+```
+
+### Get Tender Details
+
+Retrieve comprehensive tender information including requirements, tasks, and milestones.
+
+```http
+POST /api/tenders/details
+```
+
+**Request Body**:
+```json
+{
+  "tenderId": "tender_abc123"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "tender": {
+    "id": "tender_abc123",
+    "title": "IT Infrastructure Upgrade",
+    "status": "requirements_gathered",
+    "clientName": "Government Agency",
+    "submissionDeadline": "2024-02-15T23:59:59Z",
+    "estimatedValue": 500000,
+    "currency": "USD",
+    "analysis": {
+      "isComplete": true,
+      "requirementsCount": 5,
+      "estimatedEffort": "high",
+      "riskLevel": "medium",
+      "winProbability": 65,
+      "keyRequirements": [
+        "Financial statements for last 3 years",
+        "Technical proposal",
+        "Project experience certificates"
+      ]
+    }
+  },
+  "requirements": [
+    {
+      "id": "req_123",
+      "title": "Company Registration Certificate",
+      "requirementType": "document",
+      "isRequired": true,
+      "priority": "high",
+      "status": "pending",
+      "assignedTo": "user_456"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task_123",
+      "title": "Prepare Financial Statements",
+      "status": "in_progress",
+      "priority": "critical",
+      "dueDate": "2024-02-10T23:59:59Z",
+      "assignedTo": "user_456"
+    }
+  ],
+  "submission": null,
+  "milestones": [
+    {
+      "id": "milestone_123",
+      "title": "Requirements Review",
+      "description": "Review and validate all requirements",
+      "dueDate": "2024-02-08T23:59:59Z",
+      "status": "pending"
+    }
+  ]
+}
+```
+
+### Update Requirement Status
+
+Update the status of a requirement and optionally assign it to a team member.
+
+```http
+POST /api/tenders/requirement/update
+```
+
+**Request Body**:
+```json
+{
+  "requirementId": "req_123",
+  "status": "in_progress",
+  "assignedTo": "user_456",
+  "documents": [
+    {
+      "id": "doc_123",
+      "name": "registration_certificate.pdf",
+      "description": "Company registration certificate",
+      "url": "https://storage.googleapis.com/documents/cert.pdf"
+    }
+  ]
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Requirement status updated successfully"
+}
+```
+
+### Submit Tender
+
+Submit a completed tender with all required documents.
+
+```http
+POST /api/tenders/submit
+```
+
+**Request Body**:
+```json
+{
+  "tenderId": "tender_abc123",
+  "submissionMethod": "email",
+  "submissionDetails": {
+    "recipientEmail": "procurement@agency.gov.ke",
+    "recipientName": "Procurement Officer"
+  },
+  "documents": [
+    {
+      "requirementId": "req_123",
+      "name": "technical_proposal.pdf",
+      "description": "Technical proposal document",
+      "url": "https://storage.googleapis.com/documents/proposal.pdf"
+    }
+  ]
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "submissionId": "sub_123",
+  "message": "Tender submitted successfully"
+}
+```
+
+### Get Tender Dashboard
+
+Retrieve dashboard statistics and recent tenders for an organization.
+
+```http
+POST /api/tenders/dashboard
+```
+
+**Request Body**:
+```json
+{
+  "organizationId": "org_123"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "dashboard": {
+    "totalTenders": 15,
+    "activeTenders": 8,
+    "submittedTenders": 5,
+    "awardedTenders": 2,
+    "totalValue": 2500000,
+    "upcomingDeadlines": [
+      {
+        "id": "tender_abc123",
+        "title": "IT Infrastructure Upgrade",
+        "submissionDeadline": "2024-02-15T23:59:59Z"
+      }
+    ],
+    "recentTenders": [
+      {
+        "id": "tender_abc123",
+        "title": "IT Infrastructure Upgrade",
+        "status": "in_progress",
+        "clientName": "Government Agency",
+        "estimatedValue": 500000
+      }
+    ],
+    "statusDistribution": {
+      "draft": 2,
+      "inProgress": 8,
+      "submitted": 5,
+      "awarded": 2,
+      "rejected": 0
+    }
+  }
+}
+```
+
+## AI-Powered Features
+
+### Document Analysis
+
+The system automatically analyzes uploaded RFP documents to:
+
+- Extract key requirements and specifications
+- Identify required documents and certificates
+- Assess complexity and effort estimation
+- Calculate win probability based on requirements
+- Determine risk level and critical deadlines
+
+### Requirement Extraction
+
+AI extracts requirements in categories:
+- **Document**: Certificates, licenses, registrations
+- **Financial**: Statements, audits, bank guarantees
+- **Technical**: Proposals, specifications, methodologies
+- **Legal**: Compliance certificates, tax documents
+- **Experience**: Project references, case studies
+
+### Risk Assessment
+
+AI provides risk assessment based on:
+- Number and complexity of requirements
+- Timeline constraints
+- Competition level
+- Technical expertise required
+- Financial capacity needed
+
+## Workflow Management
+
+### Task Creation
+
+When requirements are extracted, the system automatically:
+- Creates tasks for each requirement
+- Assigns priority levels (Critical, High, Medium, Low)
+- Sets due dates based on submission deadline
+- Assigns team members based on expertise
+
+### Progress Tracking
+
+Track progress through:
+- Requirement completion status
+- Task completion percentages
+- Milestone achievements
+- Deadline monitoring
+- Team performance metrics
+
+### Collaboration Features
+
+- Team member assignments
+- Task dependencies
+- Comment and feedback system
+- Document sharing and versioning
+- Real-time status updates
+
+## Error Handling
+
+### Common Error Codes
+
+| Code | Description | Solution |
+|------|-------------|----------|
+| `MISSING_REQUIREMENTS` | Required fields not completed | Complete all required requirements before submission |
+| `INVALID_DOCUMENTS` | Document format or size invalid | Check document format and size requirements |
+| `DEADLINE_PASSED` | Submission deadline has passed | Update deadline or create new tender |
+| `INSUFFICIENT_PERMISSIONS` | User lacks required permissions | Contact administrator for access |
+
+### Validation Rules
+
+- All required requirements must be completed
+- Documents must be in supported formats (PDF, DOC, DOCX)
+- File sizes must be under 10MB
+- Submission must be before deadline
+- User must have appropriate permissions
+
+## Code Examples
+
+### JavaScript/Node.js
+
+```javascript
+const { initializeApp } = require('firebase/app');
+const { getFunctions, httpsCallable } = require('firebase/functions');
+
+const functions = getFunctions();
+const createTender = httpsCallable(functions, 'createTender');
+
+// Create a new tender
+const createNewTender = async () => {
+  try {
+    const result = await createTender({
+      organizationId: 'org_123',
+      title: 'IT Infrastructure Upgrade',
+      documentType: 'rfp',
+      clientName: 'Government Agency',
+      submissionDeadline: '2024-02-15T23:59:59Z',
+      documentUrl: 'https://storage.googleapis.com/documents/rfp.pdf'
+    });
+    
+    console.log('Tender created:', result.data);
+  } catch (error) {
+    console.error('Error creating tender:', error);
+  }
+};
+```
+
+### Python
+
+```python
+import firebase_admin
+from firebase_admin import functions
+
+# Initialize Firebase
+firebase_admin.initialize_app()
+
+# Create tender function
+def create_tender():
+    try:
+        result = functions.https_callable('createTender').call({
+            'organizationId': 'org_123',
+            'title': 'IT Infrastructure Upgrade',
+            'documentType': 'rfp',
+            'clientName': 'Government Agency',
+            'submissionDeadline': '2024-02-15T23:59:59Z',
+            'documentUrl': 'https://storage.googleapis.com/documents/rfp.pdf'
+        })
+        
+        print('Tender created:', result.data)
+    except Exception as e:
+        print('Error creating tender:', e)
+```
+
+### cURL
+
+```bash
+# Create a new tender
+curl -X POST "https://api.decoded.africa/tenders/create" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "organizationId": "org_123",
+    "title": "IT Infrastructure Upgrade",
+    "documentType": "rfp",
+    "clientName": "Government Agency",
+    "submissionDeadline": "2024-02-15T23:59:59Z",
+    "documentUrl": "https://storage.googleapis.com/documents/rfp.pdf"
+  }'
+
+# Get tender details
+curl -X POST "https://api.decoded.africa/tenders/details" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "tenderId": "tender_abc123"
+  }'
+```
+
+## Webhooks
+
+### Tender Events
+
+The system sends webhooks for the following events:
+
+- `tender.created` - New tender created
+- `tender.analysis_complete` - AI analysis completed
+- `tender.requirement_updated` - Requirement status changed
+- `tender.submitted` - Tender submitted
+- `tender.awarded` - Tender awarded
+- `tender.rejected` - Tender rejected
+
+### Webhook Payload Example
+
+```json
+{
+  "event": "tender.analysis_complete",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "tenderId": "tender_abc123",
+    "requirementsCount": 5,
+    "estimatedEffort": "high",
+    "winProbability": 65,
+    "riskLevel": "medium"
+  }
+}
+```
+
+## Rate Limits
+
+- **Create Tender**: 10 requests per hour
+- **Get Details**: 100 requests per hour
+- **Update Requirements**: 50 requests per hour
+- **Submit Tender**: 5 requests per hour
+- **Dashboard**: 60 requests per hour
+
+## Related Documentation
+
+- [Authentication](./authentication.mdx)
+- [File Upload](./file-upload.mdx)
+- [Team Management](./team-management.mdx)
+- [Notifications](./notifications.mdx)
+- [Webhooks](./webhooks.mdx)
+
+

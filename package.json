@@ -1,0 +1,31 @@
+{
+  "name": "decodedventures-api-docs",
+  "version": "1.0.0",
+  "description": "API documentation for Decoded Ventures ERP API",
+  "private": true,
+  "scripts": {
+    "dev": "mintlify dev",
+    "build": "mintlify build",
+    "deploy": "mintlify deploy"
+  },
+  "devDependencies": {
+    "mintlify": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/decodedventures/decodedventures-api-monorepo.git",
+    "directory": "apps/api-docs"
+  },
+  "keywords": [
+    "api",
+    "documentation",
+    "erp",
+    "decodedventures",
+    "mintlify"
+  ],
+  "author": "Decoded Ventures",
+  "license": "MIT"
+}

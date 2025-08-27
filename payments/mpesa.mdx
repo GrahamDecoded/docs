@@ -1,0 +1,845 @@
+---
+title: 'M-Pesa Integration'
+description: 'Integrate M-Pesa mobile money payments into your application with STK Push, B2C, C2B, and advanced features.'
+---
+
+# M-Pesa Integration
+
+The Decoded Ventures ERP API provides comprehensive M-Pesa mobile money integration for Kenya and other supported markets. This guide covers all M-Pesa payment methods and features.
+
+## 🏦 M-Pesa Overview
+
+### **Supported Markets**
+- **Kenya**: Full M-Pesa integration
+- **Tanzania**: M-Pesa integration
+- **Uganda**: M-Pesa integration
+- **Ghana**: M-Pesa integration
+- **Zambia**: M-Pesa integration
+
+### **Payment Methods**
+- **STK Push**: Customer-initiated payments
+- **B2C**: Business to Customer disbursements
+- **C2B**: Customer to Business payments
+- **B2B**: Business to Business payments
+- **QR Codes**: Dynamic QR code payments
+- **Airtime**: Airtime purchase and transfer
+
+## 🔧 Setup and Configuration
+
+### **1. M-Pesa Credentials**
+
+Store your M-Pesa credentials securely using our credential management system:
+
+```javascript
+// Store M-Pesa credentials
+const credentials = await api.credentials.store({
+  clientId: 'client_123',
+  credentialType: 'mpesa_consumer_key',
+  credentialValue: 'your_mpesa_consumer_key',
+  notifyOnUpdate: true
+});
+
+const credentials2 = await api.credentials.store({
+  clientId: 'client_123',
+  credentialType: 'mpesa_consumer_secret',
+  credentialValue: 'your_mpesa_consumer_secret',
+  notifyOnUpdate: true
+});
+
+const credentials3 = await api.credentials.store({
+  clientId: 'client_123',
+  credentialType: 'mpesa_passkey',
+  credentialValue: 'your_mpesa_passkey',
+  notifyOnUpdate: true
+});
+
+const credentials4 = await api.credentials.store({
+  clientId: 'client_123',
+  credentialType: 'mpesa_business_shortcode',
+  credentialValue: 'your_mpesa_business_shortcode',
+  notifyOnUpdate: true
+});
+```
+
+### **2. Verify Credentials**
+
+Test your M-Pesa credentials:
+
+```javascript
+// Verify M-Pesa credentials
+const verification = await api.credentials.verify({
+  clientId: 'client_123',
+  credentialType: 'mpesa_consumer_key'
+});
+
+console.log('Credential status:', verification.status);
+```
+
+## 💳 STK Push (Customer-Initiated Payments)
+
+### **Initiate STK Push**
+
+Send a payment request to the customer's phone:
+
+```http
+POST /initiateSTKPush
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "phoneNumber": "254700000000",
+  "amount": 1500,
+  "reference": "INV-2024-001",
+  "description": "Invoice payment",
+  "callbackUrl": "https://your-app.com/mpesa/callback",
+  "metadata": {
+    "invoiceId": "inv_123",
+    "customerId": "customer_456"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "STK Push initiated successfully",
+  "data": {
+    "checkoutRequestId": "ws_CO_1234567890",
+    "merchantRequestId": "29115-34620561-1",
+    "responseCode": "0",
+    "responseDescription": "Success. Request accepted for processing",
+    "customerMessage": "Success. Request accepted for processing"
+  }
+}
+```
+
+### **Check Payment Status**
+
+Check the status of an STK Push payment:
+
+```http
+POST /getPaymentStatus
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "checkoutRequestId": "ws_CO_1234567890",
+  "merchantRequestId": "29115-34620561-1"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Payment status retrieved",
+  "data": {
+    "checkoutRequestId": "ws_CO_1234567890",
+    "merchantRequestId": "29115-34620561-1",
+    "resultCode": "0",
+    "resultDesc": "The service request is processed successfully.",
+    "amount": 1500,
+    "mpesaReceiptNumber": "QK12345678",
+    "transactionDate": "2024-01-01T12:00:00Z",
+    "phoneNumber": "254700000000"
+  }
+}
+```
+
+## 💸 B2C (Business to Customer)
+
+### **Initiate B2C Disbursement**
+
+Send money to a customer's M-Pesa account:
+
+```http
+POST /initiateB2CDisbursement
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "phoneNumber": "254700000000",
+  "amount": 5000,
+  "reference": "SALARY-2024-01",
+  "description": "January salary payment",
+  "occasion": "Salary payment",
+  "metadata": {
+    "employeeId": "emp_123",
+    "payrollPeriod": "2024-01"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "B2C disbursement initiated successfully",
+  "data": {
+    "originatorConversationId": "29115-34620561-1",
+    "conversationId": "AG_20240101_1234567890",
+    "responseCode": "0",
+    "responseDescription": "Accept the service request successfully."
+  }
+}
+```
+
+### **B2C Callback**
+
+Handle B2C disbursement callbacks:
+
+```javascript
+// B2C callback handler
+app.post('/mpesa/b2c-callback', (req, res) => {
+  const { Result } = req.body.Body.stkCallback;
+  
+  if (Result.ResultCode === 0) {
+    console.log('B2C successful:', {
+      transactionId: Result.TransactionID,
+      amount: Result.TransactionAmount,
+      phoneNumber: Result.TransactionReceipt
+    });
+  } else {
+    console.log('B2C failed:', Result.ResultDesc);
+  }
+  
+  res.status(200).json({ received: true });
+});
+```
+
+## 🏪 C2B (Customer to Business)
+
+### **Register C2B URLs**
+
+Register URLs for C2B payment notifications:
+
+```http
+POST /registerC2BURLs
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "shortCode": "123456",
+  "responseType": "Completed",
+  "confirmationUrl": "https://your-app.com/mpesa/confirmation",
+  "validationUrl": "https://your-app.com/mpesa/validation"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "C2B URLs registered successfully",
+  "data": {
+    "originatorConversationId": "29115-34620561-1",
+    "conversationId": "AG_20240101_1234567890",
+    "responseCode": "0",
+    "responseDescription": "Accept the service request successfully."
+  }
+}
+```
+
+### **C2B Confirmation**
+
+Handle C2B payment confirmations:
+
+```javascript
+// C2B confirmation handler
+app.post('/mpesa/confirmation', (req, res) => {
+  const {
+    TransID,
+    TransTime,
+    TransAmount,
+    BusinessShortCode,
+    BillReferenceNumber,
+    InvoiceNumber,
+    OrgAccountBalance,
+    MSISDN,
+    FirstName,
+    MiddleName,
+    LastName
+  } = req.body;
+  
+  console.log('C2B payment received:', {
+    transactionId: TransID,
+    amount: TransAmount,
+    phoneNumber: MSISDN,
+    reference: BillReferenceNumber
+  });
+  
+  res.status(200).json({ received: true });
+});
+```
+
+## 🏢 B2B (Business to Business)
+
+### **B2B Express Checkout**
+
+Process B2B payments:
+
+```http
+POST /initiateB2BExpressCheckout
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "primaryShortCode": "123456",
+  "receiverShortCode": "654321",
+  "amount": 10000,
+  "reference": "B2B-2024-001",
+  "description": "Business payment",
+  "accountReference": "ACCOUNT_REF"
+}
+```
+
+### **Business Paybill**
+
+Process paybill payments:
+
+```http
+POST /initiateBusinessPaybill
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "shortCode": "123456",
+  "amount": 5000,
+  "reference": "PAYBILL-2024-001",
+  "description": "Paybill payment",
+  "accountReference": "ACCOUNT_REF"
+}
+```
+
+### **Business Buy Goods**
+
+Process buy goods payments:
+
+```http
+POST /initiateBusinessBuyGoods
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "shortCode": "123456",
+  "amount": 3000,
+  "reference": "BUYGOODS-2024-001",
+  "description": "Buy goods payment",
+  "accountReference": "ACCOUNT_REF"
+}
+```
+
+## 🔄 Reversals
+
+### **Initiate Reversal**
+
+Reverse a transaction:
+
+```http
+POST /initiateReversal
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "transactionId": "QK12345678",
+  "amount": 1500,
+  "receiverParty": "254700000000",
+  "receiverIdentifierType": "1",
+  "resultUrl": "https://your-app.com/mpesa/reversal-result",
+  "timeoutUrl": "https://your-app.com/mpesa/reversal-timeout",
+  "remarks": "Transaction reversal"
+}
+```
+
+## 📅 Recurring Payments (Ratiba)
+
+### **Create Recurring Payment**
+
+Set up a recurring payment schedule:
+
+```http
+POST /createMpesaRatiba
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "shortCode": "123456",
+  "amount": 1000,
+  "phoneNumber": "254700000000",
+  "frequency": "daily",
+  "startDate": "2024-01-01",
+  "endDate": "2024-12-31",
+  "description": "Daily subscription payment",
+  "reference": "RATIBA-2024-001"
+}
+```
+
+### **Get Recurring Payment**
+
+Retrieve recurring payment details:
+
+```http
+POST /getMpesaRatiba
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "ratibaId": "ratiba_123"
+}
+```
+
+## 📱 QR Code Payments
+
+### **Generate Dynamic QR Code**
+
+Generate a dynamic QR code for payments:
+
+```http
+POST /generateDynamicQRCode
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "amount": 2000,
+  "reference": "QR-2024-001",
+  "description": "QR code payment",
+  "callbackUrl": "https://your-app.com/mpesa/qr-callback"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "QR code generated successfully",
+  "data": {
+    "qrCode": "00020101021226550014COM.MERCHANT011212345678901520459995303254540520005802TH530336054032005802TH6304",
+    "qrImageUrl": "https://api.decoded.africa/qr/QK12345678.png",
+    "reference": "QR-2024-001"
+  }
+}
+```
+
+## 📞 Airtime Services
+
+### **Purchase Airtime**
+
+Purchase airtime for a phone number:
+
+```http
+POST /initiateAirtimePurchase
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "phoneNumber": "254700000000",
+  "amount": 100,
+  "reference": "AIRTIME-2024-001",
+  "description": "Airtime purchase"
+}
+```
+
+### **Get Airtime Balance**
+
+Check airtime balance:
+
+```http
+POST /getAirtimeBalance
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "phoneNumber": "254700000000"
+}
+```
+
+## 💰 Tax Remittance
+
+### **Initiate Tax Remittance**
+
+Process tax payments:
+
+```http
+POST /initiateTaxRemittance
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "amount": 5000,
+  "reference": "TAX-2024-001",
+  "description": "Tax remittance",
+  "taxType": "VAT"
+}
+```
+
+## 📊 Account Management
+
+### **Get Account Balance**
+
+Check your M-Pesa account balance:
+
+```http
+POST /getAccountBalance
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "shortCode": "123456"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Account balance retrieved",
+  "data": {
+    "balance": 50000,
+    "currency": "KES",
+    "shortCode": "123456",
+    "timestamp": "2024-01-01T12:00:00Z"
+  }
+}
+```
+
+## 📈 Transaction Analytics
+
+### **Get Team Payments**
+
+Retrieve payment analytics for your team:
+
+```http
+POST /getTeamPayments
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "startDate": "2024-01-01",
+  "endDate": "2024-01-31",
+  "paymentType": "stk_push"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Payment analytics retrieved",
+  "data": {
+    "period": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    },
+    "summary": {
+      "totalPayments": 150,
+      "totalAmount": 750000,
+      "successfulPayments": 145,
+      "failedPayments": 5,
+      "successRate": 96.67
+    },
+    "breakdown": {
+      "byType": {
+        "stk_push": 100,
+        "b2c": 30,
+        "c2b": 20
+      },
+      "byDay": {
+        "2024-01-01": 5,
+        "2024-01-02": 8
+      }
+    }
+  }
+}
+```
+
+### **Get Team Disbursements**
+
+Retrieve disbursement analytics:
+
+```http
+POST /getTeamDisbursements
+```
+
+**Request Body:**
+```json
+{
+  "teamId": "team_123",
+  "startDate": "2024-01-01",
+  "endDate": "2024-01-31"
+}
+```
+
+## 🔄 Callback Handling
+
+### **Payment Callback**
+
+Handle payment callbacks:
+
+```javascript
+// Payment callback handler
+app.post('/mpesa/callback', (req, res) => {
+  const { Body } = req.body;
+  const { stkCallback } = Body;
+  
+  if (stkCallback.ResultCode === 0) {
+    // Payment successful
+    const {
+      CheckoutRequestID,
+      MerchantRequestID,
+      Amount,
+      MpesaReceiptNumber,
+      TransactionDate,
+      PhoneNumber
+    } = stkCallback.CallbackMetadata.Item;
+    
+    console.log('Payment successful:', {
+      checkoutRequestId: CheckoutRequestID.Value,
+      amount: Amount.Value,
+      receiptNumber: MpesaReceiptNumber.Value,
+      phoneNumber: PhoneNumber.Value
+    });
+    
+    // Update your database
+    updatePaymentStatus(CheckoutRequestID.Value, 'completed');
+  } else {
+    // Payment failed
+    console.log('Payment failed:', stkCallback.ResultDesc);
+    updatePaymentStatus(stkCallback.CheckoutRequestID, 'failed');
+  }
+  
+  res.status(200).json({ received: true });
+});
+```
+
+### **B2C Callback**
+
+Handle B2C callbacks:
+
+```javascript
+// B2C callback handler
+app.post('/mpesa/b2c-callback', (req, res) => {
+  const { Result } = req.body.Body.stkCallback;
+  
+  if (Result.ResultCode === 0) {
+    console.log('B2C successful:', {
+      transactionId: Result.TransactionID,
+      amount: Result.TransactionAmount,
+      phoneNumber: Result.TransactionReceipt
+    });
+  } else {
+    console.log('B2C failed:', Result.ResultDesc);
+  }
+  
+  res.status(200).json({ received: true });
+});
+```
+
+## 🚫 Error Handling
+
+### **Common M-Pesa Errors**
+
+| Error Code | Description | Solution |
+|------------|-------------|----------|
+| **1** | Insufficient funds | Customer needs to top up M-Pesa |
+| **2** | Less than minimum transaction value | Increase payment amount |
+| **4** | More than maximum transaction value | Decrease payment amount |
+| **5** | Would exceed daily transfer limit | Wait for next day or use different method |
+| **6** | Would exceed minimum balance | Customer needs to maintain minimum balance |
+| **7** | Unresolved primary party | Check phone number format |
+| **8** | Unresolved receiver party | Check receiver phone number |
+| **11** | Debit account invalid | Check account configuration |
+| **12** | Credit account invalid | Check receiver account |
+| **13** | Unresolved debit account | Verify sender account |
+| **14** | Unresolved credit account | Verify receiver account |
+| **15** | Duplicate detection | Check for duplicate transaction |
+| **17** | Internal failure | Retry the transaction |
+| **20** | Unresolved initiator | Check initiator configuration |
+| **26** | Traffic blocking condition | Wait and retry later |
+
+### **Error Handling Example**
+
+```javascript
+async function handleMpesaPayment(paymentData) {
+  try {
+    const response = await api.payments.initiateSTKPush(paymentData);
+    
+    if (response.data.responseCode === '0') {
+      console.log('STK Push initiated successfully');
+      return response.data;
+    } else {
+      throw new Error(`M-Pesa error: ${response.data.responseDescription}`);
+    }
+  } catch (error) {
+    console.error('M-Pesa payment error:', error);
+    
+    // Handle specific error codes
+    if (error.message.includes('Insufficient funds')) {
+      // Notify customer to top up
+      notifyCustomerToTopUp(paymentData.phoneNumber);
+    } else if (error.message.includes('Duplicate detection')) {
+      // Check if payment was already processed
+      checkPaymentStatus(paymentData.reference);
+    }
+    
+    throw error;
+  }
+}
+```
+
+## 📱 Code Examples
+
+### **JavaScript/TypeScript**
+
+```javascript
+import { DecodedVenturesAPI } from '@decodedventures/erp-api';
+
+const api = new DecodedVenturesAPI({
+  apiKey: 'your-api-key'
+});
+
+// Initiate STK Push
+const stkPush = await api.payments.initiateSTKPush({
+  teamId: 'team_123',
+  phoneNumber: '254700000000',
+  amount: 1500,
+  reference: 'INV-2024-001',
+  description: 'Invoice payment'
+});
+
+// Check payment status
+const status = await api.payments.getPaymentStatus({
+  teamId: 'team_123',
+  checkoutRequestId: stkPush.data.checkoutRequestId
+});
+
+// B2C disbursement
+const disbursement = await api.payments.initiateB2CDisbursement({
+  teamId: 'team_123',
+  phoneNumber: '254700000000',
+  amount: 5000,
+  reference: 'SALARY-2024-01',
+  description: 'January salary'
+});
+```
+
+### **Python**
+
+```python
+from decodedventures import DecodedVenturesAPI
+
+api = DecodedVenturesAPI(api_key='your-api-key')
+
+# Initiate STK Push
+stk_push = api.payments.initiate_stk_push(
+    team_id='team_123',
+    phone_number='254700000000',
+    amount=1500,
+    reference='INV-2024-001',
+    description='Invoice payment'
+)
+
+# Check payment status
+status = api.payments.get_payment_status(
+    team_id='team_123',
+    checkout_request_id=stk_push['data']['checkoutRequestId']
+)
+
+# B2C disbursement
+disbursement = api.payments.initiate_b2c_disbursement(
+    team_id='team_123',
+    phone_number='254700000000',
+    amount=5000,
+    reference='SALARY-2024-01',
+    description='January salary'
+)
+```
+
+### **PHP**
+
+```php
+use DecodedVentures\DecodedVenturesAPI;
+
+$api = new DecodedVenturesAPI('your-api-key');
+
+// Initiate STK Push
+$stkPush = $api->payments->initiateSTKPush([
+    'teamId' => 'team_123',
+    'phoneNumber' => '254700000000',
+    'amount' => 1500,
+    'reference' => 'INV-2024-001',
+    'description' => 'Invoice payment'
+]);
+
+// Check payment status
+$status = $api->payments->getPaymentStatus([
+    'teamId' => 'team_123',
+    'checkoutRequestId' => $stkPush['data']['checkoutRequestId']
+]);
+
+// B2C disbursement
+$disbursement = $api->payments->initiateB2CDisbursement([
+    'teamId' => 'team_123',
+    'phoneNumber' => '254700000000',
+    'amount' => 5000,
+    'reference' => 'SALARY-2024-01',
+    'description' => 'January salary'
+]);
+```
+
+## 📞 Support
+
+### **M-Pesa Issues**
+
+If you're experiencing M-Pesa integration issues:
+
+1. **Check Credentials**: Verify your M-Pesa credentials
+2. **Test Environment**: Use sandbox environment for testing
+3. **Phone Numbers**: Ensure phone numbers are in correct format
+4. **Amount Limits**: Check M-Pesa transaction limits
+5. **Network Issues**: Check M-Pesa network status
+
+### **Getting Help**
+
+- **Documentation**: [docs.decoded.africa](https://docs.decoded.africa)
+- **Email**: support@decoded.africa
+- **Discord**: [Join our community](https://discord.gg/decodedventures)
+
+## 📖 Related Documentation
+
+- [Authentication](/authentication) - Learn about API authentication
+- [Credential Management](/integrations/credentials) - Secure credential storage
+- [Webhooks](/webhooks) - Real-time payment notifications
+- [Error Handling](/errors) - Handle API errors effectively

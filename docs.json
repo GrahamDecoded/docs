@@ -1,0 +1,155 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Decoded Ventures ERP API",
+  "colors": {
+    "primary": "#3B82F6",
+    "light": "#60A5FA",
+    "dark": "#1D4ED8"
+  },
+  "favicon": "/favicon.png",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "API Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "authentication",
+              "rate-limits",
+              "errors",
+              "webhooks"
+            ]
+          },
+          {
+            "group": "Payment APIs",
+            "pages": [
+              "payments/mpesa",
+              "payments/flick",
+              "payments/flutterwave"
+            ]
+          },
+          {
+            "group": "ERP Modules",
+            "pages": [
+              "modules/finance",
+              "modules/sales",
+              "modules/hr",
+              "modules/support",
+              "modules/logistics",
+              "modules/legal",
+              "modules/agriculture",
+              "modules/manufacturing",
+              "modules/community-management"
+            ]
+          },
+          {
+            "group": "Platform Services",
+            "pages": [
+              "modules/platform-services"
+            ]
+          },
+          {
+            "group": "AI Agents",
+            "pages": [
+              "agents/overview",
+              "agents/voice",
+              "agents/sales",
+              "agents/finance",
+              "agents/hr",
+              "agents/support",
+              "agents/logistics",
+              "agents/customer-success",
+              "agents/agriculture",
+              "agents/manufacturing"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/credentials",
+              "integrations/openai",
+              "integrations/claude",
+              "integrations/google-ai",
+              "integrations/twilio",
+              "integrations/sendgrid"
+            ]
+          },
+          {
+            "group": "SDKs & Libraries",
+            "pages": [
+              "sdks/javascript",
+              "sdks/python",
+              "sdks/php",
+              "sdks/java"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "examples/quickstart",
+              "examples/payment-integration",
+              "examples/ai-agents",
+              "examples/webhooks",
+              "examples/agriculture",
+              "examples/manufacturing"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "ERP Dashboard",
+          "href": "https://erp.decoded.africa",
+          "icon": "building"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:support@decoded.africa",
+          "icon": "message-circle"
+        },
+        {
+          "anchor": "Discord",
+          "href": "https://discord.gg/decodedventures",
+          "icon": "discord"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:support@decoded.africa"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get Started",
+      "href": "https://erp.decoded.africa/onboarding"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "twitter": "https://twitter.com/decodedventures",
+      "github": "https://github.com/decodedventures",
+      "linkedin": "https://linkedin.com/company/decodedventures"
+    }
+  }
+}

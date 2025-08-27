@@ -1,0 +1,479 @@
+---
+title: 'Platform Centralized Services'
+description: 'Access centralized platform services including domain registration, bulk email, AI processing, and more. Benefit from volume pricing and unified management.'
+---
+
+# Platform Centralized Services
+
+The Decoded Ventures ERP platform provides centralized access to essential business services, eliminating the need for ERP clients to manage their own provider credentials and accounts. This approach delivers significant cost savings, improved user experience, and unified service management.
+
+## 🎯 **Overview**
+
+### **Why Platform Services?**
+
+- **Cost Savings**: 20-50% reduction through volume pricing
+- **Simplified Management**: Single interface for multiple services
+- **Better Support**: Platform-level optimization and support
+- **Advanced Features**: Capabilities not available individually
+- **Unified Experience**: Consistent interface across all services
+
+### **Available Services**
+
+| Service | Provider | Primary Use Case | Cost Savings |
+|---------|----------|------------------|--------------|
+| **Domain Registration** | AWS Route 53 | Domain management & DNS | 20-30% |
+| **Bulk Email** | AWS SES | Marketing campaigns | 25-40% |
+| **AI Processing** | Google Generative AI | AI-powered insights | 30-50% |
+| **File Storage** | AWS S3 | Document management | 15-25% |
+| **SMS Messaging** | Twilio | Customer communication | 20-35% |
+
+## 🚀 **Quick Start**
+
+### **1. Check Service Availability**
+
+```bash
+curl -X GET "https://your-function-url.com/getPlatformServiceStatus" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+### **2. View Service Pricing**
+
+```bash
+curl -X GET "https://your-function-url.com/getPlatformServicePricing" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+### **3. Configure Service Preferences**
+
+```bash
+curl -X POST "https://your-function-url.com/updateClientServicePreferences" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "services": {
+      "domain": "platform",
+      "email": "platform",
+      "ai": "platform",
+      "storage": "platform",
+      "sms": "platform"
+    },
+    "billingTier": "professional",
+    "autoUpgrade": true
+  }'
+```
+
+## 📧 **Bulk Email Service**
+
+### **Send Bulk Email Campaign**
+
+Send bulk email campaigns using AWS SES with advanced features like templates, personalization, and analytics.
+
+```bash
+curl -X POST "https://your-function-url.com/sendBulkEmail" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaign": {
+      "templateName": "welcome_series",
+      "from": "noreply@yourcompany.com",
+      "recipients": [
+        {
+          "email": "user1@example.com",
+          "variables": {
+            "firstName": "John",
+            "company": "Tech Corp"
+          }
+        },
+        {
+          "email": "user2@example.com",
+          "variables": {
+            "firstName": "Jane",
+            "company": "Design Studio"
+          }
+        }
+      ]
+    }
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "campaignId": "campaign_1234567890",
+  "messageIds": ["msg_001", "msg_002"],
+  "message": "Bulk email campaign sent to 2 recipients"
+}
+```
+
+### **Email Templates**
+
+The platform provides pre-built email templates for common use cases:
+
+- **Welcome Series**: New customer onboarding
+- **Product Updates**: Feature announcements
+- **Newsletter**: Regular company updates
+- **Promotional**: Sales and marketing campaigns
+- **Transactional**: Order confirmations, receipts
+
+## 🌐 **Domain Registration Service**
+
+### **Register New Domain**
+
+Register domains through AWS Route 53 with automatic DNS configuration and SSL certificate provisioning.
+
+```bash
+curl -X POST "https://your-function-url.com/registerDomain" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domainName": "yourcompany.africa",
+    "contactInfo": {
+      "FirstName": "John",
+      "LastName": "Doe",
+      "OrganizationName": "Your Company Ltd",
+      "AddressLine1": "123 Business Street",
+      "City": "Nairobi",
+      "State": "Nairobi",
+      "CountryCode": "KE",
+      "PhoneNumber": "+254700000000",
+      "Email": "admin@yourcompany.africa"
+    }
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "operationId": "op_1234567890",
+  "message": "Domain registration initiated successfully",
+  "estimatedCompletion": "24-48 hours"
+}
+```
+
+### **Domain Features**
+
+- **Automatic DNS Setup**: Pre-configured DNS records
+- **SSL Certificates**: Let's Encrypt integration
+- **Email Forwarding**: Professional email addresses
+- **Subdomain Management**: Team and service subdomains
+- **Auto-renewal**: Never lose your domain
+
+## 🤖 **AI Processing Service**
+
+### **Process with AI**
+
+Access advanced AI models including Google Gemini, OpenAI GPT-4, and Anthropic Claude for various business applications.
+
+```bash
+curl -X POST "https://your-function-url.com/processWithAI" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Analyze this customer feedback and provide actionable insights for improving our product: 'The app is great but the interface could be more intuitive. I love the features but sometimes it's hard to find what I need.'",
+    "model": "gemini"
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "response": "Based on the customer feedback, here are the key insights and recommendations...",
+  "model": "gemini",
+  "tokensUsed": 150,
+  "cost": 0.00001125
+}
+```
+
+### **AI Use Cases**
+
+- **Customer Feedback Analysis**: Sentiment analysis and insights
+- **Content Generation**: Marketing copy, product descriptions
+- **Data Analysis**: Business intelligence and reporting
+- **Process Optimization**: Workflow improvements
+- **Predictive Analytics**: Sales forecasting, risk assessment
+
+## 💰 **Pricing & Billing**
+
+### **Service Tiers**
+
+#### **Starter Tier** ($99/month)
+- 1,000 email credits
+- 10,000 AI tokens
+- 100GB storage
+- Basic support
+
+#### **Professional Tier** ($299/month)
+- 5,000 email credits
+- 50,000 AI tokens
+- 500GB storage
+- Priority support
+- Advanced analytics
+
+#### **Enterprise Tier** ($999/month)
+- 25,000 email credits
+- 250,000 AI tokens
+- 2TB storage
+- Dedicated support
+- Custom integrations
+
+### **Volume Discounts**
+
+| Service | Volume | Discount |
+|---------|--------|----------|
+| **Email** | 10,000+ | 20% off |
+| **Email** | 100,000+ | 30% off |
+| **Storage** | 1TB+ | 20% off |
+| **Storage** | 10TB+ | 30% off |
+| **AI** | 100K tokens+ | 15% off |
+| **AI** | 1M tokens+ | 25% off |
+
+### **Regional Pricing**
+
+SMS messaging includes regional pricing optimization:
+
+- **Africa**: $0.005 per SMS
+- **Europe**: $0.0075 per SMS
+- **North America**: $0.0075 per SMS
+- **Asia**: $0.01 per SMS
+
+## 🔧 **Service Management**
+
+### **Get Service Status**
+
+Check the availability and health of all platform services.
+
+```bash
+curl -X GET "https://your-function-url.com/getPlatformServiceStatus" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "services": [
+    {
+      "name": "domain_registration",
+      "status": "available",
+      "provider": "AWS Route 53"
+    },
+    {
+      "name": "bulk_email",
+      "status": "available",
+      "provider": "AWS SES"
+    },
+    {
+      "name": "ai_processing",
+      "status": "available",
+      "provider": "Google Generative AI"
+    }
+  ],
+  "message": "All platform services are available"
+}
+```
+
+### **Update Service Preferences**
+
+Configure which services to use from the platform vs. custom providers.
+
+```bash
+curl -X POST "https://your-function-url.com/updateClientServicePreferences" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "services": {
+      "domain": "platform",
+      "email": "custom",
+      "ai": "platform",
+      "storage": "platform",
+      "sms": "platform"
+    },
+    "billingTier": "professional",
+    "autoUpgrade": false
+  }'
+```
+
+## 📊 **Migration & Optimization**
+
+### **Get Migration Recommendations**
+
+Receive personalized recommendations for migrating to platform services.
+
+```bash
+curl -X GET "https://your-function-url.com/getServiceMigrationRecommendations" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "recommendations": [
+    {
+      "service": "email",
+      "currentCost": 150.00,
+      "platformCost": 90.00,
+      "savings": 60.00,
+      "migrationEffort": "medium",
+      "benefits": ["Better deliverability", "Unified templates", "Advanced analytics"],
+      "estimatedTime": "4-8 hours"
+    }
+  ],
+  "totalPotentialSavings": 60.00,
+  "message": "Migration recommendations generated successfully"
+}
+```
+
+### **Initiate Service Migration**
+
+Start the migration process for a specific service.
+
+```bash
+curl -X POST "https://your-function-url.com/initiateServiceMigration" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "service": "email",
+    "migrationType": "custom_to_platform"
+  }'
+```
+
+## 📈 **Analytics & Monitoring**
+
+### **Usage Tracking**
+
+All platform service usage is automatically tracked and available through the ERP dashboard:
+
+- **Cost Analysis**: Monthly spending by service
+- **Usage Patterns**: Peak usage times and trends
+- **Efficiency Metrics**: Cost per transaction/email/token
+- **Savings Calculator**: Real-time cost savings
+
+### **Performance Metrics**
+
+- **Uptime**: 99.9% target for all services
+- **Response Time**: Less than 200ms for API calls
+- **Error Rate**: Less than 0.1% for all services
+- **Support Response**: Less than 2 hours for critical issues
+
+## 🔒 **Security & Compliance**
+
+### **Data Protection**
+
+- **Client Isolation**: Complete data separation between clients
+- **Encryption**: All data encrypted at rest and in transit
+- **Access Control**: Role-based permissions and audit logging
+- **Compliance**: GDPR, POPIA, and industry standards
+
+### **Credential Management**
+
+- **Platform Credentials**: Stored securely in Google Secret Manager
+- **No Cross-Access**: Clients cannot access other clients' data
+- **Audit Trail**: Complete history of all service usage
+- **Automatic Rotation**: Regular credential updates
+
+## 🚀 **Best Practices**
+
+### **Service Selection**
+
+1. **Start with Platform Services**: Begin with domain and email services
+2. **Evaluate Custom Needs**: Assess which services require custom providers
+3. **Monitor Usage**: Track costs and performance regularly
+4. **Optimize Gradually**: Migrate services based on ROI analysis
+
+### **Cost Optimization**
+
+1. **Use Volume Discounts**: Batch operations when possible
+2. **Monitor Usage**: Set up alerts for unexpected spikes
+3. **Choose Right Tier**: Start with starter, upgrade as needed
+4. **Leverage AI**: Use AI for automation and optimization
+
+### **Integration Tips**
+
+1. **API-First Approach**: Use REST APIs for all integrations
+2. **Webhook Support**: Set up real-time notifications
+3. **Error Handling**: Implement proper retry logic
+4. **Testing**: Test in staging environment first
+
+## 📚 **Examples & Use Cases**
+
+### **E-commerce Company**
+
+**Services Used**: Domain, Email, AI, Storage
+**Use Cases**:
+- Domain management for multiple storefronts
+- Email marketing campaigns for customer retention
+- AI-powered product recommendations
+- Secure storage for customer documents
+
+**Monthly Savings**: $200+ (30% cost reduction)
+
+### **Consulting Firm**
+
+**Services Used**: Email, AI, Storage
+**Use Cases**:
+- Professional email campaigns for lead generation
+- AI-powered content creation and analysis
+- Secure document storage for client files
+
+**Monthly Savings**: $150+ (25% cost reduction)
+
+### **Startup**
+
+**Services Used**: All platform services
+**Use Cases**:
+- Complete digital infrastructure setup
+- Cost-effective scaling as business grows
+- Professional appearance from day one
+
+**Monthly Savings**: $300+ (40% cost reduction)
+
+## 🆘 **Support & Troubleshooting**
+
+### **Common Issues**
+
+#### **Email Delivery Problems**
+- Check domain verification status
+- Verify sender email configuration
+- Review bounce and complaint rates
+
+#### **AI Processing Errors**
+- Ensure sufficient token credits
+- Check prompt length and format
+- Verify model availability
+
+#### **Domain Registration Delays**
+- Verify contact information accuracy
+- Check domain availability
+- Allow 24-48 hours for processing
+
+### **Getting Help**
+
+- **Documentation**: Comprehensive guides and examples
+- **Support Portal**: 24/7 technical support
+- **Community Forum**: Peer support and best practices
+- **Dedicated Success Manager**: For enterprise clients
+
+## 🔮 **Future Roadmap**
+
+### **Upcoming Features**
+
+- **Advanced AI Models**: GPT-5, Claude 4, and more
+- **Video Processing**: AI-powered video analysis
+- **Voice Services**: Text-to-speech and speech recognition
+- **Blockchain Integration**: Crypto payments and smart contracts
+- **IoT Services**: Device management and data collection
+
+### **Integration Expansions**
+
+- **More Email Providers**: Mailgun, SendGrid alternatives
+- **Additional AI Providers**: Local AI models for compliance
+- **Regional Services**: Local payment and communication providers
+- **Industry Solutions**: Specialized services for specific sectors
+
+---
+
+**Ready to get started?** [Contact our team](mailto:support@decoded.africa) to discuss your specific needs and receive a personalized migration plan.

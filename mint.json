@@ -1,0 +1,138 @@
+{
+  "name": "Decoded Ventures ERP API",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#3B82F6",
+    "light": "#60A5FA",
+    "dark": "#1D4ED8",
+    "anchors": {
+      "from": "#3B82F6",
+      "to": "#1D4ED8"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "ERP Dashboard",
+      "url": "https://erp.decoded.africa"
+    },
+    {
+      "name": "Support",
+      "url": "https://support.decoded.africa"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "https://erp.decoded.africa/onboarding"
+  },
+  "anchors": [
+    {
+      "name": "Contact",
+      "icon": "phone",
+      "url": "mailto:support@decoded.africa"
+    },
+    {
+      "name": "Discord",
+      "icon": "discord",
+      "url": "https://discord.gg/decodedventures"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "authentication",
+        "rate-limits",
+        "errors",
+        "webhooks"
+      ]
+    },
+    {
+      "group": "Payment APIs",
+      "pages": [
+        "payments/mpesa",
+        "payments/flick",
+        "payments/flutterwave"
+      ]
+    },
+    {
+      "group": "ERP Modules",
+      "pages": [
+        "modules/finance",
+        "modules/sales",
+        "modules/hr",
+        "modules/support",
+        "modules/logistics",
+        "modules/legal",
+        "modules/agriculture",
+        "modules/manufacturing",
+        "modules/community-management"
+      ]
+    },
+    {
+      "group": "Platform Services",
+      "pages": [
+        "modules/platform-services"
+      ]
+    },
+    {
+      "group": "AI Agents",
+      "pages": [
+        "agents/overview",
+        "agents/voice",
+        "agents/sales",
+        "agents/finance",
+        "agents/hr",
+        "agents/support",
+        "agents/logistics",
+        "agents/customer-success",
+        "agents/agriculture",
+        "agents/manufacturing"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/credentials",
+        "integrations/openai",
+        "integrations/claude",
+        "integrations/google-ai",
+        "integrations/twilio",
+        "integrations/sendgrid"
+      ]
+    },
+    {
+      "group": "SDKs & Libraries",
+      "pages": [
+        "sdks/javascript",
+        "sdks/python",
+        "sdks/php",
+        "sdks/java"
+      ]
+    },
+    {
+      "group": "Examples",
+      "pages": [
+        "examples/quickstart",
+        "examples/payment-integration",
+        "examples/ai-agents",
+        "examples/webhooks",
+        "examples/agriculture",
+        "examples/manufacturing"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "twitter": "https://twitter.com/decodedventures",
+    "github": "https://github.com/decodedventures",
+    "linkedin": "https://linkedin.com/company/decodedventures"
+  },
+  "backgroundImage": "/background.png",
+  "variables": {
+    "sentryDsn": "https://examplePublicKey@o0.ingest.sentry.io/0"
+  }
+}

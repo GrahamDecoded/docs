@@ -1,0 +1,592 @@
+---
+title: 'Webhooks'
+description: 'Set up webhooks to receive real-time notifications from the Decoded Ventures ERP API.'
+---
+
+# Webhooks
+
+Webhooks allow you to receive real-time notifications when events occur in the Decoded Ventures ERP API. This guide explains how to set up and handle webhooks securely.
+
+## 🔗 Webhook Overview
+
+### **What are Webhooks?**
+
+Webhooks are HTTP callbacks that send real-time data to your application when specific events occur. Instead of polling the API for updates, webhooks push data to your server immediately.
+
+### **Benefits**
+- **Real-time Updates**: Instant notifications when events occur
+- **Reduced API Calls**: No need to poll for changes
+- **Better Performance**: Lower latency and server load
+- **Automated Workflows**: Trigger actions based on events
+
+## 🛠️ Setting Up Webhooks
+
+### **1. Create Webhook Endpoint**
+
+First, create an endpoint in your application to receive webhook data:
+
+```javascript
+// Express.js example
+app.post('/webhooks/decoded', (req, res) => {
+  const { event, data, timestamp, signature } = req.body;
+  
+  // Verify webhook signature
+  if (!verifyWebhookSignature(req.body, signature)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  // Process the webhook
+  handleWebhookEvent(event, data);
+  
+  // Respond with 200 to acknowledge receipt
+  res.status(200).json({ received: true });
+});
+```
+
+### **2. Register Webhook URL**
+
+Register your webhook URL with the API:
+
+```javascript
+const webhook = await api.webhooks.create({
+  url: 'https://your-app.com/webhooks/decoded',
+  events: ['invoice.paid', 'payment.completed', 'user.created'],
+  description: 'My ERP webhook endpoint'
+});
+```
+
+### **3. Handle Webhook Events**
+
+Process the webhook data in your application:
+
+```javascript
+function handleWebhookEvent(event, data) {
+  switch (event) {
+    case 'invoice.paid':
+      handleInvoicePaid(data);
+      break;
+    case 'payment.completed':
+      handlePaymentCompleted(data);
+      break;
+    case 'user.created':
+      handleUserCreated(data);
+      break;
+    default:
+      console.log('Unknown event:', event);
+  }
+}
+```
+
+## 🔐 Webhook Security
+
+### **Signature Verification**
+
+All webhooks include a signature for verification:
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(JSON.stringify(payload))
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+// Usage
+app.post('/webhooks/decoded', (req, res) => {
+  const { signature } = req.headers;
+  const secret = process.env.WEBHOOK_SECRET;
+  
+  if (!verifyWebhookSignature(req.body, signature, secret)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  // Process webhook...
+});
+```
+
+### **Webhook Secret**
+
+Your webhook secret is provided when you create a webhook:
+
+```javascript
+const webhook = await api.webhooks.create({
+  url: 'https://your-app.com/webhooks/decoded',
+  events: ['invoice.paid']
+});
+
+console.log('Webhook secret:', webhook.secret);
+// Store this secret securely in your environment variables
+```
+
+## 📊 Webhook Events
+
+### **Finance Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `invoice.created` | New invoice created | `{ invoiceId, amount, customerId }` |
+| `invoice.paid` | Invoice payment received | `{ invoiceId, amount, paymentMethod }` |
+| `invoice.overdue` | Invoice past due date | `{ invoiceId, daysOverdue }` |
+| `disbursement.created` | New disbursement created | `{ disbursementId, amount, recipientId }` |
+| `disbursement.completed` | Disbursement processed | `{ disbursementId, transactionId }` |
+| `receipt.issued` | Receipt generated | `{ receiptId, invoiceId, amount }` |
+
+### **Sales Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `lead.created` | New sales lead created | `{ leadId, customerId, source }` |
+| `lead.qualified` | Lead qualified for sales | `{ leadId, score, assignedTo }` |
+| `opportunity.created` | New sales opportunity | `{ opportunityId, leadId, value }` |
+| `opportunity.won` | Opportunity won | `{ opportunityId, value, closedBy }` |
+| `order.created` | New sales order | `{ orderId, customerId, total }` |
+| `order.fulfilled` | Order fulfilled | `{ orderId, fulfillmentDate }` |
+
+### **HR Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `employee.created` | New employee added | `{ employeeId, name, department }` |
+| `employee.updated` | Employee information updated | `{ employeeId, changes }` |
+| `leave.requested` | Leave request submitted | `{ requestId, employeeId, days }` |
+| `leave.approved` | Leave request approved | `{ requestId, approvedBy }` |
+| `payroll.processed` | Payroll processed | `{ payrollId, employeeCount, total }` |
+
+### **Support Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `ticket.created` | New support ticket | `{ ticketId, customerId, priority }` |
+| `ticket.updated` | Ticket status changed | `{ ticketId, status, assignedTo }` |
+| `ticket.resolved` | Ticket resolved | `{ ticketId, resolution, resolvedBy }` |
+| `message.received` | New support message | `{ messageId, ticketId, customerId }` |
+
+### **Payment Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `payment.initiated` | Payment initiated | `{ paymentId, amount, method }` |
+| `payment.completed` | Payment successful | `{ paymentId, transactionId, amount }` |
+| `payment.failed` | Payment failed | `{ paymentId, error, reason }` |
+| `payment.refunded` | Payment refunded | `{ paymentId, refundAmount, reason }` |
+
+### **AI Agent Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `agent.session.started` | AI agent session started | `{ sessionId, agentType, userId }` |
+| `agent.session.completed` | AI agent session completed | `{ sessionId, duration, actions }` |
+| `agent.action.executed` | AI agent action executed | `{ sessionId, action, result }` |
+
+### **Agriculture Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `crop.planted` | Crop planted | `{ cropId, farmId, cropType, area }` |
+| `crop.harvested` | Crop harvested | `{ cropId, yield, quality }` |
+| `weather.alert` | Weather alert | `{ farmId, alertType, severity }` |
+| `market.price.update` | Market price updated | `{ cropType, location, price }` |
+
+### **Manufacturing Events**
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `production.started` | Production started | `{ productionId, productId, quantity }` |
+| `production.completed` | Production completed | `{ productionId, completedQuantity }` |
+| `quality.check.performed` | Quality check performed | `{ checkId, batchId, result }` |
+| `maintenance.scheduled` | Maintenance scheduled | `{ maintenanceId, equipmentId, date }` |
+
+## 📝 Webhook Payload Format
+
+### **Standard Payload Structure**
+
+```json
+{
+  "event": "invoice.paid",
+  "data": {
+    "invoiceId": "inv_1234567890",
+    "amount": 15000,
+    "currency": "KES",
+    "paymentMethod": "mpesa",
+    "transactionId": "mpesa_123456",
+    "paidAt": "2024-01-01T12:00:00Z"
+  },
+  "timestamp": "2024-01-01T12:00:00Z",
+  "signature": "sha256=abc123...",
+  "webhookId": "webhook_1234567890"
+}
+```
+
+### **Event-Specific Data**
+
+#### **Invoice Paid Event**
+```json
+{
+  "event": "invoice.paid",
+  "data": {
+    "invoiceId": "inv_1234567890",
+    "invoiceNumber": "INV-2024-001",
+    "amount": 15000,
+    "currency": "KES",
+    "customerId": "customer_123",
+    "paymentMethod": "mpesa",
+    "transactionId": "mpesa_123456",
+    "paidAt": "2024-01-01T12:00:00Z",
+    "metadata": {
+      "customerEmail": "customer@example.com",
+      "customerPhone": "+254700000000"
+    }
+  }
+}
+```
+
+#### **Lead Qualified Event**
+```json
+{
+  "event": "lead.qualified",
+  "data": {
+    "leadId": "lead_1234567890",
+    "customerId": "customer_123",
+    "score": 85,
+    "assignedTo": "user_456",
+    "qualificationDate": "2024-01-01T12:00:00Z",
+    "source": "website",
+    "metadata": {
+      "leadSource": "contact_form",
+      "campaign": "summer_2024"
+    }
+  }
+}
+```
+
+## 🛠️ Webhook Management
+
+### **Create Webhook**
+
+```javascript
+const webhook = await api.webhooks.create({
+  url: 'https://your-app.com/webhooks/decoded',
+  events: ['invoice.paid', 'payment.completed'],
+  description: 'ERP webhook endpoint',
+  isActive: true
+});
+
+console.log('Webhook created:', webhook.id);
+```
+
+### **List Webhooks**
+
+```javascript
+const webhooks = await api.webhooks.list({
+  teamId: 'team_123',
+  limit: 10
+});
+
+webhooks.forEach(webhook => {
+  console.log(`Webhook ${webhook.id}: ${webhook.url}`);
+});
+```
+
+### **Update Webhook**
+
+```javascript
+const updatedWebhook = await api.webhooks.update(webhookId, {
+  events: ['invoice.paid', 'payment.completed', 'user.created'],
+  description: 'Updated webhook description'
+});
+```
+
+### **Delete Webhook**
+
+```javascript
+await api.webhooks.delete(webhookId);
+console.log('Webhook deleted successfully');
+```
+
+### **Test Webhook**
+
+```javascript
+const testResult = await api.webhooks.test(webhookId, {
+  event: 'invoice.paid',
+  data: {
+    invoiceId: 'test_invoice_123',
+    amount: 1000,
+    currency: 'KES'
+  }
+});
+
+console.log('Test result:', testResult);
+```
+
+## 🔄 Webhook Retry Logic
+
+### **Automatic Retries**
+
+The API automatically retries failed webhook deliveries:
+
+- **Retry Schedule**: 1min, 5min, 15min, 1hour, 6hours, 24hours
+- **Max Retries**: 6 attempts
+- **Timeout**: 30 seconds per attempt
+
+### **Handling Retries**
+
+```javascript
+app.post('/webhooks/decoded', (req, res) => {
+  try {
+    // Process webhook
+    const result = processWebhook(req.body);
+    
+    // Return 200 for success
+    res.status(200).json({ received: true });
+  } catch (error) {
+    // Return 4xx for client errors (won't retry)
+    if (error.code === 'VALIDATION_ERROR') {
+      return res.status(400).json({ error: error.message });
+    }
+    
+    // Return 5xx for server errors (will retry)
+    console.error('Webhook processing error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+```
+
+## 📊 Webhook Analytics
+
+### **Delivery Statistics**
+
+```javascript
+const stats = await api.webhooks.getStats(webhookId, {
+  startDate: '2024-01-01',
+  endDate: '2024-01-31'
+});
+
+console.log('Webhook stats:', {
+  totalDeliveries: stats.totalDeliveries,
+  successfulDeliveries: stats.successfulDeliveries,
+  failedDeliveries: stats.failedDeliveries,
+  successRate: stats.successRate
+});
+```
+
+### **Delivery Logs**
+
+```javascript
+const logs = await api.webhooks.getLogs(webhookId, {
+  limit: 50,
+  status: 'failed'
+});
+
+logs.forEach(log => {
+  console.log(`Delivery ${log.id}: ${log.status} - ${log.error}`);
+});
+```
+
+## 🚀 Best Practices
+
+### **Webhook Endpoint Design**
+
+1. **Idempotency**: Handle duplicate webhooks gracefully
+2. **Quick Response**: Respond within 5 seconds
+3. **Error Handling**: Return appropriate HTTP status codes
+4. **Logging**: Log all webhook events for debugging
+
+### **Security**
+
+1. **Signature Verification**: Always verify webhook signatures
+2. **HTTPS Only**: Use HTTPS for webhook endpoints
+3. **Secret Management**: Store webhook secrets securely
+4. **IP Whitelisting**: Consider whitelisting API IPs
+
+### **Performance**
+
+1. **Async Processing**: Process webhooks asynchronously
+2. **Queue Management**: Use message queues for high volume
+3. **Monitoring**: Monitor webhook delivery success rates
+4. **Scaling**: Scale webhook endpoints for high load
+
+## 📱 Code Examples
+
+### **Express.js Webhook Handler**
+
+```javascript
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhooks/decoded', (req, res) => {
+  // Verify signature
+  const signature = req.headers['x-webhook-signature'];
+  const secret = process.env.WEBHOOK_SECRET;
+  
+  if (!verifySignature(req.body, signature, secret)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  // Process webhook asynchronously
+  setImmediate(() => {
+    handleWebhookEvent(req.body);
+  });
+  
+  // Respond immediately
+  res.status(200).json({ received: true });
+});
+
+function verifySignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(JSON.stringify(payload))
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+function handleWebhookEvent(webhook) {
+  const { event, data } = webhook;
+  
+  switch (event) {
+    case 'invoice.paid':
+      handleInvoicePaid(data);
+      break;
+    case 'payment.completed':
+      handlePaymentCompleted(data);
+      break;
+    default:
+      console.log('Unknown event:', event);
+  }
+}
+```
+
+### **Python Flask Webhook Handler**
+
+```python
+from flask import Flask, request, jsonify
+import hmac
+import hashlib
+import json
+import os
+
+app = Flask(__name__)
+
+@app.route('/webhooks/decoded', methods=['POST'])
+def webhook_handler():
+    # Verify signature
+    signature = request.headers.get('X-Webhook-Signature')
+    secret = os.environ.get('WEBHOOK_SECRET')
+    
+    if not verify_signature(request.data, signature, secret):
+        return jsonify({'error': 'Invalid signature'}), 401
+    
+    # Process webhook
+    webhook_data = request.json
+    handle_webhook_event(webhook_data)
+    
+    return jsonify({'received': True}), 200
+
+def verify_signature(payload, signature, secret):
+    expected_signature = hmac.new(
+        secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(signature, expected_signature)
+
+def handle_webhook_event(webhook):
+    event = webhook['event']
+    data = webhook['data']
+    
+    if event == 'invoice.paid':
+        handle_invoice_paid(data)
+    elif event == 'payment.completed':
+        handle_payment_completed(data)
+    else:
+        print(f'Unknown event: {event}')
+```
+
+### **PHP Webhook Handler**
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+use DecodedVentures\DecodedVenturesAPI;
+
+$api = new DecodedVenturesAPI('your-api-key');
+
+// Webhook endpoint
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/webhooks/decoded') {
+    $payload = file_get_contents('php://input');
+    $signature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '';
+    $secret = $_ENV['WEBHOOK_SECRET'];
+    
+    if (!verifySignature($payload, $signature, $secret)) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid signature']);
+        exit;
+    }
+    
+    $webhook = json_decode($payload, true);
+    handleWebhookEvent($webhook);
+    
+    http_response_code(200);
+    echo json_encode(['received' => true]);
+}
+
+function verifySignature($payload, $signature, $secret) {
+    $expectedSignature = hash_hmac('sha256', $payload, $secret);
+    return hash_equals($signature, $expectedSignature);
+}
+
+function handleWebhookEvent($webhook) {
+    $event = $webhook['event'];
+    $data = $webhook['data'];
+    
+    switch ($event) {
+        case 'invoice.paid':
+            handleInvoicePaid($data);
+            break;
+        case 'payment.completed':
+            handlePaymentCompleted($data);
+            break;
+        default:
+            error_log("Unknown event: $event");
+    }
+}
+?>
+```
+
+## 📞 Support
+
+### **Webhook Issues**
+
+If you're experiencing webhook issues:
+
+1. **Check Endpoint**: Ensure your endpoint is accessible
+2. **Verify Signature**: Check signature verification
+3. **Review Logs**: Check webhook delivery logs
+4. **Test Webhook**: Use the test endpoint
+
+### **Getting Help**
+
+- **Documentation**: [docs.decoded.africa](https://docs.decoded.africa)
+- **Email**: support@decoded.africa
+- **Discord**: [Join our community](https://discord.gg/decodedventures)
+
+## 📖 Related Documentation
+
+- [Authentication](/authentication) - Learn about API authentication
+- [Rate Limits](/rate-limits) - Understand rate limiting
+- [Error Handling](/errors) - Handle API errors effectively

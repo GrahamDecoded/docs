@@ -1,0 +1,375 @@
+---
+title: 'Authentication'
+description: 'Learn how to authenticate with the Decoded Ventures ERP API using API keys and manage your credentials securely.'
+---
+
+# Authentication
+
+The Decoded Ventures ERP API uses API key-based authentication to secure all endpoints. This guide explains how to authenticate your requests and manage your API credentials.
+
+## 🔐 API Key Authentication
+
+All API requests require an API key to be included in the request headers. The API key identifies your account and determines which resources you can access.
+
+### **Request Headers**
+
+Include your API key in the `Authorization` header:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### **Example Request**
+
+```bash
+curl -X POST https://api.decoded.africa/createTeam \
+  -H "Authorization: Bearer sk_live_1234567890abcdef" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Team",
+    "apiAccountId": "account_123"
+  }'
+```
+
+## 🗝️ Getting Your API Key
+
+### **1. Sign Up for an Account**
+
+Visit [erp.decoded.africa](https://erp.decoded.africa) and create a new account.
+
+### **2. Create an API Account**
+
+```bash
+curl -X POST https://api.decoded.africa/registerApiAccount \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your-email@example.com",
+    "phone": "+254700000000"
+  }'
+```
+
+### **3. Create a Team**
+
+```bash
+curl -X POST https://api.decoded.africa/createTeam \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Team",
+    "apiAccountId": "your_api_account_id"
+  }'
+```
+
+### **4. Create an App**
+
+```bash
+curl -X POST https://api.decoded.africa/createApp \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "teamId": "your_team_id",
+    "name": "My App",
+    "allowedDepartments": ["finance", "sales", "hr", "support"]
+  }'
+```
+
+The response will include your API key:
+
+```json
+{
+  "status": "success",
+  "message": "App created successfully",
+  "data": {
+    "id": "app_123",
+    "name": "My App",
+    "apiKey": "sk_live_1234567890abcdef",
+    "allowedDepartments": ["finance", "sales", "hr", "support"],
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+## 🔒 API Key Security
+
+### **Best Practices**
+
+1. **Keep Your API Key Secret**
+   - Never expose your API key in client-side code
+   - Don't commit API keys to version control
+   - Use environment variables to store API keys
+
+2. **Use Different Keys for Different Environments**
+   - Use test keys for development
+   - Use production keys only in production
+   - Rotate keys regularly
+
+3. **Monitor Key Usage**
+   - Check your API usage regularly
+   - Set up alerts for unusual activity
+   - Revoke compromised keys immediately
+
+### **Environment Variables**
+
+```bash
+# Development
+export DECODED_API_KEY="sk_test_1234567890abcdef"
+
+# Production
+export DECODED_API_KEY="sk_live_1234567890abcdef"
+```
+
+### **Code Examples**
+
+#### **JavaScript/TypeScript**
+
+```javascript
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: 'https://api.decoded.africa',
+  headers: {
+    'Authorization': `Bearer ${process.env.DECODED_API_KEY}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// Make API calls
+const response = await apiClient.post('/createTeam', {
+  name: 'My Team',
+  apiAccountId: 'account_123'
+});
+```
+
+#### **Python**
+
+```python
+import requests
+import os
+
+api_key = os.getenv('DECODED_API_KEY')
+headers = {
+    'Authorization': f'Bearer {api_key}',
+    'Content-Type': 'application/json'
+}
+
+response = requests.post(
+    'https://api.decoded.africa/createTeam',
+    headers=headers,
+    json={
+        'name': 'My Team',
+        'apiAccountId': 'account_123'
+    }
+)
+```
+
+#### **PHP**
+
+```php
+<?php
+$api_key = getenv('DECODED_API_KEY');
+$headers = [
+    'Authorization: Bearer ' . $api_key,
+    'Content-Type: application/json'
+];
+
+$data = [
+    'name' => 'My Team',
+    'apiAccountId' => 'account_123'
+];
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://api.decoded.africa/createTeam');
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+?>
+```
+
+## 🚫 Error Responses
+
+### **Authentication Errors**
+
+#### **401 Unauthorized**
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key",
+    "details": "The provided API key is invalid or expired"
+  }
+}
+```
+
+#### **403 Forbidden**
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Insufficient permissions",
+    "details": "Your API key does not have permission to access this resource"
+  }
+}
+```
+
+#### **429 Too Many Requests**
+```json
+{
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Rate limit exceeded",
+    "details": "You have exceeded your rate limit. Please try again later."
+  }
+}
+```
+
+## 🔄 API Key Management
+
+### **List API Tokens**
+
+```bash
+curl -X GET https://api.decoded.africa/listTokens \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### **Create New Token**
+
+```bash
+curl -X POST https://api.decoded.africa/createToken \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New Token",
+    "permissions": ["read", "write"]
+  }'
+```
+
+### **Revoke Token**
+
+```bash
+curl -X DELETE https://api.decoded.africa/revokeToken \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tokenId": "token_123"
+  }'
+```
+
+## 🛡️ Multi-Tenant Security
+
+The API supports multi-tenant architecture with the following security features:
+
+### **Team-Based Access Control**
+- API keys are scoped to specific teams
+- Resources are isolated between teams
+- Cross-team access requires explicit permissions
+
+### **Department-Based Permissions**
+- API keys can be restricted to specific departments
+- Available departments: `finance`, `sales`, `hr`, `support`, `legal`, `operations`, `marketing`, `it`, `supplychain`, `agriculture`, `manufacturing`
+
+### **Role-Based Access**
+- Different roles have different permissions
+- Roles: `owner`, `admin`, `manager`, `user`, `viewer`
+
+## 📊 Rate Limiting
+
+### **Rate Limits by Plan**
+
+| Plan | Requests per Hour | Burst Limit |
+|------|------------------|-------------|
+| **Standard** | 1,000 | 100 |
+| **Professional** | 10,000 | 1,000 |
+| **Enterprise** | 100,000 | 10,000 |
+
+### **Rate Limit Headers**
+
+```bash
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1640995200
+```
+
+### **Handling Rate Limits**
+
+```javascript
+// Check rate limit headers
+const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
+const rateLimitReset = response.headers['x-ratelimit-reset'];
+
+if (rateLimitRemaining === '0') {
+  const resetTime = new Date(rateLimitReset * 1000);
+  console.log(`Rate limit exceeded. Reset at: ${resetTime}`);
+}
+```
+
+## 🔍 Testing Authentication
+
+### **Health Check Endpoint**
+
+```bash
+curl -X GET https://api.decoded.africa/health \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "API is healthy",
+  "data": {
+    "timestamp": "2024-01-01T00:00:00Z",
+    "version": "1.0.0",
+    "environment": "production"
+  }
+}
+```
+
+### **Validate Token**
+
+```bash
+curl -X POST https://api.decoded.africa/validateToken \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Token is valid",
+  "data": {
+    "teamId": "team_123",
+    "permissions": ["read", "write"],
+    "departments": ["finance", "sales"],
+    "expiresAt": "2024-12-31T23:59:59Z"
+  }
+}
+```
+
+## 🆘 Troubleshooting
+
+### **Common Issues**
+
+1. **Invalid API Key**
+   - Check that your API key is correct
+   - Ensure the key hasn't expired
+   - Verify the key is for the correct environment
+
+2. **Permission Denied**
+   - Check that your API key has the required permissions
+   - Verify the key is scoped to the correct team
+   - Ensure the key has access to the required departments
+
+3. **Rate Limit Exceeded**
+   - Check your current usage
+   - Implement exponential backoff
+   - Consider upgrading your plan
+
+### **Getting Help**
+
+- **Documentation**: [docs.decoded.africa](https://docs.decoded.africa)
+- **Email**: support@decoded.africa
+- **Discord**: [Join our community](https://discord.gg/decodedventures)

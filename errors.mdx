@@ -1,0 +1,692 @@
+---
+title: 'Error Handling'
+description: 'Learn how to handle API errors, understand error codes, and implement proper error handling in your applications.'
+---
+
+# Error Handling
+
+The Decoded Ventures ERP API uses standard HTTP status codes and provides detailed error information to help you handle errors effectively. This guide explains our error response format and how to implement proper error handling.
+
+## 🚨 Error Response Format
+
+All API errors follow a consistent format:
+
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": "Additional error details or explanation",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### **Error Response Fields**
+
+| Field | Description |
+|-------|-------------|
+| `code` | Machine-readable error code |
+| `message` | Human-readable error message |
+| `details` | Additional context or explanation |
+| `requestId` | Unique request identifier for support |
+| `timestamp` | When the error occurred |
+
+## 📊 HTTP Status Codes
+
+### **2xx Success**
+- **200 OK**: Request successful
+- **201 Created**: Resource created successfully
+- **202 Accepted**: Request accepted for processing
+
+### **4xx Client Errors**
+- **400 Bad Request**: Invalid request data
+- **401 Unauthorized**: Authentication required
+- **403 Forbidden**: Insufficient permissions
+- **404 Not Found**: Resource not found
+- **409 Conflict**: Resource conflict
+- **422 Unprocessable Entity**: Validation failed
+- **429 Too Many Requests**: Rate limit exceeded
+
+### **5xx Server Errors**
+- **500 Internal Server Error**: Server error
+- **502 Bad Gateway**: Gateway error
+- **503 Service Unavailable**: Service temporarily unavailable
+- **504 Gateway Timeout**: Gateway timeout
+
+## 🔍 Common Error Codes
+
+### **Authentication Errors**
+
+#### **UNAUTHORIZED**
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key",
+    "details": "The provided API key is invalid or expired",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Causes:**
+- Missing API key
+- Invalid API key
+- Expired API key
+- Malformed authorization header
+
+**Solutions:**
+```javascript
+// Check API key format
+const apiKey = 'sk_live_1234567890abcdef';
+const headers = {
+  'Authorization': `Bearer ${apiKey}`,
+  'Content-Type': 'application/json'
+};
+
+// Verify API key is valid
+const response = await fetch('/validateToken', { headers });
+if (response.status === 401) {
+  console.error('Invalid API key');
+}
+```
+
+#### **FORBIDDEN**
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Insufficient permissions",
+    "details": "Your API key does not have permission to access this resource",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Causes:**
+- API key lacks required permissions
+- Resource belongs to different team
+- Department access restrictions
+
+**Solutions:**
+```javascript
+// Check API key permissions
+const permissions = await api.getTokenPermissions();
+console.log('Available permissions:', permissions);
+
+// Verify team access
+const teamId = 'team_123';
+const hasAccess = await api.verifyTeamAccess(teamId);
+```
+
+### **Validation Errors**
+
+#### **INVALID_REQUEST**
+```json
+{
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "Invalid request data",
+    "details": "Amount must be a positive number",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Causes:**
+- Missing required fields
+- Invalid data types
+- Out of range values
+- Malformed JSON
+
+**Solutions:**
+```javascript
+// Validate request data before sending
+const validateRequest = (data) => {
+  const errors = [];
+  
+  if (!data.teamId) {
+    errors.push('teamId is required');
+  }
+  
+  if (data.amount && data.amount <= 0) {
+    errors.push('amount must be positive');
+  }
+  
+  return errors;
+};
+
+const errors = validateRequest(requestData);
+if (errors.length > 0) {
+  console.error('Validation errors:', errors);
+  return;
+}
+```
+
+#### **VALIDATION_ERROR**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "amount": "Amount must be greater than 0",
+      "currency": "Currency must be a valid ISO code",
+      "email": "Email must be a valid email address"
+    },
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Causes:**
+- Field-specific validation failures
+- Business rule violations
+- Format requirements not met
+
+**Solutions:**
+```javascript
+// Handle field-specific errors
+try {
+  const response = await api.finance.createRecord(data);
+} catch (error) {
+  if (error.code === 'VALIDATION_ERROR') {
+    Object.entries(error.details).forEach(([field, message]) => {
+      console.error(`${field}: ${message}`);
+    });
+  }
+}
+```
+
+### **Resource Errors**
+
+#### **RECORD_NOT_FOUND**
+```json
+{
+  "error": {
+    "code": "RECORD_NOT_FOUND",
+    "message": "Finance record not found",
+    "details": "The specified finance record does not exist",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Causes:**
+- Resource ID doesn't exist
+- Resource was deleted
+- Wrong resource type
+
+**Solutions:**
+```javascript
+// Check if resource exists before operations
+const recordExists = await api.finance.recordExists(recordId);
+if (!recordExists) {
+  console.error('Record not found');
+  return;
+}
+
+// Handle gracefully
+try {
+  const record = await api.finance.getRecord(recordId);
+} catch (error) {
+  if (error.code === 'RECORD_NOT_FOUND') {
+    console.log('Record not found, creating new one...');
+    const newRecord = await api.finance.createRecord(data);
+  }
+}
+```
+
+#### **RESOURCE_CONFLICT**
+```json
+{
+  "error": {
+    "code": "RESOURCE_CONFLICT",
+    "message": "Resource already exists",
+    "details": "A record with this identifier already exists",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Causes:**
+- Duplicate resource creation
+- Concurrent modifications
+- Unique constraint violations
+
+**Solutions:**
+```javascript
+// Use upsert operations
+try {
+  const record = await api.finance.createRecord(data);
+} catch (error) {
+  if (error.code === 'RESOURCE_CONFLICT') {
+    // Update existing record
+    const updatedRecord = await api.finance.updateRecord(recordId, data);
+  }
+}
+
+// Or use upsert endpoint
+const record = await api.finance.upsertRecord(data);
+```
+
+### **Rate Limiting Errors**
+
+#### **RATE_LIMIT_EXCEEDED**
+```json
+{
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Rate limit exceeded",
+    "details": "You have exceeded your rate limit. Please try again later.",
+    "retryAfter": 3600,
+    "limit": 1000,
+    "remaining": 0,
+    "reset": 1640995200,
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Solutions:**
+```javascript
+// Implement exponential backoff
+async function makeRequestWithRetry(requestFn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (error.code === 'RATE_LIMIT_EXCEEDED') {
+        const retryAfter = error.retryAfter || Math.pow(2, i) * 60;
+        console.log(`Rate limited. Retrying in ${retryAfter} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+```
+
+### **Server Errors**
+
+#### **INTERNAL_SERVER_ERROR**
+```json
+{
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "An unexpected error occurred",
+    "details": "Please try again later or contact support if the problem persists",
+    "requestId": "req_1234567890abcdef",
+    "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Solutions:**
+```javascript
+// Implement retry logic for server errors
+async function makeRequestWithRetry(requestFn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (error.code === 'INTERNAL_SERVER_ERROR' && i < maxRetries - 1) {
+        const delay = Math.pow(2, i) * 1000;
+        console.log(`Server error. Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+```
+
+## 🛠️ Error Handling Patterns
+
+### **Global Error Handler**
+
+```javascript
+class APIErrorHandler {
+  static async handleRequest(requestFn) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      this.logError(error);
+      this.handleSpecificError(error);
+      throw error;
+    }
+  }
+  
+  static logError(error) {
+    console.error('API Error:', {
+      code: error.code,
+      message: error.message,
+      requestId: error.requestId,
+      timestamp: error.timestamp
+    });
+  }
+  
+  static handleSpecificError(error) {
+    switch (error.code) {
+      case 'UNAUTHORIZED':
+        this.handleAuthError(error);
+        break;
+      case 'RATE_LIMIT_EXCEEDED':
+        this.handleRateLimitError(error);
+        break;
+      case 'VALIDATION_ERROR':
+        this.handleValidationError(error);
+        break;
+      default:
+        this.handleGenericError(error);
+    }
+  }
+  
+  static handleAuthError(error) {
+    // Redirect to login or refresh token
+    console.error('Authentication error:', error.message);
+  }
+  
+  static handleRateLimitError(error) {
+    // Implement backoff strategy
+    console.error('Rate limit exceeded:', error.retryAfter);
+  }
+  
+  static handleValidationError(error) {
+    // Display validation errors to user
+    console.error('Validation errors:', error.details);
+  }
+  
+  static handleGenericError(error) {
+    // Show generic error message
+    console.error('An error occurred:', error.message);
+  }
+}
+
+// Usage
+const result = await APIErrorHandler.handleRequest(() => 
+  api.finance.getRecords({ teamId: 'team_123' })
+);
+```
+
+### **Retry with Exponential Backoff**
+
+```javascript
+class RetryHandler {
+  static async retry(requestFn, options = {}) {
+    const {
+      maxRetries = 3,
+      baseDelay = 1000,
+      maxDelay = 30000,
+      backoffMultiplier = 2,
+      retryableErrors = ['RATE_LIMIT_EXCEEDED', 'INTERNAL_SERVER_ERROR']
+    } = options;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await requestFn();
+      } catch (error) {
+        if (attempt === maxRetries || !retryableErrors.includes(error.code)) {
+          throw error;
+        }
+        
+        const delay = Math.min(
+          baseDelay * Math.pow(backoffMultiplier, attempt),
+          maxDelay
+        );
+        
+        console.log(`Attempt ${attempt + 1} failed. Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+}
+
+// Usage
+const result = await RetryHandler.retry(
+  () => api.finance.getRecords({ teamId: 'team_123' }),
+  {
+    maxRetries: 3,
+    baseDelay: 1000,
+    retryableErrors: ['RATE_LIMIT_EXCEEDED', 'INTERNAL_SERVER_ERROR']
+  }
+);
+```
+
+### **Error Recovery Strategies**
+
+```javascript
+class ErrorRecovery {
+  static async createRecordWithFallback(data) {
+    try {
+      return await api.finance.createRecord(data);
+    } catch (error) {
+      if (error.code === 'RESOURCE_CONFLICT') {
+        // Try to update existing record
+        return await api.finance.updateRecord(data.id, data);
+      }
+      throw error;
+    }
+  }
+  
+  static async getRecordWithCache(recordId) {
+    try {
+      return await api.finance.getRecord(recordId);
+    } catch (error) {
+      if (error.code === 'RECORD_NOT_FOUND') {
+        // Return cached data if available
+        const cachedData = this.getCachedRecord(recordId);
+        if (cachedData) {
+          return cachedData;
+        }
+      }
+      throw error;
+    }
+  }
+  
+  static async handleNetworkError(requestFn) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (error.code === 'NETWORK_ERROR') {
+        // Try offline mode or cached data
+        return this.getOfflineData();
+      }
+      throw error;
+    }
+  }
+}
+```
+
+## 📱 Error Handling in Different Languages
+
+### **JavaScript/TypeScript**
+
+```javascript
+import { DecodedVenturesAPI } from '@decodedventures/erp-api';
+
+const api = new DecodedVenturesAPI({
+  apiKey: 'your-api-key',
+  errorHandler: {
+    onError: (error) => {
+      console.error('API Error:', error);
+      // Custom error handling
+    },
+    retryConfig: {
+      maxRetries: 3,
+      backoffMultiplier: 2
+    }
+  }
+});
+
+try {
+  const records = await api.finance.getRecords({
+    teamId: 'team_123'
+  });
+} catch (error) {
+  if (error.code === 'UNAUTHORIZED') {
+    // Handle authentication error
+  } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    // Handle rate limit error
+  }
+}
+```
+
+### **Python**
+
+```python
+from decodedventures import DecodedVenturesAPI
+import time
+
+api = DecodedVenturesAPI(api_key='your-api-key')
+
+def handle_api_error(error):
+    if error.code == 'UNAUTHORIZED':
+        print("Authentication error:", error.message)
+    elif error.code == 'RATE_LIMIT_EXCEEDED':
+        print("Rate limit exceeded:", error.retry_after)
+    else:
+        print("API error:", error.message)
+
+try:
+    records = api.finance.get_records(team_id='team_123')
+except Exception as error:
+    handle_api_error(error)
+```
+
+### **PHP**
+
+```php
+use DecodedVentures\DecodedVenturesAPI;
+
+$api = new DecodedVenturesAPI('your-api-key');
+
+try {
+    $records = $api->finance->getRecords(['teamId' => 'team_123']);
+} catch (Exception $error) {
+    switch ($error->getCode()) {
+        case 'UNAUTHORIZED':
+            error_log("Authentication error: " . $error->getMessage());
+            break;
+        case 'RATE_LIMIT_EXCEEDED':
+            error_log("Rate limit exceeded: " . $error->getMessage());
+            break;
+        default:
+            error_log("API error: " . $error->getMessage());
+    }
+}
+```
+
+## 🔧 Error Monitoring and Logging
+
+### **Error Logging**
+
+```javascript
+class ErrorLogger {
+  static logError(error, context = {}) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      error: {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        requestId: error.requestId
+      },
+      context: {
+        endpoint: context.endpoint,
+        method: context.method,
+        userId: context.userId,
+        teamId: context.teamId
+      }
+    };
+    
+    // Send to logging service
+    this.sendToLoggingService(logEntry);
+    
+    // Store locally for debugging
+    this.storeLocally(logEntry);
+  }
+  
+  static sendToLoggingService(logEntry) {
+    // Send to external logging service
+    fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(logEntry)
+    });
+  }
+  
+  static storeLocally(logEntry) {
+    const logs = JSON.parse(localStorage.getItem('api_logs') || '[]');
+    logs.push(logEntry);
+    localStorage.setItem('api_logs', JSON.stringify(logs.slice(-100)));
+  }
+}
+```
+
+### **Error Analytics**
+
+```javascript
+class ErrorAnalytics {
+  static trackError(error, context = {}) {
+    const analytics = {
+      errorCode: error.code,
+      endpoint: context.endpoint,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      userId: context.userId
+    };
+    
+    // Send to analytics service
+    this.sendToAnalytics(analytics);
+  }
+  
+  static getErrorStats() {
+    const logs = JSON.parse(localStorage.getItem('api_logs') || '[]');
+    const stats = {};
+    
+    logs.forEach(log => {
+      const code = log.error.code;
+      stats[code] = (stats[code] || 0) + 1;
+    });
+    
+    return stats;
+  }
+}
+```
+
+## 📞 Getting Help
+
+### **Error Reporting**
+
+When reporting errors to support, include:
+
+1. **Error Code**: The specific error code
+2. **Request ID**: The unique request identifier
+3. **Timestamp**: When the error occurred
+4. **Request Details**: The API endpoint and data sent
+5. **Context**: Your application context
+
+### **Support Channels**
+
+- **Documentation**: [docs.decoded.africa](https://docs.decoded.africa)
+- **Email**: support@decoded.africa
+- **Discord**: [Join our community](https://discord.gg/decodedventures)
+
+## 📖 Related Documentation
+
+- [Authentication](/authentication) - Learn about API authentication
+- [Rate Limits](/rate-limits) - Understand rate limiting
+- [Webhooks](/webhooks) - Real-time event notifications
