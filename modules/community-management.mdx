@@ -33,6 +33,7 @@ Communities serve as a strategic tool for:
 - Meeting scheduling and management
 - Resource sharing and collaboration
 - Invitation and referral systems
+- **Community ticketing system for support and issue management**
 - Analytics and engagement tracking
 
 ## Authentication
@@ -96,6 +97,199 @@ Retrieves details of a specific community.
 
 ```http
 GET /getCommunity?communityId=<id>
+```
+
+## Community Ticketing System
+
+The community ticketing system allows community members to submit support requests, report issues, and track their resolution. This system integrates with the community management workflow to provide comprehensive support.
+
+### Create Community Ticket
+
+Creates a new support ticket within a community.
+
+```http
+POST /createCommunityTicket
+```
+
+**Request Body:**
+
+```json
+{
+  "communityId": "string",
+  "title": "string",
+  "description": "string",
+  "category": "general|technical|content|moderation|billing|feature_request|bug_report",
+  "priority": "low|medium|high|urgent",
+  "tags": ["support", "technical"],
+  "attachments": [
+    {
+      "name": "screenshot.png",
+      "url": "https://storage.googleapis.com/attachments/screenshot.png",
+      "type": "image/png",
+      "size": 1024000
+    }
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "ticket-id",
+  "message": "Community ticket created successfully",
+  "status": "open"
+}
+```
+
+### List Community Tickets
+
+Retrieves a list of community tickets with filtering options.
+
+```http
+GET /listCommunityTickets?communityId=<id>&status=<status>&category=<category>&priority=<priority>&limit=20&offset=0
+```
+
+**Query Parameters:**
+- `communityId`: Filter by community ID
+- `status`: Filter by ticket status (open, in_progress, resolved, closed, escalated)
+- `category`: Filter by ticket category
+- `priority`: Filter by priority level
+- `assignedTo`: Filter by assigned user
+- `submittedBy`: Filter by ticket submitter
+- `limit`: Number of tickets to return (default: 20)
+- `offset`: Pagination offset (default: 0)
+
+**Response:**
+
+```json
+{
+  "tickets": [
+    {
+      "id": "ticket-id",
+      "communityId": "community-id",
+      "submittedBy": "user-id",
+      "title": "Technical Issue with Platform",
+      "description": "Unable to access community resources",
+      "category": "technical",
+      "priority": "high",
+      "status": "in_progress",
+      "assignedTo": "admin-id",
+      "tags": ["support", "technical"],
+      "attachments": [],
+      "comments": [
+        {
+          "id": "comment-id",
+          "authorId": "user-id",
+          "authorName": "John Doe",
+          "content": "Issue resolved",
+          "isInternal": false,
+          "createdAt": "2025-08-28T07:30:00.000Z"
+        }
+      ],
+      "metrics": {
+        "responseTime": 120,
+        "resolutionTime": 480,
+        "customerSatisfaction": 5,
+        "reopenCount": 0
+      },
+      "createdAt": "2025-08-28T07:30:00.000Z",
+      "updatedAt": "2025-08-28T07:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 25,
+    "limit": 20,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+### Update Community Ticket
+
+Updates an existing community ticket (status, assignment, comments, etc.).
+
+```http
+PUT /updateCommunityTicket/<ticketId>
+```
+
+**Request Body:**
+
+```json
+{
+  "status": "resolved",
+  "assignedTo": "admin-id",
+  "priority": "medium",
+  "tags": ["resolved", "technical"],
+  "resolution": {
+    "description": "Issue was caused by temporary server maintenance",
+    "resolvedBy": "admin-id",
+    "resolvedAt": "2025-08-28T07:30:00.000Z"
+  },
+  "comment": "Issue has been resolved. Please test and let us know if you need further assistance."
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Community ticket updated successfully",
+  "ticketId": "ticket-id"
+}
+```
+
+### Get Community Ticket
+
+Retrieves details of a specific community ticket.
+
+```http
+GET /getCommunityTicket/<ticketId>
+```
+
+**Response:**
+
+```json
+{
+  "id": "ticket-id",
+  "communityId": "community-id",
+  "submittedBy": "user-id",
+  "title": "Technical Issue with Platform",
+  "description": "Unable to access community resources",
+  "category": "technical",
+  "priority": "high",
+  "status": "resolved",
+  "assignedTo": "admin-id",
+  "tags": ["support", "technical", "resolved"],
+  "attachments": [],
+  "comments": [
+    {
+      "id": "comment-id",
+      "authorId": "admin-id",
+      "authorName": "Admin User",
+      "content": "Issue has been resolved. Please test and let us know if you need further assistance.",
+      "isInternal": true,
+      "createdAt": "2025-08-28T07:30:00.000Z"
+    }
+  ],
+  "resolution": {
+    "description": "Issue was caused by temporary server maintenance",
+    "resolvedBy": "admin-id",
+    "resolvedAt": "2025-08-28T07:30:00.000Z",
+    "satisfactionRating": 5,
+    "feedback": "Excellent support service!"
+  },
+  "metrics": {
+    "responseTime": 120,
+    "resolutionTime": 480,
+    "customerSatisfaction": 5,
+    "reopenCount": 0
+  },
+  "createdAt": "2025-08-28T07:30:00.000Z",
+  "updatedAt": "2025-08-28T07:30:00.000Z",
+  "closedAt": "2025-08-28T07:30:00.000Z"
+}
 ```
 
 **Response:**

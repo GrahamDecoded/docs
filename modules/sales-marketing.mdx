@@ -1,0 +1,725 @@
+# Sales & Marketing API
+
+The Sales & Marketing API provides comprehensive tools for managing sales pipelines, marketing campaigns, customer relationships, and automated marketing workflows. This system integrates with the AAARRR pipeline to optimize customer acquisition and retention.
+
+## Overview
+
+The Sales & Marketing API enables ERP clients to:
+- Manage complete sales pipelines and opportunities
+- Create and track marketing campaigns across multiple channels
+- Implement automated drip marketing workflows
+- Track customer journey through AAARRR stages
+- Generate and manage call-to-action (CTA) campaigns
+- Analyze sales and marketing performance metrics
+
+## Authentication
+
+All sales and marketing endpoints require Firebase authentication. Include your Firebase ID token in the Authorization header:
+
+```bash
+Authorization: Bearer <firebase_id_token>
+```
+
+## Sales Pipeline Management
+
+### Create Sales Pipeline
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/sales/pipelines" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Enterprise Sales Pipeline",
+    "description": "Pipeline for enterprise customer acquisition",
+    "stages": [
+      {
+        "name": "Lead Qualification",
+        "order": 1,
+        "probability": 10,
+        "color": "#FF6B6B"
+      },
+      {
+        "name": "Discovery Call",
+        "order": 2,
+        "probability": 25,
+        "color": "#4ECDC4"
+      },
+      {
+        "name": "Proposal",
+        "order": 3,
+        "probability": 50,
+        "color": "#45B7D1"
+      },
+      {
+        "name": "Negotiation",
+        "order": 4,
+        "probability": 75,
+        "color": "#96CEB4"
+      },
+      {
+        "name": "Closed Won",
+        "order": 5,
+        "probability": 100,
+        "color": "#FFEAA7"
+      }
+    ],
+    "settings": {
+      "autoAssignLeads": true,
+      "enableNotifications": true,
+      "requireActivityLog": true
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Sales pipeline created successfully",
+  "data": {
+    "id": "pipeline-1234567890",
+    "name": "Enterprise Sales Pipeline",
+    "description": "Pipeline for enterprise customer acquisition",
+    "stages": [
+      {
+        "id": "stage-1",
+        "name": "Lead Qualification",
+        "order": 1,
+        "probability": 10,
+        "color": "#FF6B6B",
+        "dealCount": 0,
+        "totalValue": 0
+      }
+    ],
+    "settings": {
+      "autoAssignLeads": true,
+      "enableNotifications": true,
+      "requireActivityLog": true
+    },
+    "metrics": {
+      "totalDeals": 0,
+      "totalValue": 0,
+      "conversionRate": 0,
+      "averageDealSize": 0
+    },
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Create Sales Lead
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/sales/leads" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@company.com",
+    "phone": "+254700000000",
+    "company": "Tech Solutions Ltd",
+    "position": "CTO",
+    "industry": "Technology",
+    "source": "website",
+    "pipelineId": "pipeline-1",
+    "stageId": "stage-1",
+    "estimatedValue": 50000,
+    "currency": "USD",
+    "notes": "Interested in enterprise ERP solution",
+    "tags": ["enterprise", "technology", "high-value"]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Sales lead created successfully",
+  "data": {
+    "id": "lead-1234567890",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@company.com",
+    "phone": "+254700000000",
+    "company": "Tech Solutions Ltd",
+    "position": "CTO",
+    "industry": "Technology",
+    "source": "website",
+    "pipelineId": "pipeline-1",
+    "stageId": "stage-1",
+    "stageName": "Lead Qualification",
+    "estimatedValue": 50000,
+    "currency": "USD",
+    "status": "active",
+    "notes": "Interested in enterprise ERP solution",
+    "tags": ["enterprise", "technology", "high-value"],
+    "activities": [],
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Create Sales Opportunity
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/sales/opportunities" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "leadId": "lead-1",
+    "pipelineId": "pipeline-1",
+    "stageId": "stage-2",
+    "title": "Enterprise ERP Implementation",
+    "description": "Full ERP implementation for Tech Solutions Ltd",
+    "estimatedValue": 50000,
+    "currency": "USD",
+    "expectedCloseDate": "2025-09-30T00:00:00.000Z",
+    "probability": 25,
+    "competitors": ["SAP", "Oracle"],
+    "decisionMakers": [
+      {
+        "name": "John Doe",
+        "position": "CTO",
+        "email": "john.doe@company.com",
+        "influence": "high"
+      }
+    ],
+    "notes": "Initial discovery call scheduled for next week"
+  }'
+```
+</RequestExample>
+
+### Update Pipeline Stage
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/sales/opportunities/opp-1/stage" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "stageId": "stage-3",
+    "notes": "Proposal sent to client",
+    "activity": {
+      "type": "proposal_sent",
+      "description": "Sent detailed proposal to Tech Solutions Ltd",
+      "date": "2025-08-28T07:30:00.000Z"
+    }
+  }'
+```
+</RequestExample>
+
+## Marketing Campaign Management
+
+### Create Marketing Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/marketing/campaigns" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Q4 Enterprise Campaign",
+    "description": "Targeted campaign for enterprise customers",
+    "type": "email",
+    "objective": "lead_generation",
+    "targetAudience": {
+      "industries": ["Technology", "Manufacturing"],
+      "companySize": ["51-200", "201-500", "500+"],
+      "positions": ["CTO", "CEO", "Operations Manager"],
+      "locations": ["Kenya", "Nigeria", "Ghana"]
+    },
+    "content": {
+      "subject": "Transform Your Business Operations",
+      "body": "Discover how our ERP solution can streamline your operations...",
+      "ctaText": "Schedule Demo",
+      "ctaUrl": "https://erp.decoded.africa/demo"
+    },
+    "schedule": {
+      "startDate": "2025-09-01T00:00:00.000Z",
+      "endDate": "2025-09-30T00:00:00.000Z",
+      "frequency": "weekly"
+    },
+    "budget": 5000,
+    "currency": "USD"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Marketing campaign created successfully",
+  "data": {
+    "id": "campaign-1234567890",
+    "name": "Q4 Enterprise Campaign",
+    "description": "Targeted campaign for enterprise customers",
+    "type": "email",
+    "objective": "lead_generation",
+    "status": "scheduled",
+    "targetAudience": {
+      "industries": ["Technology", "Manufacturing"],
+      "companySize": ["51-200", "201-500", "500+"],
+      "positions": ["CTO", "CEO", "Operations Manager"],
+      "locations": ["Kenya", "Nigeria", "Ghana"]
+    },
+    "content": {
+      "subject": "Transform Your Business Operations",
+      "body": "Discover how our ERP solution can streamline your operations...",
+      "ctaText": "Schedule Demo",
+      "ctaUrl": "https://erp.decoded.africa/demo"
+    },
+    "schedule": {
+      "startDate": "2025-09-01T00:00:00.000Z",
+      "endDate": "2025-09-30T00:00:00.000Z",
+      "frequency": "weekly"
+    },
+    "budget": 5000,
+    "currency": "USD",
+    "metrics": {
+      "sent": 0,
+      "delivered": 0,
+      "opened": 0,
+      "clicked": 0,
+      "converted": 0,
+      "bounced": 0,
+      "unsubscribed": 0
+    },
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Track Campaign Performance
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/marketing/campaigns/campaign-1/performance" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Campaign performance data retrieved",
+  "data": {
+    "campaignId": "campaign-1",
+    "period": "last_30_days",
+    "overview": {
+      "sent": 10000,
+      "delivered": 9800,
+      "opened": 2450,
+      "clicked": 490,
+      "converted": 49,
+      "bounced": 200,
+      "unsubscribed": 50,
+      "openRate": 0.245,
+      "clickRate": 0.049,
+      "conversionRate": 0.005,
+      "bounceRate": 0.02,
+      "unsubscribeRate": 0.005
+    },
+    "dailyPerformance": [
+      {
+        "date": "2025-08-28",
+        "sent": 500,
+        "delivered": 490,
+        "opened": 120,
+        "clicked": 25,
+        "converted": 3
+      }
+    ],
+    "audienceBreakdown": {
+      "byIndustry": [
+        {
+          "industry": "Technology",
+          "sent": 5000,
+          "opened": 1250,
+          "clicked": 250,
+          "converted": 25
+        }
+      ],
+      "byLocation": [
+        {
+          "location": "Kenya",
+          "sent": 4000,
+          "opened": 1000,
+          "clicked": 200,
+          "converted": 20
+        }
+      ]
+    }
+  }
+}
+```
+</ResponseExample>
+
+## Call-to-Action (CTA) Management
+
+### Create Call-to-Action
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/marketing/ctas" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Demo Request CTA",
+    "type": "button",
+    "text": "Schedule Free Demo",
+    "url": "https://erp.decoded.africa/demo",
+    "style": {
+      "backgroundColor": "#3B82F6",
+      "textColor": "#FFFFFF",
+      "borderRadius": "8px",
+      "padding": "12px 24px"
+    },
+    "placement": {
+      "pages": ["homepage", "pricing", "features"],
+      "position": "bottom-right"
+    },
+    "tracking": {
+      "enableAnalytics": true,
+      "trackClicks": true,
+      "trackConversions": true
+    }
+  }'
+```
+</RequestExample>
+
+### Track CTA Interaction
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/marketing/ctas/cta-1/interaction" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "click",
+    "userId": "user-123",
+    "sessionId": "session-456",
+    "pageUrl": "https://erp.decoded.africa/pricing",
+    "timestamp": "2025-08-28T07:30:00.000Z",
+    "metadata": {
+      "userAgent": "Mozilla/5.0...",
+      "ipAddress": "192.168.1.1",
+      "referrer": "https://google.com"
+    }
+  }'
+```
+</RequestExample>
+
+## Customer Account Management
+
+### Create Customer Account
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/customers/accounts" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@company.com",
+    "phone": "+254700000001",
+    "company": "Innovation Corp",
+    "industry": "Technology",
+    "aaarrrStage": "awareness",
+    "source": "website",
+    "preferences": {
+      "communicationChannel": "email",
+      "frequency": "weekly",
+      "topics": ["product-updates", "industry-insights"]
+    },
+    "tags": ["enterprise", "technology", "early-adopter"]
+  }'
+```
+</RequestExample>
+
+### Update AAARRR Stage
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/customers/accounts/customer-1/stage" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "stage": "acquisition",
+    "reason": "signed_up_for_newsletter",
+    "metadata": {
+      "campaignId": "campaign-1",
+      "ctaId": "cta-1",
+      "landingPage": "newsletter-signup"
+    }
+  }'
+```
+</RequestExample>
+
+### Get Customer Analytics
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/customers/analytics?period=last_30_days" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Customer analytics retrieved",
+  "data": {
+    "period": "last_30_days",
+    "overview": {
+      "totalCustomers": 1250,
+      "newCustomers": 150,
+      "churnedCustomers": 25,
+      "netGrowth": 125,
+      "retentionRate": 0.98
+    },
+    "aaarrrBreakdown": {
+      "awareness": {
+        "count": 500,
+        "percentage": 40,
+        "growth": 50
+      },
+      "acquisition": {
+        "count": 300,
+        "percentage": 24,
+        "growth": 30
+      },
+      "activation": {
+        "count": 200,
+        "percentage": 16,
+        "growth": 25
+      },
+      "retention": {
+        "count": 150,
+        "percentage": 12,
+        "growth": 20
+      },
+      "revenue": {
+        "count": 80,
+        "percentage": 6.4,
+        "growth": 15
+      },
+      "referral": {
+        "count": 20,
+        "percentage": 1.6,
+        "growth": 10
+      }
+    },
+    "conversionFunnel": {
+      "websiteVisitors": 10000,
+      "newsletterSignups": 1000,
+      "demoRequests": 200,
+      "trialSignups": 50,
+      "paidCustomers": 25
+    }
+  }
+}
+```
+</ResponseExample>
+
+## Drip Marketing Workflows
+
+### Create Drip Workflow
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/marketing/drip-workflows" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Onboarding Workflow",
+    "description": "Automated onboarding sequence for new customers",
+    "trigger": {
+      "type": "customer_signup",
+      "conditions": {
+        "aaarrrStage": "acquisition",
+        "source": "website"
+      }
+    },
+    "steps": [
+      {
+        "order": 1,
+        "type": "email",
+        "delay": 0,
+        "template": "welcome_email",
+        "conditions": {
+          "required": true
+        }
+      },
+      {
+        "order": 2,
+        "type": "email",
+        "delay": 86400,
+        "template": "getting_started_guide",
+        "conditions": {
+          "required": false
+        }
+      },
+      {
+        "order": 3,
+        "type": "email",
+        "delay": 604800,
+        "template": "feature_showcase",
+        "conditions": {
+          "required": false,
+          "engagement": "opened_previous"
+        }
+      }
+    ],
+    "settings": {
+      "maxDuration": 2592000,
+      "allowUnsubscribe": true,
+      "enableTracking": true
+    }
+  }'
+```
+</RequestExample>
+
+### Start Workflow Instance
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/marketing/drip-workflows/workflow-1/start" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerId": "customer-1",
+    "metadata": {
+      "signupDate": "2025-08-28T07:30:00.000Z",
+      "source": "website",
+      "referrer": "google"
+    }
+  }'
+```
+</RequestExample>
+
+### Get Workflow Analytics
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/marketing/drip-workflows/workflow-1/analytics" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Drip workflow analytics retrieved",
+  "data": {
+    "workflowId": "workflow-1",
+    "period": "last_30_days",
+    "overview": {
+      "totalInstances": 500,
+      "activeInstances": 150,
+      "completedInstances": 300,
+      "droppedInstances": 50,
+      "completionRate": 0.6
+    },
+    "stepPerformance": [
+      {
+        "stepOrder": 1,
+        "stepType": "email",
+        "template": "welcome_email",
+        "sent": 500,
+        "delivered": 490,
+        "opened": 245,
+        "clicked": 49,
+        "conversionRate": 0.098
+      },
+      {
+        "stepOrder": 2,
+        "stepType": "email",
+        "template": "getting_started_guide",
+        "sent": 245,
+        "delivered": 240,
+        "opened": 120,
+        "clicked": 24,
+        "conversionRate": 0.098
+      }
+    ],
+    "customerJourney": {
+      "averageTimeToComplete": 604800,
+      "dropoutPoints": [
+        {
+          "step": 2,
+          "dropoutCount": 125,
+          "dropoutRate": 0.255
+        }
+      ]
+    }
+  }
+}
+```
+</ResponseExample>
+
+## Error Responses
+
+### Validation Error
+
+```json
+{
+  "error": "Validation failed",
+  "message": "Missing required fields",
+  "details": {
+    "email": "Email is required",
+    "firstName": "First name is required"
+  }
+}
+```
+
+### Permission Error
+
+```json
+{
+  "error": "Insufficient permissions",
+  "message": "You do not have permission to access this resource"
+}
+```
+
+### Resource Not Found
+
+```json
+{
+  "error": "Resource not found",
+  "message": "Campaign with ID 'campaign-999' does not exist"
+}
+```
+
+## Rate Limits
+
+- **Sales endpoints**: 1000 requests per hour
+- **Marketing endpoints**: 500 requests per hour
+- **Analytics endpoints**: 200 requests per hour
+- **Workflow endpoints**: 100 requests per hour
+
+## Webhooks
+
+The Sales & Marketing API supports webhooks for the following events:
+
+- `sales.lead.created` - When a new lead is created
+- `sales.opportunity.stage_changed` - When an opportunity moves to a new stage
+- `sales.deal.closed` - When a deal is closed
+- `marketing.campaign.sent` - When a marketing campaign is sent
+- `marketing.campaign.opened` - When a campaign email is opened
+- `marketing.campaign.clicked` - When a campaign link is clicked
+- `customer.stage_changed` - When a customer moves to a new AAARRR stage
+- `drip.workflow.started` - When a drip workflow is started
+- `drip.workflow.completed` - When a drip workflow is completed
+
+Configure webhooks in your ERP dashboard or contact support for setup assistance.

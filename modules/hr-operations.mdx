@@ -1,0 +1,759 @@
+# HR & Operations API
+
+The HR & Operations API provides comprehensive tools for managing human resources, employee lifecycle, payroll processing, project management, and operational tasks. This system integrates with the ERP workflow to streamline HR and operations management.
+
+## Overview
+
+The HR & Operations API enables ERP clients to:
+- Manage complete employee lifecycle from hiring to offboarding
+- Process payroll and manage compensation
+- Handle leave requests and time tracking
+- Manage projects and operational tasks
+- Track performance and employee engagement
+- Generate HR analytics and reports
+
+## Authentication
+
+All HR and operations endpoints require Firebase authentication. Include your Firebase ID token in the Authorization header:
+
+```bash
+Authorization: Bearer <firebase_id_token>
+```
+
+## Employee Management
+
+### Create Employee
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/hr/employees" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@company.com",
+    "phone": "+254700000000",
+    "dateOfBirth": "1990-05-15",
+    "hireDate": "2025-01-15",
+    "position": "Software Engineer",
+    "department": "Engineering",
+    "managerId": "manager-123",
+    "employmentType": "full_time",
+    "salary": {
+      "amount": 80000,
+      "currency": "USD",
+      "frequency": "monthly"
+    },
+    "benefits": {
+      "healthInsurance": true,
+      "dentalInsurance": true,
+      "retirementPlan": true,
+      "paidTimeOff": 20
+    },
+    "address": {
+      "street": "123 Main Street",
+      "city": "Nairobi",
+      "state": "Nairobi",
+      "country": "Kenya",
+      "postalCode": "00100"
+    },
+    "emergencyContact": {
+      "name": "Jane Doe",
+      "relationship": "Spouse",
+      "phone": "+254700000001"
+    },
+    "documents": {
+      "idNumber": "12345678",
+      "passportNumber": "A12345678",
+      "workPermit": "WP123456"
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Employee created successfully",
+  "data": {
+    "id": "employee-1234567890",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@company.com",
+    "phone": "+254700000000",
+    "dateOfBirth": "1990-05-15",
+    "hireDate": "2025-01-15",
+    "position": "Software Engineer",
+    "department": "Engineering",
+    "managerId": "manager-123",
+    "employmentType": "full_time",
+    "status": "active",
+    "salary": {
+      "amount": 80000,
+      "currency": "USD",
+      "frequency": "monthly"
+    },
+    "benefits": {
+      "healthInsurance": true,
+      "dentalInsurance": true,
+      "retirementPlan": true,
+      "paidTimeOff": 20
+    },
+    "performance": {
+      "rating": 0,
+      "lastReview": null,
+      "nextReview": "2025-07-15"
+    },
+    "attendance": {
+      "totalDays": 0,
+      "absentDays": 0,
+      "lateDays": 0
+    },
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### List Employees
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/hr/employees?department=Engineering&status=active&limit=20&offset=0" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Employees retrieved successfully",
+  "data": {
+    "employees": [
+      {
+        "id": "employee-1",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@company.com",
+        "position": "Software Engineer",
+        "department": "Engineering",
+        "hireDate": "2025-01-15",
+        "status": "active",
+        "salary": {
+          "amount": 80000,
+          "currency": "USD"
+        },
+        "performance": {
+          "rating": 4.5,
+          "lastReview": "2025-06-15"
+        }
+      }
+    ],
+    "pagination": {
+      "total": 50,
+      "limit": 20,
+      "offset": 0,
+      "hasMore": true
+    }
+  }
+}
+```
+</ResponseExample>
+
+### Update Employee Status
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/hr/employees/employee-1/status" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "terminated",
+    "terminationDate": "2025-08-28",
+    "reason": "Resignation",
+    "exitInterview": {
+      "conducted": true,
+      "date": "2025-08-25",
+      "feedback": "Employee provided positive feedback about the company"
+    }
+  }'
+```
+</RequestExample>
+
+## Leave Management
+
+### Create Leave Request
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/hr/leave-requests" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "employeeId": "employee-1",
+    "leaveType": "annual",
+    "startDate": "2025-09-15",
+    "endDate": "2025-09-20",
+    "totalDays": 5,
+    "reason": "Family vacation",
+    "emergencyContact": {
+      "name": "Jane Doe",
+      "phone": "+254700000001"
+    },
+    "attachments": [
+      {
+        "name": "vacation_request.pdf",
+        "url": "https://storage.googleapis.com/hr-docs/vacation_request.pdf"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Leave request created successfully",
+  "data": {
+    "id": "leave-1234567890",
+    "employeeId": "employee-1",
+    "employeeName": "John Doe",
+    "leaveType": "annual",
+    "startDate": "2025-09-15",
+    "endDate": "2025-09-20",
+    "totalDays": 5,
+    "reason": "Family vacation",
+    "status": "pending",
+    "approvalWorkflow": [
+      {
+        "approverId": "manager-123",
+        "approverName": "Jane Manager",
+        "status": "pending",
+        "comments": null
+      }
+    ],
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Approve/Reject Leave Request
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/hr/leave-requests/leave-1/approve" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "approved": true,
+    "comments": "Approved - enjoy your vacation!",
+    "approvedBy": "manager-123"
+  }'
+```
+</RequestExample>
+
+### List Leave Requests
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/hr/leave-requests?status=pending&department=Engineering&startDate=2025-09-01&endDate=2025-09-30" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+## Payroll Management
+
+### Create Payroll
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/hr/payroll" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "payrollPeriod": {
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-31"
+    },
+    "employees": [
+      {
+        "employeeId": "employee-1",
+        "baseSalary": 80000,
+        "overtimeHours": 10,
+        "overtimeRate": 50,
+        "bonuses": 5000,
+        "deductions": {
+          "tax": 16000,
+          "insurance": 2000,
+          "retirement": 4000
+        },
+        "netPay": 63000
+      }
+    ],
+    "totalPayroll": 63000,
+    "currency": "USD"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Payroll created successfully",
+  "data": {
+    "id": "payroll-1234567890",
+    "payrollPeriod": {
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-31"
+    },
+    "status": "pending",
+    "totalEmployees": 1,
+    "totalPayroll": 63000,
+    "currency": "USD",
+    "breakdown": {
+      "baseSalaries": 80000,
+      "overtime": 500,
+      "bonuses": 5000,
+      "deductions": 22000,
+      "netPay": 63000
+    },
+    "approvalWorkflow": [
+      {
+        "approverId": "hr-manager-123",
+        "status": "pending"
+      }
+    ],
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Process Payroll
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/hr/payroll/payroll-1/process" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paymentMethod": "bank_transfer",
+    "paymentDate": "2025-09-05",
+    "bankDetails": {
+      "bankName": "Equity Bank",
+      "accountNumber": "1234567890",
+      "branchCode": "001"
+    }
+  }'
+```
+</RequestExample>
+
+## Project Management
+
+### Create Project
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/operations/projects" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ERP System Implementation",
+    "description": "Implementation of ERP system for client",
+    "clientId": "client-123",
+    "projectManager": "pm-123",
+    "team": [
+      {
+        "employeeId": "employee-1",
+        "role": "Lead Developer",
+        "allocation": 100
+      },
+      {
+        "employeeId": "employee-2",
+        "role": "UI/UX Designer",
+        "allocation": 50
+      }
+    ],
+    "timeline": {
+      "startDate": "2025-09-01",
+      "endDate": "2025-12-31",
+      "milestones": [
+        {
+          "name": "Requirements Gathering",
+          "dueDate": "2025-09-15",
+          "deliverables": ["BRD", "Technical Specs"]
+        },
+        {
+          "name": "Development Phase",
+          "dueDate": "2025-11-30",
+          "deliverables": ["Core Modules", "API Integration"]
+        }
+      ]
+    },
+    "budget": {
+      "total": 100000,
+      "currency": "USD",
+      "breakdown": {
+        "development": 60000,
+        "design": 20000,
+        "testing": 15000,
+        "deployment": 5000
+      }
+    },
+    "status": "planning"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Project created successfully",
+  "data": {
+    "id": "project-1234567890",
+    "name": "ERP System Implementation",
+    "description": "Implementation of ERP system for client",
+    "clientId": "client-123",
+    "projectManager": "pm-123",
+    "team": [
+      {
+        "employeeId": "employee-1",
+        "employeeName": "John Doe",
+        "role": "Lead Developer",
+        "allocation": 100
+      }
+    ],
+    "timeline": {
+      "startDate": "2025-09-01",
+      "endDate": "2025-12-31",
+      "duration": 122,
+      "progress": 0,
+      "milestones": [
+        {
+          "id": "milestone-1",
+          "name": "Requirements Gathering",
+          "dueDate": "2025-09-15",
+          "status": "pending",
+          "progress": 0
+        }
+      ]
+    },
+    "budget": {
+      "total": 100000,
+      "currency": "USD",
+      "spent": 0,
+      "remaining": 100000,
+      "utilization": 0
+    },
+    "status": "planning",
+    "metrics": {
+      "tasksCompleted": 0,
+      "totalTasks": 0,
+      "completionRate": 0
+    },
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Update Project Status
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/operations/projects/project-1/status" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "in_progress",
+    "progress": 25,
+    "notes": "Requirements gathering completed, starting development phase",
+    "milestoneUpdates": [
+      {
+        "milestoneId": "milestone-1",
+        "status": "completed",
+        "completionDate": "2025-09-15"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+## Operations Tasks
+
+### Create Operations Task
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/operations/tasks" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Server Maintenance",
+    "description": "Perform routine server maintenance and updates",
+    "category": "infrastructure",
+    "priority": "medium",
+    "assignedTo": "employee-1",
+    "projectId": "project-1",
+    "dueDate": "2025-09-05",
+    "estimatedHours": 4,
+    "dependencies": ["task-123"],
+    "checklist": [
+      {
+        "item": "Backup all data",
+        "completed": false
+      },
+      {
+        "item": "Update system packages",
+        "completed": false
+      },
+      {
+        "item": "Test system functionality",
+        "completed": false
+      }
+    ],
+    "attachments": [
+      {
+        "name": "maintenance_guide.pdf",
+        "url": "https://storage.googleapis.com/ops-docs/maintenance_guide.pdf"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Operations task created successfully",
+  "data": {
+    "id": "task-1234567890",
+    "title": "Server Maintenance",
+    "description": "Perform routine server maintenance and updates",
+    "category": "infrastructure",
+    "priority": "medium",
+    "status": "assigned",
+    "assignedTo": "employee-1",
+    "assignedToName": "John Doe",
+    "projectId": "project-1",
+    "dueDate": "2025-09-05",
+    "estimatedHours": 4,
+    "actualHours": 0,
+    "dependencies": ["task-123"],
+    "checklist": [
+      {
+        "id": "checklist-1",
+        "item": "Backup all data",
+        "completed": false,
+        "completedAt": null
+      }
+    ],
+    "progress": 0,
+    "timeTracking": {
+      "startedAt": null,
+      "totalTime": 0,
+      "sessions": []
+    },
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Update Task Status
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/operations/tasks/task-1/status" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "in_progress",
+    "progress": 50,
+    "actualHours": 2,
+    "checklistUpdates": [
+      {
+        "checklistId": "checklist-1",
+        "completed": true,
+        "completedAt": "2025-08-28T07:30:00.000Z"
+      }
+    ],
+    "notes": "Data backup completed successfully, proceeding with system updates"
+  }'
+```
+</RequestExample>
+
+### List Operations Tasks
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/operations/tasks?status=in_progress&assignedTo=employee-1&priority=high&dueDate=2025-09-05" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Operations tasks retrieved successfully",
+  "data": {
+    "tasks": [
+      {
+        "id": "task-1",
+        "title": "Server Maintenance",
+        "category": "infrastructure",
+        "priority": "medium",
+        "status": "in_progress",
+        "assignedTo": "employee-1",
+        "assignedToName": "John Doe",
+        "dueDate": "2025-09-05",
+        "progress": 50,
+        "estimatedHours": 4,
+        "actualHours": 2
+      }
+    ],
+    "pagination": {
+      "total": 25,
+      "limit": 20,
+      "offset": 0,
+      "hasMore": true
+    },
+    "summary": {
+      "total": 25,
+      "completed": 10,
+      "inProgress": 8,
+      "pending": 5,
+      "overdue": 2
+    }
+  }
+}
+```
+</ResponseExample>
+
+## HR Analytics
+
+### Get HR Analytics
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/hr/analytics?period=last_30_days" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "HR analytics retrieved successfully",
+  "data": {
+    "period": "last_30_days",
+    "overview": {
+      "totalEmployees": 150,
+      "newHires": 12,
+      "terminations": 3,
+      "attritionRate": 0.02,
+      "averageTenure": 2.5
+    },
+    "departmentBreakdown": [
+      {
+        "department": "Engineering",
+        "headcount": 45,
+        "newHires": 5,
+        "attritionRate": 0.022
+      },
+      {
+        "department": "Sales",
+        "headcount": 30,
+        "newHires": 3,
+        "attritionRate": 0.033
+      }
+    ],
+    "leaveAnalytics": {
+      "totalRequests": 25,
+      "approved": 20,
+      "rejected": 3,
+      "pending": 2,
+      "averageProcessingTime": 2.5
+    },
+    "payrollAnalytics": {
+      "totalPayroll": 2500000,
+      "averageSalary": 16667,
+      "overtimeHours": 120,
+      "overtimeCost": 6000
+    },
+    "performanceAnalytics": {
+      "averageRating": 4.2,
+      "topPerformers": 15,
+      "needsImprovement": 5,
+      "reviewCompletionRate": 0.85
+    }
+  }
+}
+```
+</ResponseExample>
+
+## Error Responses
+
+### Validation Error
+
+```json
+{
+  "error": "Validation failed",
+  "message": "Missing required fields",
+  "details": {
+    "firstName": "First name is required",
+    "email": "Valid email is required"
+  }
+}
+```
+
+### Permission Error
+
+```json
+{
+  "error": "Insufficient permissions",
+  "message": "You do not have permission to access this resource"
+}
+```
+
+### Resource Not Found
+
+```json
+{
+  "error": "Resource not found",
+  "message": "Employee with ID 'employee-999' does not exist"
+}
+```
+
+## Rate Limits
+
+- **HR endpoints**: 1000 requests per hour
+- **Operations endpoints**: 500 requests per hour
+- **Analytics endpoints**: 200 requests per hour
+- **Payroll endpoints**: 100 requests per hour
+
+## Webhooks
+
+The HR & Operations API supports webhooks for the following events:
+
+- `hr.employee.created` - When a new employee is created
+- `hr.employee.updated` - When employee information is updated
+- `hr.employee.terminated` - When an employee is terminated
+- `hr.leave.requested` - When a leave request is submitted
+- `hr.leave.approved` - When a leave request is approved
+- `hr.leave.rejected` - When a leave request is rejected
+- `hr.payroll.created` - When payroll is created
+- `hr.payroll.processed` - When payroll is processed
+- `operations.project.created` - When a project is created
+- `operations.project.status_changed` - When project status changes
+- `operations.task.created` - When a task is created
+- `operations.task.completed` - When a task is completed
+
+Configure webhooks in your ERP dashboard or contact support for setup assistance.

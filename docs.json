@@ -35,8 +35,8 @@
             "group": "ERP Modules",
             "pages": [
               "modules/finance",
-              "modules/sales",
-              "modules/hr",
+              "modules/sales-marketing",
+              "modules/hr-operations",
               "modules/support",
               "modules/logistics",
               "modules/legal",
