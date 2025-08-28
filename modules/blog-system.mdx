@@ -1,0 +1,703 @@
+# Blog System API
+
+The Blog System API provides comprehensive blog management capabilities for ERP clients, including content creation, multimedia support, newsletter management, digital ads integration, and AAARRR pipeline optimization.
+
+## Overview
+
+The blog system enables ERP clients to:
+- Create and manage multiple blogs with custom domains
+- Publish multimedia-rich content with SEO optimization
+- Integrate with newsletter/email marketing
+- Deploy digital ads campaigns across multiple platforms
+- Track leads and conversions through the AAARRR pipeline
+- Manage subdomains and custom domains
+- Generate and track promotional coupons
+
+## Authentication
+
+All blog system endpoints require Firebase authentication. Include your Firebase ID token in the Authorization header:
+
+```bash
+Authorization: Bearer <firebase_id_token>
+```
+
+## Blog Categories
+
+### List Blog Categories
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/categories" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "List all blog categories for the ERP client",
+  "data": {
+    "categories": [
+      {
+        "id": "cat-1",
+        "name": "Industry Insights",
+        "description": "Industry trends and analysis",
+        "slug": "industry-insights",
+        "color": "#3B82F6",
+        "blogCount": 5,
+        "createdAt": "2025-08-28T07:30:00.000Z",
+        "updatedAt": "2025-08-28T07:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Create Blog Category
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs/categories" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product Updates",
+    "description": "Latest product features and updates",
+    "color": "#10B981"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Blog category created successfully",
+  "data": {
+    "id": "cat-1234567890",
+    "name": "Product Updates",
+    "description": "Latest product features and updates",
+    "slug": "product-updates",
+    "color": "#10B981",
+    "blogCount": 0,
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+## Blog Management
+
+### List All Blogs
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "List all blogs for the ERP client",
+  "data": {
+    "blogs": [
+      {
+        "id": "blog-1",
+        "name": "Company Blog",
+        "description": "Main company blog for content marketing",
+        "subdomain": "blog",
+        "customDomain": "blog.company.com",
+        "status": "active",
+        "settings": {
+          "theme": "modern",
+          "allowComments": true,
+          "requireApproval": false,
+          "newsletterEnabled": true,
+          "seoEnabled": true,
+          "analyticsEnabled": true
+        },
+        "analytics": {
+          "totalPosts": 15,
+          "totalViews": 2500,
+          "totalSubscribers": 150,
+          "conversionRate": 2.5
+        },
+        "createdAt": "2025-08-28T07:30:00.000Z",
+        "updatedAt": "2025-08-28T07:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Create New Blog
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Marketing Blog",
+    "description": "Content marketing and lead generation blog",
+    "subdomain": "marketing",
+    "customDomain": "marketing.company.com",
+    "settings": {
+      "theme": "modern",
+      "allowComments": true,
+      "newsletterEnabled": true,
+      "seoEnabled": true
+    },
+    "newsletterSettings": {
+      "welcomeEmail": true,
+      "doubleOptIn": true,
+      "frequency": "weekly"
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Blog created successfully",
+  "data": {
+    "id": "blog-1234567890",
+    "name": "Marketing Blog",
+    "description": "Content marketing and lead generation blog",
+    "subdomain": "marketing",
+    "customDomain": "marketing.company.com",
+    "status": "active",
+    "settings": {
+      "theme": "modern",
+      "allowComments": true,
+      "requireApproval": false,
+      "newsletterEnabled": true,
+      "seoEnabled": true,
+      "analyticsEnabled": true
+    },
+    "newsletterSettings": {
+      "welcomeEmail": true,
+      "doubleOptIn": true,
+      "frequency": "weekly"
+    },
+    "analytics": {
+      "totalPosts": 0,
+      "totalViews": 0,
+      "totalSubscribers": 0,
+      "conversionRate": 0
+    },
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Get Blog Details
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/blog-1" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+### Update Blog
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/blogs/blog-1" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Blog Name",
+    "description": "Updated description",
+    "settings": {
+      "theme": "minimal",
+      "allowComments": false
+    }
+  }'
+```
+</RequestExample>
+
+## Blog Posts
+
+### List Blog Posts
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/blog-1/posts?page=1&limit=10&status=published&category=cat-1" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "List all blog posts for the specified blog",
+  "data": {
+    "blogId": "blog-1",
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 25,
+      "totalPages": 3
+    },
+    "posts": [
+      {
+        "id": "post-1",
+        "title": "Welcome to Our Blog",
+        "excerpt": "This is our first blog post with comprehensive features...",
+        "content": "This is our first blog post with comprehensive features including multimedia, SEO, and AAARRR pipeline integration...",
+        "status": "published",
+        "category": {
+          "id": "cat-1",
+          "name": "Industry Insights",
+          "slug": "industry-insights"
+        },
+        "tags": ["welcome", "introduction", "company"],
+        "multimedia": {
+          "featuredImage": {
+            "url": "https://storage.googleapis.com/blog-images/featured-1.jpg",
+            "alt": "Welcome to our blog",
+            "caption": "Our team working together"
+          },
+          "gallery": [
+            {
+              "url": "https://storage.googleapis.com/blog-images/gallery-1.jpg",
+              "alt": "Team collaboration",
+              "caption": "Collaborative workspace"
+            }
+          ],
+          "videos": [
+            {
+              "url": "https://www.youtube.com/watch?v=example",
+              "title": "Company Introduction Video",
+              "duration": "2:30"
+            }
+          ]
+        },
+        "seo": {
+          "metaTitle": "Welcome to Our Company Blog - Industry Insights",
+          "metaDescription": "Discover the latest industry trends and company updates",
+          "keywords": ["blog", "company", "industry", "insights"],
+          "canonicalUrl": "https://blog.company.com/welcome-to-our-blog"
+        },
+        "aaarrr": {
+          "awareness": {
+            "socialShares": 45,
+            "organicTraffic": 1200,
+            "backlinks": 15
+          },
+          "acquisition": {
+            "emailSignups": 25,
+            "newsletterSubscribers": 18,
+            "couponDownloads": 12
+          },
+          "activation": {
+            "timeOnPage": 180,
+            "bounceRate": 0.35,
+            "scrollDepth": 0.75
+          },
+          "retention": {
+            "returnVisitors": 8,
+            "repeatEngagement": 5
+          },
+          "revenue": {
+            "conversions": 3,
+            "revenueGenerated": 1500,
+            "leadValue": 500
+          },
+          "referral": {
+            "socialReferrals": 7,
+            "emailReferrals": 3
+          }
+        },
+        "leadCapture": {
+          "enabled": true,
+          "formType": "newsletter",
+          "couponCode": "WELCOME10",
+          "discountPercentage": 10,
+          "leadCount": 25
+        },
+        "publishedAt": "2025-08-28T07:30:00.000Z",
+        "createdAt": "2025-08-28T07:30:00.000Z",
+        "updatedAt": "2025-08-28T07:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Create Blog Post
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs/blog-1/posts" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "New Product Launch",
+    "excerpt": "Exciting new product launch with amazing features",
+    "content": "We are excited to announce our new product launch...",
+    "status": "draft",
+    "categoryId": "cat-1",
+    "tags": ["product", "launch", "innovation"],
+    "multimedia": {
+      "featuredImage": {
+        "url": "https://storage.googleapis.com/blog-images/product-launch.jpg",
+        "alt": "New Product Launch",
+        "caption": "Our latest innovation"
+      }
+    },
+    "seo": {
+      "metaTitle": "New Product Launch - Company Name",
+      "metaDescription": "Discover our latest product innovation",
+      "keywords": ["product", "launch", "innovation"]
+    },
+    "leadCapture": {
+      "enabled": true,
+      "formType": "newsletter",
+      "couponCode": "LAUNCH20",
+      "discountPercentage": 20
+    },
+    "publishSchedule": "2025-08-29T09:00:00.000Z"
+  }'
+```
+</RequestExample>
+
+### Get Blog Post
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/blog-1/posts/post-1" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+### Update Blog Post
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/blogs/blog-1/posts/post-1" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated Product Launch Title",
+    "content": "Updated content...",
+    "status": "published",
+    "seo": {
+      "metaTitle": "Updated Meta Title"
+    }
+  }'
+```
+</RequestExample>
+
+### Delete Blog Post
+
+<RequestExample>
+```bash
+curl -X DELETE "https://api.decoded.africa/api/blogs/blog-1/posts/post-1" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+## Newsletter Management
+
+### Get Newsletter Settings
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/blog-1/newsletter" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Newsletter settings and subscribers retrieved",
+  "data": {
+    "blogId": "blog-1",
+    "settings": {
+      "welcomeEmail": true,
+      "doubleOptIn": true,
+      "frequency": "weekly",
+      "template": "modern",
+      "senderName": "Company Blog",
+      "senderEmail": "blog@company.com"
+    },
+    "subscribers": [
+      {
+        "id": "sub-1",
+        "email": "user@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "status": "active",
+        "subscribedAt": "2025-08-28T07:30:00.000Z",
+        "lastEmailSent": "2025-08-28T07:30:00.000Z"
+      }
+    ],
+    "campaigns": [
+      {
+        "id": "campaign-1",
+        "name": "Weekly Digest",
+        "status": "scheduled",
+        "scheduledAt": "2025-08-28T07:30:00.000Z",
+        "openRate": 0.25,
+        "clickRate": 0.08
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Add Newsletter Subscriber
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs/blog-1/newsletter/subscribers" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "newuser@example.com",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "source": "blog"
+  }'
+```
+</RequestExample>
+
+## Digital Ads Integration
+
+### List Ad Campaigns
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/blog-1/ads" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Digital ads campaigns for blog posts",
+  "data": {
+    "blogId": "blog-1",
+    "campaigns": [
+      {
+        "id": "ad-1",
+        "name": "Blog Post Promotion",
+        "platform": "google_ads",
+        "status": "active",
+        "budget": 500,
+        "spent": 125,
+        "impressions": 5000,
+        "clicks": 250,
+        "conversions": 15,
+        "posts": ["post-1", "post-2"],
+        "targeting": {
+          "locations": ["Kenya", "Nigeria"],
+          "interests": ["business", "technology"],
+          "demographics": {
+            "ageRange": ["25-34", "35-44"],
+            "gender": "all"
+          }
+        },
+        "createdAt": "2025-08-28T07:30:00.000Z",
+        "updatedAt": "2025-08-28T07:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Create Ad Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs/blog-1/ads" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product Launch Campaign",
+    "platform": "google_ads",
+    "budget": 1000,
+    "posts": ["post-1"],
+    "targeting": {
+      "locations": ["Kenya", "Nigeria", "Ghana"],
+      "interests": ["business", "technology", "innovation"],
+      "demographics": {
+        "ageRange": ["25-34", "35-44"],
+        "gender": "all"
+      }
+    },
+    "startDate": "2025-08-29T00:00:00.000Z",
+    "endDate": "2025-09-29T00:00:00.000Z"
+  }'
+```
+</RequestExample>
+
+## Subdomain Management
+
+### Configure Subdomain
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs/blog-1/subdomain" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain": "blog",
+    "customDomain": "blog.company.com"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Subdomain configuration updated successfully",
+  "data": {
+    "blogId": "blog-1",
+    "subdomain": "blog",
+    "customDomain": "blog.company.com",
+    "dnsRecords": [
+      {
+        "type": "CNAME",
+        "name": "blog",
+        "value": "ghs.googlehosted.com.",
+        "ttl": 300
+      }
+    ],
+    "status": "pending",
+    "estimatedTime": "5-10 minutes",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+## Lead Capture & Coupons
+
+### Get Leads and Coupons
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/blogs/blog-1/leads" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Lead capture data retrieved",
+  "data": {
+    "blogId": "blog-1",
+    "leads": [
+      {
+        "id": "lead-1",
+        "email": "lead@example.com",
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "source": "blog_post",
+        "postId": "post-1",
+        "couponUsed": "WELCOME10",
+        "status": "qualified",
+        "value": 500,
+        "createdAt": "2025-08-28T07:30:00.000Z"
+      }
+    ],
+    "coupons": [
+      {
+        "id": "coupon-1",
+        "code": "WELCOME10",
+        "discountPercentage": 10,
+        "usageLimit": 100,
+        "usedCount": 25,
+        "validFrom": "2025-08-28T07:30:00.000Z",
+        "validUntil": "2025-09-27T07:30:00.000Z",
+        "status": "active"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Create Coupon
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/blogs/blog-1/coupons" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "LAUNCH20",
+    "discountPercentage": 20,
+    "usageLimit": 50,
+    "validFrom": "2025-08-28T00:00:00.000Z",
+    "validUntil": "2025-09-28T00:00:00.000Z",
+    "postId": "post-1"
+  }'
+```
+</RequestExample>
+
+## Error Responses
+
+### Authentication Error
+
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### Validation Error
+
+```json
+{
+  "error": "Validation failed",
+  "message": "Title is required",
+  "details": {
+    "title": "Title field is required"
+  }
+}
+```
+
+### Not Found Error
+
+```json
+{
+  "error": "Blog not found",
+  "message": "Blog with ID 'blog-999' does not exist"
+}
+```
+
+## Rate Limits
+
+- **Standard endpoints**: 1000 requests per hour
+- **File upload endpoints**: 100 requests per hour
+- **Analytics endpoints**: 500 requests per hour
+
+## Webhooks
+
+The blog system supports webhooks for the following events:
+
+- `blog.post.created` - When a new blog post is created
+- `blog.post.published` - When a blog post is published
+- `blog.subscriber.added` - When a new newsletter subscriber is added
+- `blog.lead.captured` - When a new lead is captured
+- `blog.coupon.used` - When a coupon is used
+
+Configure webhooks in your ERP dashboard or contact support for setup assistance.

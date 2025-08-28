@@ -1,0 +1,670 @@
+# Digital Ads Integration API
+
+The Digital Ads Integration API enables ERP clients to manage advertising campaigns across multiple platforms including Google Ads, Facebook Ads, TikTok Ads, LinkedIn Ads, and other digital advertising networks.
+
+## Overview
+
+The digital ads integration provides:
+- Multi-platform campaign management
+- Automated ad creation and optimization
+- Performance tracking and analytics
+- Budget management and bidding strategies
+- Audience targeting and segmentation
+- Creative asset management
+- Conversion tracking and attribution
+
+## Authentication
+
+All digital ads endpoints require Firebase authentication. Include your Firebase ID token in the Authorization header:
+
+```bash
+Authorization: Bearer <firebase_id_token>
+```
+
+## Supported Platforms
+
+### Google Ads
+- Search campaigns
+- Display campaigns
+- Video campaigns (YouTube)
+- Shopping campaigns
+- Performance Max campaigns
+
+### Facebook Ads
+- Feed ads
+- Stories ads
+- Video ads
+- Carousel ads
+- Collection ads
+
+### TikTok Ads
+- In-feed ads
+- TopView ads
+- Branded hashtag challenges
+- Branded effects
+
+### LinkedIn Ads
+- Sponsored content
+- Message ads
+- Dynamic ads
+- Text ads
+
+### Twitter Ads
+- Promoted tweets
+- Promoted accounts
+- Promoted trends
+
+### Instagram Ads
+- Feed ads
+- Stories ads
+- Reels ads
+- Explore ads
+
+## Campaign Management
+
+### List All Campaigns
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/ads/campaigns" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "All advertising campaigns retrieved",
+  "data": {
+    "campaigns": [
+      {
+        "id": "campaign-1",
+        "name": "Product Launch Campaign",
+        "platform": "google_ads",
+        "status": "active",
+        "budget": 5000,
+        "spent": 1250,
+        "impressions": 50000,
+        "clicks": 2500,
+        "conversions": 150,
+        "ctr": 0.05,
+        "cpc": 0.50,
+        "cpa": 8.33,
+        "roas": 3.2,
+        "targeting": {
+          "locations": ["Kenya", "Nigeria", "Ghana"],
+          "interests": ["business", "technology"],
+          "demographics": {
+            "ageRange": ["25-34", "35-44"],
+            "gender": "all"
+          }
+        },
+        "startDate": "2025-08-01T00:00:00.000Z",
+        "endDate": "2025-08-31T00:00:00.000Z",
+        "createdAt": "2025-08-01T00:00:00.000Z",
+        "updatedAt": "2025-08-28T07:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Create Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/campaigns" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New Product Launch",
+    "platform": "google_ads",
+    "type": "search",
+    "budget": 3000,
+    "biddingStrategy": "maximize_conversions",
+    "targeting": {
+      "locations": ["Kenya", "Nigeria"],
+      "keywords": ["business software", "erp system", "management tools"],
+      "interests": ["business", "technology", "entrepreneurship"],
+      "demographics": {
+        "ageRange": ["25-34", "35-44"],
+        "gender": "all",
+        "income": "high"
+      }
+    },
+    "creatives": {
+      "headlines": ["Transform Your Business", "Streamline Operations", "Boost Productivity"],
+      "descriptions": ["Powerful ERP solution for modern businesses", "Everything you need to scale your business"],
+      "images": ["https://storage.googleapis.com/ads/creative1.jpg"],
+      "videos": ["https://storage.googleapis.com/ads/video1.mp4"]
+    },
+    "startDate": "2025-09-01T00:00:00.000Z",
+    "endDate": "2025-09-30T00:00:00.000Z"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Campaign created successfully",
+  "data": {
+    "id": "campaign-1234567890",
+    "name": "New Product Launch",
+    "platform": "google_ads",
+    "type": "search",
+    "status": "pending_review",
+    "budget": 3000,
+    "spent": 0,
+    "impressions": 0,
+    "clicks": 0,
+    "conversions": 0,
+    "biddingStrategy": "maximize_conversions",
+    "targeting": {
+      "locations": ["Kenya", "Nigeria"],
+      "keywords": ["business software", "erp system", "management tools"],
+      "interests": ["business", "technology", "entrepreneurship"],
+      "demographics": {
+        "ageRange": ["25-34", "35-44"],
+        "gender": "all",
+        "income": "high"
+      }
+    },
+    "creatives": {
+      "headlines": ["Transform Your Business", "Streamline Operations", "Boost Productivity"],
+      "descriptions": ["Powerful ERP solution for modern businesses", "Everything you need to scale your business"],
+      "images": ["https://storage.googleapis.com/ads/creative1.jpg"],
+      "videos": ["https://storage.googleapis.com/ads/video1.mp4"]
+    },
+    "startDate": "2025-09-01T00:00:00.000Z",
+    "endDate": "2025-09-30T00:00:00.000Z",
+    "createdAt": "2025-08-28T07:30:00.000Z",
+    "updatedAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+## Platform-Specific Endpoints
+
+### Google Ads
+
+#### Create Google Ads Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/google" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Google Search Campaign",
+    "type": "search",
+    "budget": 2000,
+    "biddingStrategy": "manual_cpc",
+    "keywords": ["erp software", "business management", "enterprise solution"],
+    "negativeKeywords": ["free", "open source"],
+    "adGroups": [
+      {
+        "name": "ERP Software",
+        "keywords": ["erp software", "enterprise resource planning"],
+        "ads": [
+          {
+            "headline1": "ERP Software",
+            "headline2": "Business Management",
+            "headline3": "Streamline Operations",
+            "description1": "Powerful ERP solution for modern businesses",
+            "description2": "Everything you need to scale your business"
+          }
+        ]
+      }
+    ],
+    "targeting": {
+      "locations": ["Kenya", "Nigeria"],
+      "languages": ["English"],
+      "devices": ["mobile", "desktop"]
+    }
+  }'
+```
+</RequestExample>
+
+#### Google Ads Performance
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/ads/google/campaign-1/performance" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Google Ads performance data",
+  "data": {
+    "campaignId": "campaign-1",
+    "platform": "google_ads",
+    "period": "last_30_days",
+    "metrics": {
+      "impressions": 50000,
+      "clicks": 2500,
+      "conversions": 150,
+      "ctr": 0.05,
+      "cpc": 0.50,
+      "cpa": 8.33,
+      "roas": 3.2,
+      "qualityScore": 8.5
+    },
+    "keywordPerformance": [
+      {
+        "keyword": "erp software",
+        "impressions": 15000,
+        "clicks": 800,
+        "conversions": 45,
+        "ctr": 0.053,
+        "cpc": 0.48,
+        "qualityScore": 9
+      }
+    ],
+    "adGroupPerformance": [
+      {
+        "adGroup": "ERP Software",
+        "impressions": 25000,
+        "clicks": 1200,
+        "conversions": 75,
+        "ctr": 0.048,
+        "cpc": 0.52
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Facebook Ads
+
+#### Create Facebook Ads Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/facebook" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Facebook Brand Awareness",
+    "objective": "brand_awareness",
+    "budget": 1500,
+    "biddingStrategy": "lowest_cost",
+    "targeting": {
+      "locations": ["Kenya", "Nigeria"],
+      "interests": ["Business", "Technology", "Entrepreneurship"],
+      "demographics": {
+        "ageRange": ["25-34", "35-44"],
+        "gender": "all",
+        "education": ["bachelor", "master"],
+        "jobTitles": ["Manager", "Director", "CEO", "Entrepreneur"]
+      },
+      "behaviors": ["Business owners", "Technology enthusiasts"]
+    },
+    "creatives": {
+      "images": ["https://storage.googleapis.com/ads/fb-image1.jpg"],
+      "videos": ["https://storage.googleapis.com/ads/fb-video1.mp4"],
+      "text": "Transform your business with our powerful ERP solution",
+      "headline": "Streamline Your Business Operations",
+      "description": "Everything you need to scale your business efficiently"
+    },
+    "placements": ["feed", "stories", "reels"]
+  }'
+```
+</RequestExample>
+
+#### Facebook Ads Performance
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/ads/facebook/campaign-1/performance" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+### TikTok Ads
+
+#### Create TikTok Ads Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/tiktok" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "TikTok Brand Awareness",
+    "objective": "reach",
+    "budget": 1000,
+    "biddingStrategy": "lowest_cost",
+    "targeting": {
+      "locations": ["Kenya", "Nigeria"],
+      "interests": ["Business", "Technology", "Entrepreneurship"],
+      "demographics": {
+        "ageRange": ["18-24", "25-34"],
+        "gender": "all"
+      },
+      "behaviors": ["Business owners", "Technology enthusiasts"]
+    },
+    "creatives": {
+      "videos": ["https://storage.googleapis.com/ads/tiktok-video1.mp4"],
+      "images": ["https://storage.googleapis.com/ads/tiktok-image1.jpg"],
+      "text": "Transform your business with our powerful ERP solution",
+      "hashtags": ["#Business", "#ERP", "#Technology"]
+    },
+    "placements": ["in_feed", "top_view"]
+  }'
+```
+</RequestExample>
+
+### LinkedIn Ads
+
+#### Create LinkedIn Ads Campaign
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/linkedin" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "LinkedIn Lead Generation",
+    "objective": "lead_generation",
+    "budget": 2000,
+    "biddingStrategy": "manual_bidding",
+    "targeting": {
+      "locations": ["Kenya", "Nigeria"],
+      "jobFunctions": ["Information Technology", "Operations", "Management"],
+      "jobSeniorities": ["Senior", "Director", "VP", "C-Level"],
+      "companySize": ["11-50", "51-200", "201-500", "501-1000", "1000+"],
+      "industries": ["Technology", "Financial Services", "Manufacturing"],
+      "skills": ["ERP", "Business Management", "Operations Management"]
+    },
+    "creatives": {
+      "images": ["https://storage.googleapis.com/ads/linkedin-image1.jpg"],
+      "videos": ["https://storage.googleapis.com/ads/linkedin-video1.mp4"],
+      "text": "Transform your business operations with our comprehensive ERP solution",
+      "headline": "Streamline Your Business Operations",
+      "description": "Everything you need to scale your business efficiently"
+    },
+    "placements": ["feed", "message"]
+  }'
+```
+</RequestExample>
+
+## Creative Management
+
+### Upload Creative Assets
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/creatives/upload" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@creative.jpg" \
+  -F "type=image" \
+  -F "platform=google_ads"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Creative asset uploaded successfully",
+  "data": {
+    "id": "creative-1234567890",
+    "url": "https://storage.googleapis.com/ads/creative-1234567890.jpg",
+    "type": "image",
+    "platform": "google_ads",
+    "dimensions": {
+      "width": 1200,
+      "height": 628
+    },
+    "fileSize": 245760,
+    "format": "jpg",
+    "status": "approved",
+    "createdAt": "2025-08-28T07:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### List Creative Assets
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/ads/creatives?platform=google_ads&type=image" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+## Performance Analytics
+
+### Campaign Performance
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/ads/campaigns/campaign-1/analytics?period=last_30_days" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "message": "Campaign performance analytics",
+  "data": {
+    "campaignId": "campaign-1",
+    "period": "last_30_days",
+    "overview": {
+      "impressions": 50000,
+      "clicks": 2500,
+      "conversions": 150,
+      "ctr": 0.05,
+      "cpc": 0.50,
+      "cpa": 8.33,
+      "roas": 3.2,
+      "spend": 1250,
+      "revenue": 4000
+    },
+    "dailyPerformance": [
+      {
+        "date": "2025-08-28",
+        "impressions": 1500,
+        "clicks": 75,
+        "conversions": 5,
+        "spend": 37.50,
+        "revenue": 120
+      }
+    ],
+    "platformBreakdown": {
+      "google_ads": {
+        "impressions": 30000,
+        "clicks": 1500,
+        "conversions": 90,
+        "spend": 750
+      },
+      "facebook_ads": {
+        "impressions": 20000,
+        "clicks": 1000,
+        "conversions": 60,
+        "spend": 500
+      }
+    },
+    "audienceInsights": {
+      "topLocations": [
+        {
+          "location": "Kenya",
+          "impressions": 25000,
+          "clicks": 1250,
+          "conversions": 75
+        }
+      ],
+      "topInterests": [
+        {
+          "interest": "Business",
+          "impressions": 20000,
+          "clicks": 1000,
+          "conversions": 60
+        }
+      ]
+    }
+  }
+}
+```
+</ResponseExample>
+
+### Cross-Platform Analytics
+
+<RequestExample>
+```bash
+curl -X GET "https://api.decoded.africa/api/ads/analytics/cross-platform?period=last_30_days" \
+  -H "Authorization: Bearer <firebase_id_token>"
+```
+</RequestExample>
+
+## Budget Management
+
+### Set Campaign Budget
+
+<RequestExample>
+```bash
+curl -X PUT "https://api.decoded.africa/api/ads/campaigns/campaign-1/budget" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dailyBudget": 100,
+    "lifetimeBudget": 3000,
+    "budgetType": "daily"
+  }'
+```
+</RequestExample>
+
+### Budget Alerts
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/budget-alerts" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaignId": "campaign-1",
+    "threshold": 80,
+    "type": "percentage",
+    "notification": {
+      "email": "marketing@company.com",
+      "slack": "marketing-channel"
+    }
+  }'
+```
+</RequestExample>
+
+## Audience Management
+
+### Create Custom Audience
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/audiences" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "High-Value Customers",
+    "platform": "facebook_ads",
+    "type": "custom",
+    "source": "customer_list",
+    "data": [
+      {
+        "email": "customer1@example.com",
+        "firstName": "John",
+        "lastName": "Doe"
+      }
+    ],
+    "description": "Customers with lifetime value > $1000"
+  }'
+```
+</RequestExample>
+
+### Lookalike Audiences
+
+<RequestExample>
+```bash
+curl -X POST "https://api.decoded.africa/api/ads/audiences/lookalike" \
+  -H "Authorization: Bearer <firebase_id_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Lookalike - High Value",
+    "platform": "facebook_ads",
+    "sourceAudience": "audience-1",
+    "percentage": 1,
+    "locations": ["Kenya", "Nigeria"]
+  }'
+```
+</RequestExample>
+
+## Error Responses
+
+### Platform Authentication Error
+
+```json
+{
+  "error": "Platform authentication failed",
+  "message": "Invalid Google Ads credentials",
+  "details": {
+    "platform": "google_ads",
+    "errorCode": "AUTHENTICATION_FAILED"
+  }
+}
+```
+
+### Budget Exceeded Error
+
+```json
+{
+  "error": "Budget limit exceeded",
+  "message": "Campaign budget has been reached",
+  "details": {
+    "campaignId": "campaign-1",
+    "currentSpend": 3000,
+    "budgetLimit": 3000
+  }
+}
+```
+
+### Creative Rejection Error
+
+```json
+{
+  "error": "Creative rejected",
+  "message": "Ad creative does not meet platform guidelines",
+  "details": {
+    "creativeId": "creative-1",
+    "platform": "facebook_ads",
+    "reason": "Text overlay exceeds 20% of image"
+  }
+}
+```
+
+## Rate Limits
+
+- **Campaign management**: 100 requests per hour
+- **Performance queries**: 500 requests per hour
+- **Creative uploads**: 50 requests per hour
+- **Analytics queries**: 200 requests per hour
+
+## Webhooks
+
+The digital ads integration supports webhooks for the following events:
+
+- `ads.campaign.created` - When a new campaign is created
+- `ads.campaign.updated` - When a campaign is updated
+- `ads.campaign.paused` - When a campaign is paused
+- `ads.campaign.completed` - When a campaign is completed
+- `ads.budget.alert` - When budget threshold is reached
+- `ads.creative.rejected` - When a creative is rejected
+- `ads.conversion.tracked` - When a conversion is tracked
+
+Configure webhooks in your ERP dashboard or contact support for setup assistance.

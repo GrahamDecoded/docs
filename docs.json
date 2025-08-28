@@ -42,7 +42,9 @@
               "modules/legal",
               "modules/agriculture",
               "modules/manufacturing",
-              "modules/community-management"
+              "modules/community-management",
+              "modules/blog-system",
+              "modules/digital-ads"
             ]
           },
           {
