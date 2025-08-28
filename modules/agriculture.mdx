@@ -1,0 +1,1156 @@
+# Agriculture Management API
+
+The Agriculture Management API enables ERP clients to manage farms, crop planning, harvest tracking, weather monitoring, and agricultural analytics. This system integrates with the AAARRR pipeline to optimize agricultural operations and maximize yields.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Farm Management
+
+### Create Farm
+
+Create a new farm with location, size, and operational details.
+
+**Endpoint:** `POST /api/agriculture/farms`
+
+**Request Body:**
+```json
+{
+  "name": "Sunset Valley Farm",
+  "location": {
+    "address": "123 Farm Road",
+    "city": "Fresno",
+    "state": "CA",
+    "zipCode": "93710",
+    "country": "US",
+    "coordinates": {
+      "latitude": 36.7378,
+      "longitude": -119.7871
+    }
+  },
+  "size": {
+    "totalAcres": 500,
+    "cultivableAcres": 450,
+    "irrigatedAcres": 400,
+    "unit": "acres"
+  },
+  "soilType": "loam",
+  "climateZone": "mediterranean",
+  "irrigationSystem": "drip",
+  "equipment": [
+    {
+      "name": "Tractor John Deere 5075E",
+      "type": "tractor",
+      "year": 2020,
+      "status": "operational"
+    }
+  ],
+  "staff": [
+    {
+      "name": "John Farmer",
+      "role": "farm_manager",
+      "contact": "+1234567890"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "farm": {
+    "id": "farm_123",
+    "name": "Sunset Valley Farm",
+    "location": {
+      "address": "123 Farm Road",
+      "city": "Fresno",
+      "state": "CA",
+      "zipCode": "93710",
+      "country": "US",
+      "coordinates": {
+        "latitude": 36.7378,
+        "longitude": -119.7871
+      }
+    },
+    "size": {
+      "totalAcres": 500,
+      "cultivableAcres": 450,
+      "irrigatedAcres": 400,
+      "unit": "acres"
+    },
+    "soilType": "loam",
+    "climateZone": "mediterranean",
+    "irrigationSystem": "drip",
+    "equipment": [
+      {
+        "id": "equipment_1",
+        "name": "Tractor John Deere 5075E",
+        "type": "tractor",
+        "year": 2020,
+        "status": "operational"
+      }
+    ],
+    "staff": [
+      {
+        "id": "staff_1",
+        "name": "John Farmer",
+        "role": "farm_manager",
+        "contact": "+1234567890"
+      }
+    ],
+    "status": "active",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Farms
+
+Retrieve farms with filtering and pagination.
+
+**Endpoint:** `GET /api/agriculture/farms`
+
+**Query Parameters:**
+- `status` (optional): Filter by farm status
+- `soilType` (optional): Filter by soil type
+- `climateZone` (optional): Filter by climate zone
+- `size` (optional): Filter by farm size range
+- `limit` (optional): Number of farms to return (default: 50)
+- `offset` (optional): Number of farms to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "farms": [
+    {
+      "id": "farm_123",
+      "name": "Sunset Valley Farm",
+      "location": {
+        "city": "Fresno",
+        "state": "CA",
+        "country": "US"
+      },
+      "size": {
+        "totalAcres": 500,
+        "cultivableAcres": 450,
+        "irrigatedAcres": 400
+      },
+      "soilType": "loam",
+      "climateZone": "mediterranean",
+      "status": "active",
+      "createdAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+## Crop Planning
+
+### Create Crop Plan
+
+Create a new crop plan for a specific farm and growing season.
+
+**Endpoint:** `POST /api/agriculture/crop-plans`
+
+**Request Body:**
+```json
+{
+  "farmId": "farm_123",
+  "season": "spring_2024",
+  "crops": [
+    {
+      "cropType": "corn",
+      "variety": "sweet_corn",
+      "acres": 100,
+      "plantingDate": "2024-03-15T00:00:00.000Z",
+      "expectedHarvestDate": "2024-07-15T00:00:00.000Z",
+      "expectedYield": 8000,
+      "yieldUnit": "bushels",
+      "fertilizerPlan": {
+        "nitrogen": 150,
+        "phosphorus": 50,
+        "potassium": 100,
+        "unit": "lbs_per_acre"
+      },
+      "pesticidePlan": {
+        "herbicide": "Roundup",
+        "insecticide": "Sevin",
+        "applicationSchedule": "monthly"
+      }
+    }
+  ],
+  "irrigationSchedule": {
+    "frequency": "daily",
+    "duration": "2 hours",
+    "startTime": "06:00"
+  },
+  "budget": {
+    "totalCost": 25000.00,
+    "currency": "USD",
+    "breakdown": {
+      "seeds": 5000.00,
+      "fertilizer": 8000.00,
+      "pesticides": 4000.00,
+      "labor": 6000.00,
+      "equipment": 2000.00
+    }
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "cropPlan": {
+    "id": "plan_456",
+    "farmId": "farm_123",
+    "season": "spring_2024",
+    "crops": [
+      {
+        "id": "crop_1",
+        "cropType": "corn",
+        "variety": "sweet_corn",
+        "acres": 100,
+        "plantingDate": "2024-03-15T00:00:00.000Z",
+        "expectedHarvestDate": "2024-07-15T00:00:00.000Z",
+        "expectedYield": 8000,
+        "yieldUnit": "bushels",
+        "status": "planned",
+        "fertilizerPlan": {
+          "nitrogen": 150,
+          "phosphorus": 50,
+          "potassium": 100,
+          "unit": "lbs_per_acre"
+        },
+        "pesticidePlan": {
+          "herbicide": "Roundup",
+          "insecticide": "Sevin",
+          "applicationSchedule": "monthly"
+        }
+      }
+    ],
+    "irrigationSchedule": {
+      "frequency": "daily",
+      "duration": "2 hours",
+      "startTime": "06:00"
+    },
+    "budget": {
+      "totalCost": 25000.00,
+      "currency": "USD",
+      "breakdown": {
+        "seeds": 5000.00,
+        "fertilizer": 8000.00,
+        "pesticides": 4000.00,
+        "labor": 6000.00,
+        "equipment": 2000.00
+      }
+    },
+    "status": "active",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Update Crop Status
+
+Update the status and progress of crops in a plan.
+
+**Endpoint:** `PUT /api/agriculture/crop-plans/:planId/crops/:cropId/status`
+
+**Request Body:**
+```json
+{
+  "status": "growing",
+  "currentStage": "vegetative",
+  "progress": 60,
+  "notes": "Crops showing good growth, irrigation working well",
+  "fieldConditions": {
+    "soilMoisture": "optimal",
+    "pestPressure": "low",
+    "diseasePressure": "none"
+  },
+  "activities": [
+    {
+      "type": "fertilization",
+      "date": "2024-04-15T00:00:00.000Z",
+      "description": "Applied nitrogen fertilizer",
+      "cost": 2000.00
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "crop": {
+    "id": "crop_1",
+    "status": "growing",
+    "currentStage": "vegetative",
+    "progress": 60,
+    "notes": "Crops showing good growth, irrigation working well",
+    "fieldConditions": {
+      "soilMoisture": "optimal",
+      "pestPressure": "low",
+      "diseasePressure": "none"
+    },
+    "activities": [
+      {
+        "id": "activity_1",
+        "type": "fertilization",
+        "date": "2024-04-15T00:00:00.000Z",
+        "description": "Applied nitrogen fertilizer",
+        "cost": 2000.00
+      }
+    ],
+    "updatedAt": "2024-04-15T10:00:00.000Z"
+  }
+}
+```
+
+## Harvest Management
+
+### Record Harvest
+
+Record harvest data for completed crops.
+
+**Endpoint:** `POST /api/agriculture/harvests`
+
+**Request Body:**
+```json
+{
+  "farmId": "farm_123",
+  "cropPlanId": "plan_456",
+  "cropId": "crop_1",
+  "harvestDate": "2024-07-15T00:00:00.000Z",
+  "yield": {
+    "quantity": 7500,
+    "unit": "bushels",
+    "quality": "grade_a",
+    "moisture": 14.5
+  },
+  "harvestMethod": "mechanical",
+  "labor": {
+    "hours": 80,
+    "workers": 4,
+    "cost": 3200.00
+  },
+  "equipment": {
+    "combine": "John Deere S670",
+    "hours": 40,
+    "fuel": 200.00
+  },
+  "storage": {
+    "location": "Grain Bin A",
+    "capacity": 10000,
+    "currentLevel": 7500
+  },
+  "notes": "Excellent harvest, above expected yield"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "harvest": {
+    "id": "harvest_789",
+    "farmId": "farm_123",
+    "cropPlanId": "plan_456",
+    "cropId": "crop_1",
+    "harvestDate": "2024-07-15T00:00:00.000Z",
+    "yield": {
+      "quantity": 7500,
+      "unit": "bushels",
+      "quality": "grade_a",
+      "moisture": 14.5
+    },
+    "harvestMethod": "mechanical",
+    "labor": {
+      "hours": 80,
+      "workers": 4,
+      "cost": 3200.00
+    },
+    "equipment": {
+      "combine": "John Deere S670",
+      "hours": 40,
+      "fuel": 200.00
+    },
+    "storage": {
+      "location": "Grain Bin A",
+      "capacity": 10000,
+      "currentLevel": 7500
+    },
+    "notes": "Excellent harvest, above expected yield",
+    "createdAt": "2024-07-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Harvest History
+
+Retrieve harvest history with filtering.
+
+**Endpoint:** `GET /api/agriculture/harvests`
+
+**Query Parameters:**
+- `farmId` (optional): Filter by farm
+- `cropType` (optional): Filter by crop type
+- `startDate` (optional): Filter by harvest date range
+- `endDate` (optional): Filter by harvest date range
+- `quality` (optional): Filter by quality grade
+- `limit` (optional): Number of harvests to return (default: 50)
+- `offset` (optional): Number of harvests to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "harvests": [
+    {
+      "id": "harvest_789",
+      "farmId": "farm_123",
+      "cropType": "corn",
+      "harvestDate": "2024-07-15T00:00:00.000Z",
+      "yield": {
+        "quantity": 7500,
+        "unit": "bushels",
+        "quality": "grade_a"
+      },
+      "harvestMethod": "mechanical",
+      "createdAt": "2024-07-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+## Weather Monitoring
+
+### Record Weather Data
+
+Record weather data for farm monitoring.
+
+**Endpoint:** `POST /api/agriculture/weather`
+
+**Request Body:**
+```json
+{
+  "farmId": "farm_123",
+  "date": "2024-01-15T00:00:00.000Z",
+  "temperature": {
+    "high": 85,
+    "low": 65,
+    "average": 75,
+    "unit": "fahrenheit"
+  },
+  "precipitation": {
+    "amount": 0.5,
+    "unit": "inches",
+    "type": "rain"
+  },
+  "humidity": {
+    "average": 65,
+    "unit": "percent"
+  },
+  "wind": {
+    "speed": 8,
+    "direction": "NW",
+    "unit": "mph"
+  },
+  "solarRadiation": {
+    "value": 450,
+    "unit": "watt_per_sqm"
+  },
+  "soilMoisture": {
+    "value": 35,
+    "unit": "percent",
+    "depth": "6_inches"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "weather": {
+    "id": "weather_123",
+    "farmId": "farm_123",
+    "date": "2024-01-15T00:00:00.000Z",
+    "temperature": {
+      "high": 85,
+      "low": 65,
+      "average": 75,
+      "unit": "fahrenheit"
+    },
+    "precipitation": {
+      "amount": 0.5,
+      "unit": "inches",
+      "type": "rain"
+    },
+    "humidity": {
+      "average": 65,
+      "unit": "percent"
+    },
+    "wind": {
+      "speed": 8,
+      "direction": "NW",
+      "unit": "mph"
+    },
+    "solarRadiation": {
+      "value": 450,
+      "unit": "watt_per_sqm"
+    },
+    "soilMoisture": {
+      "value": 35,
+      "unit": "percent",
+      "depth": "6_inches"
+    },
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Weather Forecast
+
+Retrieve weather forecast for farm planning.
+
+**Endpoint:** `GET /api/agriculture/weather/forecast/:farmId`
+
+**Query Parameters:**
+- `days` (optional): Number of days for forecast (default: 7)
+
+**Response:**
+```json
+{
+  "success": true,
+  "forecast": {
+    "farmId": "farm_123",
+    "location": "Fresno, CA",
+    "forecast": [
+      {
+        "date": "2024-01-16T00:00:00.000Z",
+        "temperature": {
+          "high": 82,
+          "low": 63,
+          "average": 72.5,
+          "unit": "fahrenheit"
+        },
+        "precipitation": {
+          "probability": 20,
+          "amount": 0.1,
+          "unit": "inches"
+        },
+        "humidity": {
+          "average": 60,
+          "unit": "percent"
+        },
+        "wind": {
+          "speed": 6,
+          "direction": "W",
+          "unit": "mph"
+        }
+      }
+    ],
+    "generatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Market Data
+
+### Get Market Prices
+
+Retrieve current market prices for agricultural products.
+
+**Endpoint:** `GET /api/agriculture/market-prices`
+
+**Query Parameters:**
+- `cropType` (optional): Filter by crop type
+- `location` (optional): Filter by market location
+- `date` (optional): Filter by date (default: today)
+
+**Response:**
+```json
+{
+  "success": true,
+  "marketPrices": [
+    {
+      "cropType": "corn",
+      "variety": "sweet_corn",
+      "location": "Chicago Board of Trade",
+      "date": "2024-01-15T00:00:00.000Z",
+      "price": {
+        "value": 4.25,
+        "unit": "usd_per_bushel",
+        "change": 0.15,
+        "changePercent": 3.66
+      },
+      "volume": 1250000,
+      "unit": "bushels"
+    }
+  ]
+}
+```
+
+### Predict Market Prices
+
+Get AI-powered market price predictions.
+
+**Endpoint:** `POST /api/agriculture/market-predictions`
+
+**Request Body:**
+```json
+{
+  "cropType": "corn",
+  "location": "Chicago Board of Trade",
+  "predictionPeriod": "3_months",
+  "factors": {
+    "weather": "normal",
+    "demand": "increasing",
+    "supply": "stable",
+    "globalFactors": "stable"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "prediction": {
+    "cropType": "corn",
+    "location": "Chicago Board of Trade",
+    "predictionPeriod": "3_months",
+    "predictions": [
+      {
+        "date": "2024-02-15T00:00:00.000Z",
+        "predictedPrice": 4.35,
+        "confidence": 0.85,
+        "range": {
+          "min": 4.20,
+          "max": 4.50
+        }
+      }
+    ],
+    "factors": {
+      "weather": "normal",
+      "demand": "increasing",
+      "supply": "stable",
+      "globalFactors": "stable"
+    },
+    "confidence": 0.82,
+    "generatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Supply Chain Tracking
+
+### Track Supply Chain
+
+Track agricultural products through the supply chain.
+
+**Endpoint:** `POST /api/agriculture/supply-chain/track`
+
+**Request Body:**
+```json
+{
+  "harvestId": "harvest_789",
+  "trackingCode": "AG123456789",
+  "destination": "Food Processing Plant",
+  "transportMethod": "truck",
+  "estimatedDelivery": "2024-07-20T00:00:00.000Z",
+  "certifications": [
+    "organic",
+    "non_gmo",
+    "fair_trade"
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "supplyChain": {
+    "id": "chain_123",
+    "harvestId": "harvest_789",
+    "trackingCode": "AG123456789",
+    "destination": "Food Processing Plant",
+    "transportMethod": "truck",
+    "estimatedDelivery": "2024-07-20T00:00:00.000Z",
+    "certifications": [
+      "organic",
+      "non_gmo",
+      "fair_trade"
+    ],
+    "status": "in_transit",
+    "createdAt": "2024-07-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Supply Chain Trace
+
+Retrieve complete supply chain trace for a product.
+
+**Endpoint:** `GET /api/agriculture/supply-chain/trace/:trackingCode`
+
+**Response:**
+```json
+{
+  "success": true,
+  "trace": {
+    "trackingCode": "AG123456789",
+    "product": "Sweet Corn",
+    "trace": [
+      {
+        "stage": "harvest",
+        "date": "2024-07-15T00:00:00.000Z",
+        "location": "Sunset Valley Farm",
+        "details": "Harvested 7500 bushels of sweet corn"
+      },
+      {
+        "stage": "storage",
+        "date": "2024-07-15T06:00:00.000Z",
+        "location": "Grain Bin A",
+        "details": "Stored in controlled environment"
+      },
+      {
+        "stage": "transport",
+        "date": "2024-07-18T08:00:00.000Z",
+        "location": "In Transit",
+        "details": "Loaded on refrigerated truck"
+      }
+    ],
+    "certifications": [
+      "organic",
+      "non_gmo",
+      "fair_trade"
+    ],
+    "estimatedDelivery": "2024-07-20T00:00:00.000Z"
+  }
+}
+```
+
+## Quality Control
+
+### Perform Quality Check
+
+Perform quality control checks on harvested products.
+
+**Endpoint:** `POST /api/agriculture/quality-checks`
+
+**Request Body:**
+```json
+{
+  "harvestId": "harvest_789",
+  "checkType": "post_harvest",
+  "parameters": {
+    "moisture": 14.5,
+    "protein": 8.2,
+    "starch": 72.1,
+    "damage": 2.1,
+    "foreignMaterial": 0.5
+  },
+  "standards": {
+    "moistureMax": 15.0,
+    "proteinMin": 8.0,
+    "starchMin": 70.0,
+    "damageMax": 3.0,
+    "foreignMaterialMax": 1.0
+  },
+  "inspector": "John Farmer",
+  "notes": "All parameters within acceptable range"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "qualityCheck": {
+    "id": "quality_123",
+    "harvestId": "harvest_789",
+    "checkType": "post_harvest",
+    "parameters": {
+      "moisture": 14.5,
+      "protein": 8.2,
+      "starch": 72.1,
+      "damage": 2.1,
+      "foreignMaterial": 0.5
+    },
+    "standards": {
+      "moistureMax": 15.0,
+      "proteinMin": 8.0,
+      "starchMin": 70.0,
+      "damageMax": 3.0,
+      "foreignMaterialMax": 1.0
+    },
+    "inspector": "John Farmer",
+    "notes": "All parameters within acceptable range",
+    "result": "passed",
+    "createdAt": "2024-07-15T10:00:00.000Z"
+  }
+}
+```
+
+## Financial Management
+
+### Record Financial Transaction
+
+Record financial transactions related to agricultural operations.
+
+**Endpoint:** `POST /api/agriculture/financial-transactions`
+
+**Request Body:**
+```json
+{
+  "farmId": "farm_123",
+  "type": "expense",
+  "category": "fertilizer",
+  "amount": 8000.00,
+  "currency": "USD",
+  "date": "2024-04-15T00:00:00.000Z",
+  "description": "Nitrogen fertilizer purchase",
+  "vendor": "Agro Supply Co",
+  "paymentMethod": "credit",
+  "relatedCrop": "corn_2024"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "transaction": {
+    "id": "transaction_456",
+    "farmId": "farm_123",
+    "type": "expense",
+    "category": "fertilizer",
+    "amount": 8000.00,
+    "currency": "USD",
+    "date": "2024-04-15T00:00:00.000Z",
+    "description": "Nitrogen fertilizer purchase",
+    "vendor": "Agro Supply Co",
+    "paymentMethod": "credit",
+    "relatedCrop": "corn_2024",
+    "createdAt": "2024-04-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Financial Report
+
+Retrieve comprehensive financial reports for agricultural operations.
+
+**Endpoint:** `GET /api/agriculture/financial-reports`
+
+**Query Parameters:**
+- `farmId` (optional): Filter by farm
+- `startDate` (optional): Start date for report
+- `endDate` (optional): End date for report
+- `category` (optional): Filter by transaction category
+
+**Response:**
+```json
+{
+  "success": true,
+  "financialReport": {
+    "farmId": "farm_123",
+    "period": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31"
+    },
+    "summary": {
+      "totalRevenue": 150000.00,
+      "totalExpenses": 95000.00,
+      "netProfit": 55000.00,
+      "profitMargin": 36.67
+    },
+    "revenue": {
+      "cropSales": 140000.00,
+      "equipmentRental": 5000.00,
+      "other": 5000.00
+    },
+    "expenses": {
+      "seeds": 15000.00,
+      "fertilizer": 20000.00,
+      "pesticides": 10000.00,
+      "labor": 25000.00,
+      "equipment": 15000.00,
+      "other": 10000.00
+    },
+    "cropPerformance": [
+      {
+        "crop": "corn",
+        "revenue": 80000.00,
+        "expenses": 45000.00,
+        "profit": 35000.00,
+        "roi": 77.78
+      }
+    ]
+  }
+}
+```
+
+## Sustainability Management
+
+### Record Sustainability Data
+
+Record sustainability metrics and practices.
+
+**Endpoint:** `POST /api/agriculture/sustainability`
+
+**Request Body:**
+```json
+{
+  "farmId": "farm_123",
+  "date": "2024-01-15T00:00:00.000Z",
+  "waterUsage": {
+    "amount": 50000,
+    "unit": "gallons",
+    "efficiency": 85,
+    "unit": "percent"
+  },
+  "energyUsage": {
+    "amount": 2500,
+    "unit": "kwh",
+    "source": "solar",
+    "percentage": 60
+  },
+  "soilHealth": {
+    "organicMatter": 3.2,
+    "ph": 6.8,
+    "nitrogen": 45,
+    "phosphorus": 25,
+    "potassium": 180
+  },
+  "biodiversity": {
+    "pollinatorCount": 150,
+    "species": 25,
+    "habitatArea": 50,
+    "unit": "acres"
+  },
+  "practices": [
+    "cover_cropping",
+    "crop_rotation",
+    "integrated_pest_management",
+    "conservation_tillage"
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "sustainability": {
+    "id": "sustainability_123",
+    "farmId": "farm_123",
+    "date": "2024-01-15T00:00:00.000Z",
+    "waterUsage": {
+      "amount": 50000,
+      "unit": "gallons",
+      "efficiency": 85,
+      "unit": "percent"
+    },
+    "energyUsage": {
+      "amount": 2500,
+      "unit": "kwh",
+      "source": "solar",
+      "percentage": 60
+    },
+    "soilHealth": {
+      "organicMatter": 3.2,
+      "ph": 6.8,
+      "nitrogen": 45,
+      "phosphorus": 25,
+      "potassium": 180
+    },
+    "biodiversity": {
+      "pollinatorCount": 150,
+      "species": 25,
+      "habitatArea": 50,
+      "unit": "acres"
+    },
+    "practices": [
+      "cover_cropping",
+      "crop_rotation",
+      "integrated_pest_management",
+      "conservation_tillage"
+    ],
+    "sustainabilityScore": 85,
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Agricultural Analytics
+
+### Get Farm Analytics
+
+Retrieve comprehensive analytics for agricultural operations.
+
+**Endpoint:** `GET /api/agriculture/analytics`
+
+**Query Parameters:**
+- `farmId` (optional): Filter by farm
+- `startDate` (optional): Start date for analytics
+- `endDate` (optional): End date for analytics
+- `cropType` (optional): Filter by crop type
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "production": {
+      "totalYield": 15000,
+      "unit": "bushels",
+      "averageYieldPerAcre": 75,
+      "yieldTrend": "increasing",
+      "cropPerformance": {
+        "corn": 8000,
+        "soybeans": 5000,
+        "wheat": 2000
+      }
+    },
+    "financial": {
+      "totalRevenue": 150000.00,
+      "totalExpenses": 95000.00,
+      "netProfit": 55000.00,
+      "profitMargin": 36.67,
+      "roi": 57.89
+    },
+    "efficiency": {
+      "waterEfficiency": 85,
+      "energyEfficiency": 75,
+      "laborEfficiency": 90,
+      "equipmentUtilization": 80
+    },
+    "sustainability": {
+      "sustainabilityScore": 85,
+      "soilHealth": "good",
+      "biodiversity": "increasing",
+      "carbonFootprint": "reducing"
+    },
+    "weather": {
+      "averageTemperature": 72.5,
+      "totalPrecipitation": 25.5,
+      "growingDegreeDays": 2800,
+      "droughtIndex": "normal"
+    },
+    "timeRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31"
+    }
+  }
+}
+```
+
+## Integration with AAARRR Pipeline
+
+The Agriculture Management system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track agricultural trends and market conditions
+- Monitor crop performance and yield data
+- Identify opportunities for improvement
+
+### Acquisition
+- Attract customers with sustainable farming practices
+- Demonstrate quality and traceability
+- Showcase technological innovation
+
+### Activation
+- Ensure smooth onboarding of new farming practices
+- Provide real-time monitoring and alerts
+- Optimize crop planning and management
+
+### Retention
+- Maintain high crop yields and quality
+- Proactively address farming challenges
+- Provide ongoing support and optimization
+
+### Revenue
+- Maximize crop yields and market prices
+- Optimize input costs and efficiency
+- Diversify revenue streams
+
+### Referral
+- Share success stories and best practices
+- Build trust through quality and sustainability
+- Encourage adoption of proven methods
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["name", "location", "size"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Farm not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to create farm",
+  "message": "Database connection error"
+}
+```
+
+## Rate Limits
+
+- **Farm Operations**: 100 operations per minute per client
+- **Crop Management**: 200 operations per minute per client
+- **Weather Data**: 500 records per minute per client
+- **Analytics**: 100 requests per minute per client
+
+## Best Practices
+
+1. **Data Collection**: Regularly collect and update farm data
+2. **Weather Monitoring**: Monitor weather conditions continuously
+3. **Crop Planning**: Plan crops based on market demand and conditions
+4. **Quality Control**: Implement strict quality control measures
+5. **Sustainability**: Practice sustainable farming methods
+6. **Financial Tracking**: Maintain accurate financial records
+7. **Technology Adoption**: Use technology to optimize operations
+8. **Market Analysis**: Stay informed about market trends and prices

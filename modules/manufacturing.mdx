@@ -1,0 +1,1061 @@
+# Manufacturing Management API
+
+The Manufacturing Management API enables ERP clients to manage factories, production planning, quality control, and manufacturing operations. This system integrates with the AAARRR pipeline to optimize manufacturing processes and maximize efficiency.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Factory Management
+
+### Create Factory
+
+Create a new manufacturing factory with location, capacity, and operational details.
+
+**Endpoint:** `POST /api/manufacturing/factories`
+
+**Request Body:**
+```json
+{
+  "name": "Main Production Facility",
+  "location": {
+    "address": "456 Industrial Blvd",
+    "city": "Detroit",
+    "state": "MI",
+    "zipCode": "48201",
+    "country": "US",
+    "coordinates": {
+      "latitude": 42.3314,
+      "longitude": -83.0458
+    }
+  },
+  "capacity": {
+    "totalSpace": 100000,
+    "productionSpace": 80000,
+    "warehouseSpace": 15000,
+    "officeSpace": 5000,
+    "unit": "sqft"
+  },
+  "productionLines": [
+    {
+      "name": "Line A",
+      "type": "assembly",
+      "capacity": 1000,
+      "unit": "units_per_day",
+      "status": "operational"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "CNC Machine Center",
+      "type": "machining",
+      "model": "HAAS VF-2",
+      "year": 2022,
+      "status": "operational"
+    }
+  ],
+  "staff": [
+    {
+      "name": "John Manager",
+      "role": "production_manager",
+      "contact": "+1234567890"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "factory": {
+    "id": "factory_123",
+    "name": "Main Production Facility",
+    "location": {
+      "address": "456 Industrial Blvd",
+      "city": "Detroit",
+      "state": "MI",
+      "zipCode": "48201",
+      "country": "US",
+      "coordinates": {
+        "latitude": 42.3314,
+        "longitude": -83.0458
+      }
+    },
+    "capacity": {
+      "totalSpace": 100000,
+      "productionSpace": 80000,
+      "warehouseSpace": 15000,
+      "officeSpace": 5000,
+      "unit": "sqft"
+    },
+    "productionLines": [
+      {
+        "id": "line_1",
+        "name": "Line A",
+        "type": "assembly",
+        "capacity": 1000,
+        "unit": "units_per_day",
+        "status": "operational"
+      }
+    ],
+    "equipment": [
+      {
+        "id": "equipment_1",
+        "name": "CNC Machine Center",
+        "type": "machining",
+        "model": "HAAS VF-2",
+        "year": 2022,
+        "status": "operational"
+      }
+    ],
+    "staff": [
+      {
+        "id": "staff_1",
+        "name": "John Manager",
+        "role": "production_manager",
+        "contact": "+1234567890"
+      }
+    ],
+    "status": "active",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Factories
+
+Retrieve factories with filtering and pagination.
+
+**Endpoint:** `GET /api/manufacturing/factories`
+
+**Query Parameters:**
+- `status` (optional): Filter by factory status
+- `location` (optional): Filter by location
+- `capacity` (optional): Filter by capacity range
+- `limit` (optional): Number of factories to return (default: 50)
+- `offset` (optional): Number of factories to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "factories": [
+    {
+      "id": "factory_123",
+      "name": "Main Production Facility",
+      "location": {
+        "city": "Detroit",
+        "state": "MI",
+        "country": "US"
+      },
+      "capacity": {
+        "totalSpace": 100000,
+        "productionSpace": 80000
+      },
+      "status": "active",
+      "createdAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+## Production Planning
+
+### Create Production Plan
+
+Create a new production plan for manufacturing operations.
+
+**Endpoint:** `POST /api/manufacturing/production-plans`
+
+**Request Body:**
+```json
+{
+  "factoryId": "factory_123",
+  "productId": "product_456",
+  "planName": "Q1 2024 Production Plan",
+  "startDate": "2024-01-01T00:00:00.000Z",
+  "endDate": "2024-03-31T23:59:59.000Z",
+  "targetQuantity": 50000,
+  "productionLines": [
+    {
+      "lineId": "line_1",
+      "allocation": 60,
+      "unit": "percent"
+    }
+  ],
+  "materials": [
+    {
+      "materialId": "material_123",
+      "quantity": 100000,
+      "unit": "kg",
+      "cost": 50000.00
+    }
+  ],
+  "labor": {
+    "hours": 8000,
+    "workers": 50,
+    "cost": 200000.00
+  },
+  "equipment": {
+    "utilization": 85,
+    "unit": "percent",
+    "maintenance": 5000.00
+  },
+  "qualityStandards": {
+    "defectRate": 1.0,
+    "unit": "percent",
+    "inspectionFrequency": "every_batch"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "productionPlan": {
+    "id": "plan_789",
+    "factoryId": "factory_123",
+    "productId": "product_456",
+    "planName": "Q1 2024 Production Plan",
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.000Z",
+    "targetQuantity": 50000,
+    "productionLines": [
+      {
+        "id": "line_allocation_1",
+        "lineId": "line_1",
+        "allocation": 60,
+        "unit": "percent"
+      }
+    ],
+    "materials": [
+      {
+        "id": "material_allocation_1",
+        "materialId": "material_123",
+        "quantity": 100000,
+        "unit": "kg",
+        "cost": 50000.00
+      }
+    ],
+    "labor": {
+      "hours": 8000,
+      "workers": 50,
+      "cost": 200000.00
+    },
+    "equipment": {
+      "utilization": 85,
+      "unit": "percent",
+      "maintenance": 5000.00
+    },
+    "qualityStandards": {
+      "defectRate": 1.0,
+      "unit": "percent",
+      "inspectionFrequency": "every_batch"
+    },
+    "status": "active",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Update Production Status
+
+Update the status and progress of production plans.
+
+**Endpoint:** `PUT /api/manufacturing/production-plans/:planId/status`
+
+**Request Body:**
+```json
+{
+  "status": "in_progress",
+  "currentQuantity": 15000,
+  "completionPercentage": 30,
+  "notes": "Production running on schedule",
+  "issues": [
+    {
+      "type": "material_shortage",
+      "description": "Steel supply delayed by 2 days",
+      "impact": "minor",
+      "resolution": "Using backup supplier"
+    }
+  ],
+  "qualityMetrics": {
+    "defectRate": 0.8,
+    "unit": "percent",
+    "inspections": 150,
+    "passed": 149
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "productionPlan": {
+    "id": "plan_789",
+    "status": "in_progress",
+    "currentQuantity": 15000,
+    "completionPercentage": 30,
+    "notes": "Production running on schedule",
+    "issues": [
+      {
+        "id": "issue_1",
+        "type": "material_shortage",
+        "description": "Steel supply delayed by 2 days",
+        "impact": "minor",
+        "resolution": "Using backup supplier"
+      }
+    ],
+    "qualityMetrics": {
+      "defectRate": 0.8,
+      "unit": "percent",
+      "inspections": 150,
+      "passed": 149
+    },
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Production Orders
+
+### Create Production Order
+
+Create a new production order for specific manufacturing tasks.
+
+**Endpoint:** `POST /api/manufacturing/production-orders`
+
+**Request Body:**
+```json
+{
+  "factoryId": "factory_123",
+  "productId": "product_456",
+  "quantity": 1000,
+  "priority": "high",
+  "dueDate": "2024-02-15T00:00:00.000Z",
+  "productionLine": "line_1",
+  "materials": [
+    {
+      "materialId": "material_123",
+      "quantity": 2000,
+      "unit": "kg"
+    }
+  ],
+  "instructions": "Follow standard operating procedures",
+  "qualityRequirements": {
+    "defectRate": 0.5,
+    "unit": "percent",
+    "inspections": "every_100_units"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "productionOrder": {
+    "id": "order_123",
+    "factoryId": "factory_123",
+    "productId": "product_456",
+    "quantity": 1000,
+    "priority": "high",
+    "dueDate": "2024-02-15T00:00:00.000Z",
+    "productionLine": "line_1",
+    "materials": [
+      {
+        "id": "material_req_1",
+        "materialId": "material_123",
+        "quantity": 2000,
+        "unit": "kg"
+      }
+    ],
+    "instructions": "Follow standard operating procedures",
+    "qualityRequirements": {
+      "defectRate": 0.5,
+      "unit": "percent",
+      "inspections": "every_100_units"
+    },
+    "status": "pending",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Update Production Progress
+
+Update the progress of production orders.
+
+**Endpoint:** `PUT /api/manufacturing/production-orders/:orderId/progress`
+
+**Request Body:**
+```json
+{
+  "completedQuantity": 500,
+  "defectiveQuantity": 3,
+  "currentStage": "assembly",
+  "estimatedCompletion": "2024-02-10T00:00:00.000Z",
+  "notes": "Assembly line running smoothly",
+  "qualityCheck": {
+    "inspected": 100,
+    "passed": 98,
+    "failed": 2,
+    "defectRate": 2.0
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "productionOrder": {
+    "id": "order_123",
+    "completedQuantity": 500,
+    "defectiveQuantity": 3,
+    "currentStage": "assembly",
+    "estimatedCompletion": "2024-02-10T00:00:00.000Z",
+    "notes": "Assembly line running smoothly",
+    "qualityCheck": {
+      "inspected": 100,
+      "passed": 98,
+      "failed": 2,
+      "defectRate": 2.0
+    },
+    "progress": 50,
+    "unit": "percent",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Inventory Management
+
+### Update Inventory
+
+Update inventory levels for manufacturing materials and products.
+
+**Endpoint:** `POST /api/manufacturing/inventory/update`
+
+**Request Body:**
+```json
+{
+  "factoryId": "factory_123",
+  "items": [
+    {
+      "materialId": "material_123",
+      "type": "raw_material",
+      "quantity": 5000,
+      "unit": "kg",
+      "location": "Warehouse A",
+      "cost": 25000.00
+    },
+    {
+      "productId": "product_456",
+      "type": "finished_good",
+      "quantity": 1000,
+      "unit": "units",
+      "location": "Warehouse B",
+      "cost": 50000.00
+    }
+  ],
+  "transactionType": "production_completion",
+  "reference": "order_123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "inventoryUpdate": {
+    "id": "inventory_update_456",
+    "factoryId": "factory_123",
+    "items": [
+      {
+        "id": "item_1",
+        "materialId": "material_123",
+        "type": "raw_material",
+        "quantity": 5000,
+        "unit": "kg",
+        "location": "Warehouse A",
+        "cost": 25000.00
+      },
+      {
+        "id": "item_2",
+        "productId": "product_456",
+        "type": "finished_good",
+        "quantity": 1000,
+        "unit": "units",
+        "location": "Warehouse B",
+        "cost": 50000.00
+      }
+    ],
+    "transactionType": "production_completion",
+    "reference": "order_123",
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Inventory Report
+
+Retrieve comprehensive inventory reports.
+
+**Endpoint:** `GET /api/manufacturing/inventory/report`
+
+**Query Parameters:**
+- `factoryId` (optional): Filter by factory
+- `type` (optional): Filter by inventory type
+- `location` (optional): Filter by location
+- `lowStock` (optional): Filter for low stock items
+
+**Response:**
+```json
+{
+  "success": true,
+  "inventoryReport": {
+    "factoryId": "factory_123",
+    "summary": {
+      "totalItems": 150,
+      "totalValue": 500000.00,
+      "lowStockItems": 10,
+      "outOfStockItems": 2
+    },
+    "byType": {
+      "raw_materials": {
+        "count": 50,
+        "value": 200000.00
+      },
+      "work_in_progress": {
+        "count": 30,
+        "value": 150000.00
+      },
+      "finished_goods": {
+        "count": 70,
+        "value": 150000.00
+      }
+    },
+    "lowStock": [
+      {
+        "materialId": "material_123",
+        "name": "Steel Sheets",
+        "currentQuantity": 100,
+        "minimumQuantity": 500,
+        "unit": "kg"
+      }
+    ],
+    "generatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Quality Control
+
+### Perform Quality Check
+
+Perform quality control checks on manufactured products.
+
+**Endpoint:** `POST /api/manufacturing/quality-checks`
+
+**Request Body:**
+```json
+{
+  "productionOrderId": "order_123",
+  "checkType": "final_inspection",
+  "sampleSize": 100,
+  "defects": [
+    {
+      "type": "surface_scratch",
+      "count": 2,
+      "severity": "minor"
+    }
+  ],
+  "measurements": [
+    {
+      "parameter": "dimensions",
+      "specification": "100mm ± 0.5mm",
+      "actual": "100.2mm",
+      "status": "within_spec"
+    }
+  ],
+  "inspector": "Jane Inspector",
+  "notes": "Overall quality meets standards",
+  "recommendation": "approve"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "qualityCheck": {
+    "id": "quality_789",
+    "productionOrderId": "order_123",
+    "checkType": "final_inspection",
+    "sampleSize": 100,
+    "defects": [
+      {
+        "id": "defect_1",
+        "type": "surface_scratch",
+        "count": 2,
+        "severity": "minor"
+      }
+    ],
+    "measurements": [
+      {
+        "id": "measurement_1",
+        "parameter": "dimensions",
+        "specification": "100mm ± 0.5mm",
+        "actual": "100.2mm",
+        "status": "within_spec"
+      }
+    ],
+    "inspector": "Jane Inspector",
+    "notes": "Overall quality meets standards",
+    "recommendation": "approve",
+    "defectRate": 2.0,
+    "unit": "percent",
+    "result": "passed",
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Quality Report
+
+Retrieve comprehensive quality control reports.
+
+**Endpoint:** `GET /api/manufacturing/quality-reports`
+
+**Query Parameters:**
+- `factoryId` (optional): Filter by factory
+- `startDate` (optional): Start date for report
+- `endDate` (optional): End date for report
+- `productId` (optional): Filter by product
+
+**Response:**
+```json
+{
+  "success": true,
+  "qualityReport": {
+    "factoryId": "factory_123",
+    "period": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    },
+    "summary": {
+      "totalInspections": 500,
+      "passedInspections": 485,
+      "failedInspections": 15,
+      "overallDefectRate": 3.0,
+      "unit": "percent"
+    },
+    "byProduct": [
+      {
+        "productId": "product_456",
+        "inspections": 200,
+        "defectRate": 2.5,
+        "unit": "percent",
+        "commonDefects": [
+          "surface_scratch",
+          "dimension_variation"
+        ]
+      }
+    ],
+    "byDefectType": {
+      "surface_scratch": 8,
+      "dimension_variation": 4,
+      "assembly_error": 3
+    },
+    "trends": {
+      "defectRateTrend": "decreasing",
+      "improvement": 15,
+      "unit": "percent"
+    },
+    "generatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Maintenance Management
+
+### Schedule Maintenance
+
+Schedule maintenance for manufacturing equipment.
+
+**Endpoint:** `POST /api/manufacturing/maintenance/schedule`
+
+**Request Body:**
+```json
+{
+  "factoryId": "factory_123",
+  "equipmentId": "equipment_1",
+  "maintenanceType": "preventive",
+  "scheduledDate": "2024-02-01T08:00:00.000Z",
+  "estimatedDuration": 4,
+  "unit": "hours",
+  "technician": "Mike Technician",
+  "parts": [
+    {
+      "partId": "part_123",
+      "name": "Filter Element",
+      "quantity": 2,
+      "cost": 150.00
+    }
+  ],
+    "laborCost": 200.00,
+    "description": "Regular preventive maintenance",
+    "priority": "medium"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "maintenance": {
+    "id": "maintenance_123",
+    "factoryId": "factory_123",
+    "equipmentId": "equipment_1",
+    "maintenanceType": "preventive",
+    "scheduledDate": "2024-02-01T08:00:00.000Z",
+    "estimatedDuration": 4,
+    "unit": "hours",
+    "technician": "Mike Technician",
+    "parts": [
+      {
+        "id": "part_req_1",
+        "partId": "part_123",
+        "name": "Filter Element",
+        "quantity": 2,
+        "cost": 150.00
+      }
+    ],
+    "laborCost": 200.00,
+    "description": "Regular preventive maintenance",
+    "priority": "medium",
+    "status": "scheduled",
+    "totalCost": 500.00,
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Update Maintenance Status
+
+Update the status of maintenance activities.
+
+**Endpoint:** `PUT /api/manufacturing/maintenance/:maintenanceId/status`
+
+**Request Body:**
+```json
+{
+  "status": "completed",
+  "actualDuration": 3.5,
+  "unit": "hours",
+  "actualCost": 480.00,
+  "findings": "Equipment in good condition",
+    "recommendations": "Schedule next maintenance in 6 months",
+    "nextMaintenanceDate": "2024-08-01T08:00:00.000Z"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "maintenance": {
+    "id": "maintenance_123",
+    "status": "completed",
+    "actualDuration": 3.5,
+    "unit": "hours",
+    "actualCost": 480.00,
+    "findings": "Equipment in good condition",
+    "recommendations": "Schedule next maintenance in 6 months",
+    "nextMaintenanceDate": "2024-08-01T08:00:00.000Z",
+    "completedAt": "2024-02-01T12:00:00.000Z",
+    "updatedAt": "2024-02-01T12:00:00.000Z"
+  }
+}
+```
+
+## Purchase Orders
+
+### Create Manufacturing Purchase Order
+
+Create a purchase order for manufacturing materials and equipment.
+
+**Endpoint:** `POST /api/manufacturing/purchase-orders`
+
+**Request Body:**
+```json
+{
+  "factoryId": "factory_123",
+  "supplierId": "supplier_456",
+  "items": [
+    {
+      "materialId": "material_123",
+      "quantity": 10000,
+      "unit": "kg",
+      "unitPrice": 5.00,
+      "totalPrice": 50000.00,
+      "expectedDelivery": "2024-02-15T00:00:00.000Z"
+    }
+  ],
+  "shippingMethod": "ground",
+    "paymentTerms": "net_30",
+    "notes": "Regular monthly order",
+    "priority": "normal"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "purchaseOrder": {
+    "id": "po_789",
+    "factoryId": "factory_123",
+    "supplierId": "supplier_456",
+    "status": "pending",
+    "items": [
+      {
+        "id": "po_item_1",
+        "materialId": "material_123",
+        "quantity": 10000,
+        "unit": "kg",
+        "unitPrice": 5.00,
+        "totalPrice": 50000.00,
+        "expectedDelivery": "2024-02-15T00:00:00.000Z"
+      }
+    ],
+    "shippingMethod": "ground",
+    "paymentTerms": "net_30",
+    "notes": "Regular monthly order",
+    "priority": "normal",
+    "totalAmount": 50000.00,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Update Purchase Order Status
+
+Update the status of purchase orders.
+
+**Endpoint:** `PUT /api/manufacturing/purchase-orders/:orderId/status`
+
+**Request Body:**
+```json
+{
+  "status": "received",
+  "receivedDate": "2024-02-15T10:00:00.000Z",
+  "receivedItems": [
+    {
+      "materialId": "material_123",
+      "quantity": 10000,
+      "unit": "kg",
+      "quality": "acceptable"
+    }
+  ],
+  "notes": "All items received in good condition"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "purchaseOrder": {
+    "id": "po_789",
+    "status": "received",
+    "receivedDate": "2024-02-15T10:00:00.000Z",
+    "receivedItems": [
+      {
+        "id": "received_item_1",
+        "materialId": "material_123",
+        "quantity": 10000,
+        "unit": "kg",
+        "quality": "acceptable"
+      }
+    ],
+    "notes": "All items received in good condition",
+    "updatedAt": "2024-02-15T10:00:00.000Z"
+  }
+}
+```
+
+## Manufacturing Analytics
+
+### Get Manufacturing Analytics
+
+Retrieve comprehensive manufacturing analytics and metrics.
+
+**Endpoint:** `GET /api/manufacturing/analytics`
+
+**Query Parameters:**
+- `factoryId` (optional): Filter by factory
+- `startDate` (optional): Start date for analytics
+- `endDate` (optional): End date for analytics
+- `productId` (optional): Filter by product
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "production": {
+      "totalOutput": 45000,
+      "unit": "units",
+      "averageDailyOutput": 1500,
+      "utilization": 85,
+      "unit": "percent",
+      "efficiency": 92,
+      "unit": "percent"
+    },
+    "quality": {
+      "overallDefectRate": 2.5,
+      "unit": "percent",
+      "customerReturns": 0.5,
+      "unit": "percent",
+      "qualityScore": 95,
+      "unit": "percent"
+    },
+    "financial": {
+      "totalRevenue": 2250000.00,
+      "totalCost": 1800000.00,
+      "grossProfit": 450000.00,
+      "profitMargin": 20.0,
+      "unit": "percent",
+      "costPerUnit": 40.00
+    },
+    "efficiency": {
+      "laborEfficiency": 88,
+      "equipmentUtilization": 85,
+      "materialEfficiency": 92,
+      "energyEfficiency": 78,
+      "unit": "percent"
+    },
+    "maintenance": {
+      "totalMaintenanceCost": 25000.00,
+      "preventiveMaintenance": 80,
+      "unit": "percent",
+      "equipmentDowntime": 2.5,
+      "unit": "percent"
+    },
+    "inventory": {
+      "turnoverRate": 12,
+      "averageInventory": 3750,
+      "unit": "units",
+      "inventoryValue": 150000.00,
+      "stockoutRate": 1.0,
+      "unit": "percent"
+    },
+    "timeRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+  }
+}
+```
+
+## Integration with AAARRR Pipeline
+
+The Manufacturing Management system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track manufacturing trends and market demand
+- Monitor production capacity and efficiency
+- Identify opportunities for improvement
+
+### Acquisition
+- Attract customers with high-quality products
+- Demonstrate manufacturing capabilities
+- Showcase quality and reliability
+
+### Activation
+- Ensure smooth production ramp-up
+- Optimize manufacturing processes
+- Maintain quality standards
+
+### Retention
+- Maintain consistent product quality
+- Proactively address production issues
+- Optimize costs and efficiency
+
+### Revenue
+- Maximize production output and efficiency
+- Optimize manufacturing costs
+- Improve profit margins
+
+### Referral
+- Share success stories and quality achievements
+- Build trust through consistent quality
+- Encourage adoption of proven processes
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["name", "location", "capacity"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Factory not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to create factory",
+  "message": "Database connection error"
+}
+```
+
+## Rate Limits
+
+- **Factory Operations**: 100 operations per minute per client
+- **Production Management**: 200 operations per minute per client
+- **Quality Control**: 300 operations per minute per client
+- **Analytics**: 100 requests per minute per client
+
+## Best Practices
+
+1. **Production Planning**: Plan production based on demand forecasts
+2. **Quality Control**: Implement strict quality control measures
+3. **Inventory Management**: Maintain optimal inventory levels
+4. **Maintenance**: Schedule regular preventive maintenance
+5. **Efficiency**: Continuously monitor and improve efficiency
+6. **Cost Control**: Track and optimize manufacturing costs
+7. **Technology**: Use technology to automate and optimize processes
+8. **Training**: Ensure staff are properly trained on procedures

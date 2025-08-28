@@ -1,0 +1,773 @@
+# Voice Communication API
+
+The Voice Communication API provides comprehensive voice calling capabilities using FreeSWITCH for SIP handling and WebRTC for browser-based calls. This system supports both traditional telephony and modern web-based communication.
+
+## Overview
+
+The Voice Communication system provides:
+
+- **FreeSWITCH Integration**: Enterprise-grade SIP server for voice handling
+- **WebRTC Support**: Browser-based calling without plugins
+- **SIP Trunk Management**: Connect to PSTN providers via SIP trunks
+- **Call Recording**: Automatic recording and storage to GCP buckets
+- **Call Transfer**: Seamless call routing and transfer capabilities
+- **Market Research Integration**: Voice analysis for customer insights
+
+## Features
+
+### Core Capabilities
+
+- **Multi-Protocol Support**: SIP, WebRTC, and PSTN calling
+- **FreeSWITCH Backend**: Industry-standard voice server
+- **Call Recording**: Automatic recording with GCP storage
+- **Call Transfer**: Internal and external call routing
+- **Real-Time Monitoring**: Live call status and metrics
+- **Scalability**: Support for thousands of concurrent calls
+
+### Advanced Features
+
+- **Voice Analysis**: Integration with market research agents
+- **Call Analytics**: Detailed call metrics and reporting
+- **Quality Monitoring**: Call quality assessment and optimization
+- **Failover Support**: Automatic failover between providers
+- **Security**: Encrypted communication and authentication
+
+## API Endpoints
+
+### FreeSWITCH Management
+
+#### Start FreeSWITCH Server
+
+```http
+POST /api/voice/freeswitch/start
+```
+
+Start the FreeSWITCH server with custom configuration.
+
+**Request Body:**
+```json
+{
+  "config": {
+    "sipIp": "0.0.0.0",
+    "sipPort": 5060,
+    "logLevel": "info",
+    "maxCalls": 1000,
+    "recordingPath": "/tmp/recordings"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "config": {
+    "sipIp": "0.0.0.0",
+    "sipPort": 5060,
+    "logLevel": "info",
+    "maxCalls": 1000,
+    "recordingPath": "/tmp/recordings"
+  },
+  "message": "FreeSWITCH started successfully"
+}
+```
+
+#### Stop FreeSWITCH Server
+
+```http
+POST /api/voice/freeswitch/stop
+```
+
+Stop the running FreeSWITCH server.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "FreeSWITCH stopped successfully"
+}
+```
+
+### SIP Trunk Management
+
+#### Create SIP Trunk
+
+```http
+POST /api/voice/sip-trunk/create
+```
+
+Create a SIP trunk connection to a provider.
+
+**Request Body:**
+```json
+{
+  "trunk": {
+    "name": "africas_talking_trunk",
+    "host": "sip.africastalking.com",
+    "port": 5060,
+    "username": "your_username",
+    "password": "your_password",
+    "provider": "africas_talking"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "trunkId": "trunk_1234567890",
+  "config": {
+    "name": "africas_talking_trunk",
+    "host": "sip.africastalking.com",
+    "port": 5060,
+    "username": "your_username",
+    "password": "your_password",
+    "provider": "africas_talking"
+  },
+  "message": "SIP trunk created successfully: africas_talking_trunk"
+}
+```
+
+#### Remove SIP Trunk
+
+```http
+POST /api/voice/sip-trunk/remove
+```
+
+Remove a SIP trunk connection.
+
+**Request Body:**
+```json
+{
+  "trunkId": "trunk_1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "trunkId": "trunk_1234567890",
+  "message": "SIP trunk removed: africas_talking_trunk"
+}
+```
+
+### WebRTC Session Management
+
+#### Create WebRTC Session
+
+```http
+POST /api/voice/webrtc/session/create
+```
+
+Create a WebRTC session for browser-based calling.
+
+**Request Body:**
+```json
+{
+  "session": {
+    "name": "customer_support_session",
+    "wssBinding": "0.0.0.0:8081",
+    "wssBindingSecure": "0.0.0.0:8082",
+    "iceServers": "stun:stun.l.google.com:19302"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "sessionId": "session_1234567890",
+  "config": {
+    "name": "customer_support_session",
+    "wssBinding": "0.0.0.0:8081",
+    "wssBindingSecure": "0.0.0.0:8082",
+    "iceServers": "stun:stun.l.google.com:19302"
+  },
+  "message": "WebRTC session created: customer_support_session"
+}
+```
+
+#### End WebRTC Session
+
+```http
+POST /api/voice/webrtc/session/end
+```
+
+End a WebRTC session.
+
+**Request Body:**
+```json
+{
+  "sessionId": "session_1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "sessionId": "session_1234567890",
+  "message": "WebRTC session ended: customer_support_session"
+}
+```
+
+### Call Management
+
+#### Make Call
+
+```http
+POST /api/voice/call/make
+```
+
+Initiate a voice call.
+
+**Request Body:**
+```json
+{
+  "call": {
+    "from": "254700000000",
+    "to": "254711111111",
+    "callType": "PSTN",
+    "recording": true
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "callId": "call_1234567890",
+  "status": "INITIATING",
+  "message": "Call initiated successfully"
+}
+```
+
+#### Answer Call
+
+```http
+POST /api/voice/call/answer
+```
+
+Answer an incoming call.
+
+**Request Body:**
+```json
+{
+  "callId": "call_1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "callId": "call_1234567890",
+  "message": "Call answered successfully"
+}
+```
+
+#### End Call
+
+```http
+POST /api/voice/call/end
+```
+
+End an active call.
+
+**Request Body:**
+```json
+{
+  "callId": "call_1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "callId": "call_1234567890",
+  "duration": 120000,
+  "message": "Call ended successfully"
+}
+```
+
+#### Transfer Call
+
+```http
+POST /api/voice/call/transfer
+```
+
+Transfer a call to another destination.
+
+**Request Body:**
+```json
+{
+  "callId": "call_1234567890",
+  "destination": "254722222222"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "callId": "call_1234567890",
+  "destination": "254722222222",
+  "message": "Call transferred successfully"
+}
+```
+
+#### Record Call
+
+```http
+POST /api/voice/call/record
+```
+
+Start or stop call recording.
+
+**Request Body:**
+```json
+{
+  "callId": "call_1234567890",
+  "enabled": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "callId": "call_1234567890",
+  "enabled": true,
+  "message": "Call recording started"
+}
+```
+
+### Status and Monitoring
+
+#### Get Call Status
+
+```http
+GET /api/voice/call/status/{callId}
+```
+
+Get the current status of a call.
+
+**Response:**
+```json
+{
+  "success": true,
+  "callId": "call_1234567890",
+  "status": "ACTIVE",
+  "duration": 45000,
+  "message": "Call status retrieved"
+}
+```
+
+#### Get System Status
+
+```http
+GET /api/voice/system/status
+```
+
+Get the overall system status.
+
+**Response:**
+```json
+{
+  "success": true,
+  "freeSwitchRunning": true,
+  "activeCalls": 5,
+  "sipTrunks": ["trunk_1234567890", "trunk_0987654321"],
+  "webRtcSessions": ["session_1234567890"],
+  "message": "FreeSWITCH: Running, Active Calls: 5"
+}
+```
+
+## Configuration
+
+### FreeSWITCH Configuration
+
+```hocon
+voice {
+  freeswitch {
+    sip_ip = "0.0.0.0"
+    sip_port = 5060
+    log_level = "info"
+    max_calls = 1000
+    recording_path = "/tmp/recordings"
+    
+    # WebRTC settings
+    webrtc {
+      wss_binding = "0.0.0.0:8081"
+      wss_binding_secure = "0.0.0.0:8082"
+      ice_servers = "stun:stun.l.google.com:19302"
+    }
+  }
+}
+```
+
+### SIP Trunk Configuration
+
+```hocon
+voice {
+  sip_trunks {
+    africas_talking {
+      name = "africas_talking_trunk"
+      host = "sip.africastalking.com"
+      port = 5060
+      username = "your_username"
+      password = "your_password"
+      provider = "africas_talking"
+    }
+    
+    twilio {
+      name = "twilio_trunk"
+      host = "sip.twilio.com"
+      port = 5060
+      username = "your_twilio_username"
+      password = "your_twilio_password"
+      provider = "twilio"
+    }
+  }
+}
+```
+
+### Call Recording Configuration
+
+```hocon
+voice {
+  recording {
+    enabled = true
+    storage_bucket = "decodedventures-voice-recordings"
+    format = "wav"
+    quality = "high"
+    
+    # Market research integration
+    analysis {
+      enabled = true
+      transcription = true
+      sentiment_analysis = true
+      keyword_extraction = true
+    }
+  }
+}
+```
+
+## Call States
+
+Voice calls can have the following states:
+
+| State | Description |
+|-------|-------------|
+| `INITIATING` | Call is being set up |
+| `RINGING` | Call is ringing at destination |
+| `ACTIVE` | Call is connected and active |
+| `ON_HOLD` | Call is on hold |
+| `TRANSFERRING` | Call is being transferred |
+| `ENDED` | Call has ended |
+| `FAILED` | Call failed to connect |
+
+## Call Types
+
+The system supports multiple call types:
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `SIP` | SIP-to-SIP calling | Internal extensions |
+| `WebRTC` | Browser-based calling | Customer support, web app |
+| `PSTN` | Public switched telephone network | External phone calls |
+
+## Integration Examples
+
+### Basic Call Flow
+
+```javascript
+// Make a call
+const callResponse = await fetch('/api/voice/call/make', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    call: {
+      from: '254700000000',
+      to: '254711111111',
+      callType: 'PSTN',
+      recording: true
+    }
+  })
+});
+
+const callResult = await callResponse.json();
+const callId = callResult.callId;
+
+// Answer the call
+await fetch('/api/voice/call/answer', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({ callId })
+});
+
+// End the call
+await fetch('/api/voice/call/end', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({ callId })
+});
+```
+
+### SIP Trunk Management
+
+```javascript
+// Create SIP trunk
+const trunkResponse = await fetch('/api/voice/sip-trunk/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    trunk: {
+      name: 'africas_talking_trunk',
+      host: 'sip.africastalking.com',
+      port: 5060,
+      username: 'your_username',
+      password: 'your_password',
+      provider: 'africas_talking'
+    }
+  })
+});
+
+const trunkResult = await trunkResponse.json();
+console.log('SIP trunk created:', trunkResult.trunkId);
+```
+
+### WebRTC Session
+
+```javascript
+// Create WebRTC session
+const sessionResponse = await fetch('/api/voice/webrtc/session/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    session: {
+      name: 'customer_support',
+      wssBinding: '0.0.0.0:8081',
+      wssBindingSecure: '0.0.0.0:8082',
+      iceServers: 'stun:stun.l.google.com:19302'
+    }
+  })
+});
+
+const sessionResult = await sessionResponse.json();
+console.log('WebRTC session created:', sessionResult.sessionId);
+```
+
+## WebRTC Integration
+
+### Browser Implementation
+
+```javascript
+// WebRTC client implementation
+class WebRTCClient {
+  constructor(sessionId) {
+    this.sessionId = sessionId;
+    this.peerConnection = null;
+    this.localStream = null;
+  }
+  
+  async initialize() {
+    // Get user media
+    this.localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false
+    });
+    
+    // Create peer connection
+    this.peerConnection = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }
+      ]
+    });
+    
+    // Add local stream
+    this.localStream.getTracks().forEach(track => {
+      this.peerConnection.addTrack(track, this.localStream);
+    });
+    
+    // Handle incoming streams
+    this.peerConnection.ontrack = (event) => {
+      const remoteAudio = document.getElementById('remote-audio');
+      remoteAudio.srcObject = event.streams[0];
+    };
+  }
+  
+  async makeCall(destination) {
+    const offer = await this.peerConnection.createOffer();
+    await this.peerConnection.setLocalDescription(offer);
+    
+    // Send offer to server
+    const response = await fetch('/api/voice/webrtc/call', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        sessionId: this.sessionId,
+        destination,
+        offer: offer.sdp
+      })
+    });
+    
+    const result = await response.json();
+    return result.callId;
+  }
+}
+```
+
+## Market Research Integration
+
+### Voice Analysis Pipeline
+
+```javascript
+// After call ends, analyze recording
+const analyzeCall = async (callId) => {
+  // Get call recording from GCP bucket
+  const recordingUrl = `gs://decodedventures-voice-recordings/${callId}.wav`;
+  
+  // Send to market research agent
+  const analysisResponse = await fetch('/api/agents/market-research/analyze-voice', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      callId,
+      recordingUrl,
+      analysis: {
+        transcription: true,
+        sentiment: true,
+        keywords: true,
+        customerIssues: true,
+        productFeedback: true
+      }
+    })
+  });
+  
+  const analysis = await analysisResponse.json();
+  return analysis;
+};
+```
+
+## Best Practices
+
+### 1. Call Management
+
+- Always check call status before performing operations
+- Implement proper error handling for failed calls
+- Use appropriate call types for different scenarios
+- Monitor call quality and performance
+
+### 2. Recording
+
+- Enable recording for important customer interactions
+- Store recordings securely in GCP buckets
+- Implement retention policies for recordings
+- Use recordings for quality assurance and training
+
+### 3. WebRTC
+
+- Test WebRTC compatibility across browsers
+- Implement fallback mechanisms for unsupported browsers
+- Optimize audio quality for different network conditions
+- Handle WebRTC connection failures gracefully
+
+### 4. Security
+
+- Encrypt all voice communications
+- Implement proper authentication for voice APIs
+- Monitor for suspicious call patterns
+- Protect customer privacy in recordings
+
+## Troubleshooting
+
+### Common Issues
+
+1. **FreeSWITCH Not Starting**
+   - Check system resources and dependencies
+   - Verify configuration file syntax
+   - Check port availability
+
+2. **SIP Trunk Connection Failures**
+   - Verify provider credentials
+   - Check network connectivity
+   - Validate SIP configuration
+
+3. **WebRTC Connection Issues**
+   - Check browser compatibility
+   - Verify STUN/TURN server configuration
+   - Test network connectivity
+
+4. **Call Quality Problems**
+   - Monitor network bandwidth
+   - Check audio codec settings
+   - Optimize FreeSWITCH configuration
+
+### Debugging
+
+Enable detailed logging in configuration:
+
+```hocon
+voice {
+  freeswitch {
+    log_level = "debug"
+    debug_audio = true
+    debug_sip = true
+  }
+}
+```
+
+## AAARRR Pipeline Integration
+
+The voice communication system integrates with the AAARRR pipeline:
+
+- **Acquisition**: Voice-based lead generation campaigns
+- **Activation**: Welcome calls and onboarding
+- **Retention**: Follow-up calls and customer support
+- **Revenue**: Sales calls and payment confirmations
+- **Referral**: Referral program voice campaigns
+
+## Support
+
+For voice communication issues:
+
+1. Check FreeSWITCH logs for error details
+2. Verify SIP trunk configurations
+3. Test WebRTC connectivity
+4. Monitor call quality metrics
+5. Contact support with detailed error information
+
+## References
+
+- [FreeSWITCH Documentation](https://freeswitch.org/confluence/display/FREESWITCH/FreeSWITCH+Documentation)
+- [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+- [SIP Protocol](https://tools.ietf.org/html/rfc3261)
+- [Africa's Talking Voice API](https://africastalking.com/docs/voice)
+- [Twilio Voice API](https://www.twilio.com/docs/voice)

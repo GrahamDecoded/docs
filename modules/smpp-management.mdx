@@ -1,0 +1,469 @@
+# SMPP Management API
+
+The SMPP (Short Message Peer-to-Peer) Management API provides comprehensive SMS handling capabilities using the Cloudhopper SMPP library. This system supports both SMPP client and server modes, enabling seamless integration with SMS providers like Africa's Talking and Twilio.
+
+## Overview
+
+The SMPP Management system provides:
+
+- **SMPP Server**: Accept incoming SMPP connections from SMS providers
+- **SMPP Client**: Connect to SMS providers for sending messages
+- **Message Routing**: Intelligent routing based on destination country codes
+- **Load Balancing**: Distribute SMS traffic across multiple providers
+- **Message Tracking**: Real-time status tracking and delivery reports
+- **Provider Management**: Support for multiple SMS providers
+
+## Features
+
+### Core Capabilities
+
+- **Multi-Provider Support**: Africa's Talking, Twilio, and other SMPP providers
+- **Protocol Compliance**: SMPP 3.3, 3.4, and 5.0 support
+- **High Performance**: Non-blocking NIO with minimal resource usage
+- **Scalability**: Support thousands of concurrent connections
+- **Reliability**: Automatic reconnection, heartbeat monitoring, and error handling
+- **Security**: TLS/SSL support and authentication
+
+### Advanced Features
+
+- **Message Queuing**: Persistent message storage and retry mechanisms
+- **Load Balancing**: Round-robin, weighted, and failover strategies
+- **Rate Limiting**: Configurable rate limits per provider
+- **Monitoring**: Real-time metrics and health checks
+- **Logging**: Comprehensive logging for debugging and auditing
+
+## API Endpoints
+
+### Server Management
+
+#### Start SMPP Server
+
+```http
+POST /api/smpp/server/start
+```
+
+Start the SMPP server on the specified port.
+
+**Request Body:**
+```json
+{
+  "port": 2775
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "port": 2775,
+  "message": "SMPP Server started successfully"
+}
+```
+
+#### Stop SMPP Server
+
+```http
+POST /api/smpp/server/stop
+```
+
+Stop the running SMPP server.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "SMPP Server stopped successfully"
+}
+```
+
+### Provider Management
+
+#### Connect to Provider
+
+```http
+POST /api/smpp/provider/connect
+```
+
+Connect to an SMS provider via SMPP.
+
+**Request Body:**
+```json
+{
+  "provider": "africas_talking"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "provider": "africas_talking",
+  "message": "Successfully connected to africas_talking"
+}
+```
+
+#### Disconnect from Provider
+
+```http
+POST /api/smpp/provider/disconnect
+```
+
+Disconnect from an SMS provider.
+
+**Request Body:**
+```json
+{
+  "provider": "africas_talking"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "provider": "africas_talking",
+  "message": "Successfully disconnected from africas_talking"
+}
+```
+
+### SMS Operations
+
+#### Send SMS
+
+```http
+POST /api/smpp/sms/send
+```
+
+Send an SMS message via SMPP.
+
+**Request Body:**
+```json
+{
+  "provider": "africas_talking",
+  "to": "254700000000",
+  "from": "DECODED",
+  "message": "Hello from Decoded ERP!"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "messageId": "msg_1234567890",
+  "status": "PENDING",
+  "message": "SMS submitted for sending"
+}
+```
+
+#### Query SMS Status
+
+```http
+GET /api/smpp/sms/query/{messageId}?provider={provider}
+```
+
+Query the status of a sent SMS message.
+
+**Response:**
+```json
+{
+  "success": true,
+  "messageId": "msg_1234567890",
+  "status": "DELIVERED",
+  "message": "SMS status queried successfully"
+}
+```
+
+### Status and Monitoring
+
+#### Get SMPP Status
+
+```http
+GET /api/smpp/status
+```
+
+Get the current status of the SMPP server and connected providers.
+
+**Response:**
+```json
+{
+  "success": true,
+  "serverRunning": true,
+  "connectedProviders": ["africas_talking", "twilio"],
+  "message": "Server: Running, Providers: africas_talking, twilio"
+}
+```
+
+## Configuration
+
+### Provider Configuration
+
+The SMPP system supports multiple providers with different configurations:
+
+#### Africa's Talking
+
+```hocon
+smpp {
+  africas_talking {
+    system_id = "decoded_erp"
+    password = "your_africas_talking_password"
+    host = "smpp.africastalking.com"
+    port = 2775
+    system_type = "SMPP"
+    interface_version = 34
+    addr_ton = 1
+    addr_npi = 1
+    address_range = ""
+  }
+}
+```
+
+#### Twilio
+
+```hocon
+smpp {
+  twilio {
+    system_id = "decoded_erp_twilio"
+    password = "your_twilio_password"
+    host = "smpp.twilio.com"
+    port = 2775
+    system_type = "SMPP"
+    interface_version = 34
+    addr_ton = 1
+    addr_npi = 1
+    address_range = ""
+  }
+}
+```
+
+### Routing Configuration
+
+```hocon
+smpp {
+  routing {
+    default_provider = "africas_talking"
+    
+    providers {
+      "254" = "africas_talking"  # Kenya
+      "234" = "africas_talking"  # Nigeria
+      "233" = "africas_talking"  # Ghana
+      "27" = "africas_talking"   # South Africa
+      "1" = "twilio"             # US (fallback)
+    }
+    
+    load_balancing {
+      enabled = true
+      strategy = "round_robin"
+      providers = ["africas_talking", "twilio"]
+      weights = [80, 20]
+    }
+  }
+}
+```
+
+## Message States
+
+SMPP messages can have the following states:
+
+| State | Description |
+|-------|-------------|
+| `ENROUTE` | Message is being processed |
+| `DELIVERED` | Message delivered successfully |
+| `EXPIRED` | Message expired before delivery |
+| `DELETED` | Message deleted by provider |
+| `UNDELIVERABLE` | Message cannot be delivered |
+| `ACCEPTED` | Message accepted by provider |
+| `UNKNOWN` | Status unknown |
+| `REJECTED` | Message rejected by provider |
+
+## Error Codes
+
+Common SMPP error codes:
+
+| Code | Description |
+|------|-------------|
+| `0` | Success |
+| `1` | Invalid message length |
+| `2` | Invalid command length |
+| `3` | Invalid command ID |
+| `4` | Invalid bind status |
+| `5` | Already bound |
+| `14` | Invalid password |
+| `15` | Invalid system ID |
+
+## Integration Examples
+
+### Basic SMS Sending
+
+```javascript
+// Send SMS via SMPP
+const response = await fetch('/api/smpp/sms/send', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    provider: 'africas_talking',
+    to: '254700000000',
+    from: 'DECODED',
+    message: 'Welcome to Decoded ERP!'
+  })
+});
+
+const result = await response.json();
+console.log('Message ID:', result.messageId);
+```
+
+### Provider Management
+
+```javascript
+// Connect to Africa's Talking
+await fetch('/api/smpp/provider/connect', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    provider: 'africas_talking'
+  })
+});
+
+// Check status
+const statusResponse = await fetch('/api/smpp/status', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+
+const status = await statusResponse.json();
+console.log('Connected providers:', status.connectedProviders);
+```
+
+### Message Tracking
+
+```javascript
+// Query message status
+const queryResponse = await fetch(`/api/smpp/sms/query/${messageId}?provider=africas_talking`, {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+
+const queryResult = await queryResponse.json();
+console.log('Message status:', queryResult.status);
+```
+
+## Best Practices
+
+### 1. Connection Management
+
+- Always connect to providers before sending messages
+- Monitor connection health with periodic status checks
+- Implement automatic reconnection for failed connections
+
+### 2. Message Handling
+
+- Use appropriate message encoding for different languages
+- Implement message queuing for high-volume scenarios
+- Monitor delivery reports for message tracking
+
+### 3. Error Handling
+
+- Handle SMPP error codes appropriately
+- Implement retry mechanisms for failed messages
+- Log errors for debugging and monitoring
+
+### 4. Performance Optimization
+
+- Use connection pooling for multiple providers
+- Implement message batching for bulk SMS
+- Monitor and optimize window sizes
+
+### 5. Security
+
+- Use TLS/SSL for secure connections
+- Implement proper authentication
+- Monitor for suspicious activity
+
+## Rate Limits
+
+The SMPP system implements configurable rate limits:
+
+- **Per Second**: 100 messages
+- **Per Minute**: 1,000 messages  
+- **Per Hour**: 10,000 messages
+
+Rate limits can be adjusted per provider in the configuration.
+
+## Monitoring and Metrics
+
+The SMPP system provides comprehensive monitoring:
+
+- **Connection Status**: Real-time provider connection status
+- **Message Counters**: Sent, delivered, failed message counts
+- **Response Times**: Average response times per provider
+- **Error Rates**: Error rates and failure analysis
+- **Queue Status**: Message queue size and processing rates
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Connection Failures**
+   - Verify provider credentials
+   - Check network connectivity
+   - Validate SMPP configuration
+
+2. **Message Delivery Failures**
+   - Check destination number format
+   - Verify sender ID registration
+   - Monitor provider status
+
+3. **Performance Issues**
+   - Adjust window sizes
+   - Optimize connection pooling
+   - Monitor system resources
+
+### Debugging
+
+Enable detailed logging in configuration:
+
+```hocon
+smpp {
+  logging {
+    level = "DEBUG"
+    log_pdus = true
+    log_messages = true
+    log_errors = true
+    log_connections = true
+  }
+}
+```
+
+## AAARRR Pipeline Integration
+
+The SMPP system integrates with the AAARRR pipeline:
+
+- **Acquisition**: SMS campaigns for lead generation
+- **Activation**: Welcome messages and onboarding
+- **Retention**: Engagement and follow-up messages
+- **Revenue**: Transaction notifications and promotions
+- **Referral**: Referral program SMS campaigns
+
+## Support
+
+For SMPP-related issues:
+
+1. Check the system logs for error details
+2. Verify provider credentials and configuration
+3. Test connectivity with provider endpoints
+4. Contact support with detailed error information
+
+## References
+
+- [Cloudhopper SMPP Library](https://github.com/wayr/fizzed-cloudhopper-smpp)
+- [SMPP Protocol Specification](https://smpp.org/)
+- [Africa's Talking SMPP Documentation](https://africastalking.com/docs/sms/smpp)
+- [Twilio SMPP Documentation](https://www.twilio.com/docs/sms/smpp)

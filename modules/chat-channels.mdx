@@ -1,0 +1,575 @@
+# Chat Channels Management API
+
+The Chat Channels Management API enables ERP clients to integrate multiple chat platforms including WhatsApp (via AWS SNS), Messenger, Telegram, Slack, Discord, and web widgets. This system provides unified messaging capabilities across all channels for customer support and engagement.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Supported Chat Channels
+
+- **WhatsApp**: Using AWS SNS for message delivery
+- **Facebook Messenger**: Direct integration with Messenger API
+- **Telegram**: Bot-based messaging
+- **Slack**: Workspace integration
+- **Discord**: Server integration
+- **Web Widget**: Embedded chat widget
+- **Email**: Email-based conversations
+- **SMS**: Text message support
+
+## WhatsApp Integration (AWS SNS)
+
+### Setup WhatsApp Channel
+
+Configure WhatsApp Business API integration using AWS SNS for message delivery.
+
+**Endpoint:** `POST /api/chat/channels/whatsapp`
+
+**Request Body:**
+```json
+{
+  "name": "Customer Support WhatsApp",
+  "description": "Primary WhatsApp channel for customer support",
+  "phoneNumberId": "123456789012345",
+  "accessToken": "your_whatsapp_access_token",
+  "verifyToken": "your_webhook_verify_token",
+  "region": "us-east-1"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "channel": {
+    "id": "whatsapp_1234567890",
+    "type": "whatsapp",
+    "name": "Customer Support WhatsApp",
+    "status": "configuring",
+    "webhookUrl": "https://api.decoded.africa/chat/webhooks/client123/whatsapp_1234567890"
+  },
+  "message": "WhatsApp channel setup successfully"
+}
+```
+
+### Send WhatsApp Message
+
+Send messages to customers via WhatsApp using AWS SNS.
+
+**Endpoint:** `POST /api/chat/messages/whatsapp`
+
+**Request Body:**
+```json
+{
+  "channelId": "whatsapp_1234567890",
+  "customerPhone": "+1234567890",
+  "message": "Thank you for contacting us. How can we help you today?",
+  "messageType": "text"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": {
+    "id": "msg_1234567890",
+    "status": "sent",
+    "snsMessageId": "aws-sns-message-id"
+  },
+  "message": "WhatsApp message sent successfully"
+}
+```
+
+## Facebook Messenger Integration
+
+### Setup Messenger Channel
+
+Configure Facebook Messenger integration for customer support.
+
+**Endpoint:** `POST /api/chat/channels/messenger`
+
+**Request Body:**
+```json
+{
+  "name": "Facebook Messenger Support",
+  "description": "Customer support via Facebook Messenger",
+  "pageId": "123456789012345",
+  "accessToken": "your_page_access_token",
+  "verifyToken": "your_webhook_verify_token"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "channel": {
+    "id": "messenger_1234567890",
+    "type": "messenger",
+    "name": "Facebook Messenger Support",
+    "status": "configuring",
+    "webhookUrl": "https://api.decoded.africa/chat/webhooks/client123/messenger_1234567890"
+  },
+  "message": "Messenger channel setup successfully"
+}
+```
+
+### Send Messenger Message
+
+Send messages to customers via Facebook Messenger.
+
+**Endpoint:** `POST /api/chat/messages/messenger`
+
+**Request Body:**
+```json
+{
+  "channelId": "messenger_1234567890",
+  "customerId": "customer_facebook_id",
+  "message": "We've received your inquiry and will respond shortly.",
+  "messageType": "text"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": {
+    "id": "msg_1234567890",
+    "status": "sent",
+    "messengerMessageId": "facebook_message_id"
+  },
+  "message": "Messenger message sent successfully"
+}
+```
+
+## Telegram Integration
+
+### Setup Telegram Channel
+
+Configure Telegram bot integration for customer support.
+
+**Endpoint:** `POST /api/chat/channels/telegram`
+
+**Request Body:**
+```json
+{
+  "name": "Telegram Support Bot",
+  "description": "Customer support via Telegram bot",
+  "botToken": "your_telegram_bot_token"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "channel": {
+    "id": "telegram_1234567890",
+    "type": "telegram",
+    "name": "Telegram Support Bot",
+    "status": "configuring",
+    "webhookUrl": "https://api.decoded.africa/chat/webhooks/client123/telegram_1234567890"
+  },
+  "message": "Telegram channel setup successfully"
+}
+```
+
+### Send Telegram Message
+
+Send messages to customers via Telegram bot.
+
+**Endpoint:** `POST /api/chat/messages/telegram`
+
+**Request Body:**
+```json
+{
+  "channelId": "telegram_1234567890",
+  "chatId": "123456789",
+  "message": "Hello! How can we assist you today?",
+  "messageType": "text"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": {
+    "id": "msg_1234567890",
+    "status": "sent",
+    "telegramMessageId": 123
+  },
+  "message": "Telegram message sent successfully"
+}
+```
+
+## Channel Management
+
+### Get Chat Channels
+
+Retrieve all configured chat channels for an ERP client.
+
+**Endpoint:** `GET /api/chat/channels`
+
+**Query Parameters:**
+- `status` (optional): Filter by channel status
+- `type` (optional): Filter by channel type
+
+**Response:**
+```json
+{
+  "success": true,
+  "channels": [
+    {
+      "id": "whatsapp_1234567890",
+      "type": "whatsapp",
+      "name": "Customer Support WhatsApp",
+      "description": "Primary WhatsApp channel for customer support",
+      "status": "active",
+      "isDefault": true,
+      "createdAt": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "id": "messenger_1234567890",
+      "type": "messenger",
+      "name": "Facebook Messenger Support",
+      "description": "Customer support via Facebook Messenger",
+      "status": "active",
+      "isDefault": false,
+      "createdAt": "2024-01-15T11:00:00.000Z"
+    }
+  ],
+  "total": 2
+}
+```
+
+## Conversation Management
+
+### Get Conversations
+
+Retrieve all conversations across all chat channels.
+
+**Endpoint:** `GET /api/chat/conversations`
+
+**Query Parameters:**
+- `status` (optional): Filter by conversation status
+- `channelId` (optional): Filter by specific channel
+- `limit` (optional): Number of conversations to return (default: 20)
+- `offset` (optional): Number of conversations to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "conversations": [
+    {
+      "id": "conv_+1234567890",
+      "channelId": "whatsapp_1234567890",
+      "channelType": "whatsapp",
+      "customerId": "+1234567890",
+      "customerName": "John Doe",
+      "customerPhone": "+1234567890",
+      "status": "active",
+      "assignedAgent": "agent_123",
+      "lastMessageAt": "2024-01-15T14:30:00.000Z",
+      "messageCount": 5,
+      "tags": ["support", "urgent"],
+      "priority": "high"
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "total": 1
+  }
+}
+```
+
+### Get Conversation Messages
+
+Retrieve all messages for a specific conversation.
+
+**Endpoint:** `GET /api/chat/conversations/:conversationId/messages`
+
+**Query Parameters:**
+- `limit` (optional): Number of messages to return (default: 50)
+- `offset` (optional): Number of messages to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "messages": [
+    {
+      "id": "msg_1234567890",
+      "direction": "inbound",
+      "messageType": "text",
+      "content": "I need help with my order",
+      "status": "delivered",
+      "deliveredAt": "2024-01-15T14:25:00.000Z",
+      "readAt": "2024-01-15T14:26:00.000Z",
+      "createdAt": "2024-01-15T14:25:00.000Z"
+    },
+    {
+      "id": "msg_1234567891",
+      "direction": "outbound",
+      "messageType": "text",
+      "content": "Hello! I'd be happy to help you with your order. Can you provide your order number?",
+      "status": "sent",
+      "createdAt": "2024-01-15T14:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "limit": 50,
+    "offset": 0,
+    "total": 2
+  }
+}
+```
+
+## Webhook Integration
+
+### Chat Webhook
+
+Handle incoming messages from all chat channels.
+
+**Endpoint:** `POST /api/chat/webhooks/:clientId/:channelId`
+
+**WhatsApp Webhook Example:**
+```json
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "123456789",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "+1234567890",
+              "phone_number_id": "123456789012345"
+            },
+            "messages": [
+              {
+                "from": "+1234567890",
+                "id": "message_id",
+                "timestamp": "1234567890",
+                "type": "text",
+                "text": {
+                  "body": "Hello, I need help"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Messenger Webhook Example:**
+```json
+{
+  "object": "page",
+  "entry": [
+    {
+      "id": "123456789",
+      "time": 1234567890,
+      "messaging": [
+        {
+          "sender": {
+            "id": "customer_facebook_id"
+          },
+          "recipient": {
+            "id": "page_id"
+          },
+          "timestamp": 1234567890,
+          "message": {
+            "mid": "message_id",
+            "text": "Hello, I need help"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Telegram Webhook Example:**
+```json
+{
+  "update_id": 123456789,
+  "message": {
+    "message_id": 123,
+    "from": {
+      "id": 123456789,
+      "first_name": "John",
+      "last_name": "Doe"
+    },
+    "chat": {
+      "id": 123456789,
+      "type": "private"
+    },
+    "date": 1234567890,
+    "text": "Hello, I need help"
+  }
+}
+```
+
+## Message Types
+
+### Supported Message Types
+
+- **text**: Plain text messages
+- **image**: Image files
+- **document**: Document files (PDF, DOC, etc.)
+- **audio**: Audio files
+- **video**: Video files
+- **location**: Geographic location
+- **contact**: Contact information
+
+### Message Status
+
+- **sent**: Message has been sent to the platform
+- **delivered**: Message has been delivered to the recipient
+- **read**: Message has been read by the recipient
+- **failed**: Message delivery failed
+- **pending**: Message is queued for delivery
+
+## Channel Status
+
+- **active**: Channel is operational and receiving messages
+- **inactive**: Channel is disabled
+- **configuring**: Channel is being set up
+- **error**: Channel has encountered an error
+
+## Conversation Status
+
+- **active**: Conversation is ongoing
+- **resolved**: Conversation has been resolved
+- **archived**: Conversation has been archived
+
+## Priority Levels
+
+- **low**: Low priority conversation
+- **medium**: Medium priority conversation
+- **high**: High priority conversation
+- **urgent**: Urgent conversation requiring immediate attention
+
+## Integration with AAARRR Pipeline
+
+The chat channels system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track message opens and engagement across channels
+- Monitor channel performance and reach
+
+### Acquisition
+- Capture leads from chat interactions
+- Convert chat conversations to customer accounts
+
+### Activation
+- Onboard customers through chat support
+- Guide customers through product setup
+
+### Retention
+- Provide ongoing support via chat
+- Proactive customer engagement
+
+### Revenue
+- Convert support inquiries to sales opportunities
+- Cross-sell and up-sell through chat
+
+### Referral
+- Encourage customer referrals through chat
+- Share referral links and incentives
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["channelId", "customerPhone", "message"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Channel not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to setup WhatsApp channel",
+  "message": "Invalid credentials"
+}
+```
+
+## Rate Limits
+
+- **WhatsApp API**: 1,000 messages per second per phone number
+- **Messenger API**: 200 messages per second per page
+- **Telegram API**: 30 messages per second per bot
+- **Webhook Processing**: 100 webhooks per minute per client
+
+## Best Practices
+
+1. **Channel Setup**: Use OAuth 2.0 for secure authentication
+2. **Message Handling**: Implement proper error handling for failed messages
+3. **Webhook Security**: Verify webhook signatures for security
+4. **Rate Limiting**: Respect platform-specific rate limits
+5. **Message Types**: Use appropriate message types for different content
+6. **Conversation Management**: Assign conversations to appropriate agents
+7. **Integration**: Connect with CRM and support systems
+8. **Monitoring**: Track message delivery and engagement metrics
+
+## Use Cases
+
+### Customer Support
+- Multi-channel customer support
+- Automated responses and routing
+- Escalation to human agents
+- Issue tracking and resolution
+
+### Sales and Marketing
+- Lead generation through chat
+- Product demonstrations
+- Sales qualification
+- Follow-up campaigns
+
+### E-commerce
+- Order status inquiries
+- Product recommendations
+- Payment support
+- Delivery tracking
+
+### Onboarding
+- New customer welcome
+- Product setup assistance
+- Feature demonstrations
+- Training and tutorials
+
+### Proactive Engagement
+- Abandoned cart recovery
+- Product updates
+- Special offers
+- Customer feedback collection

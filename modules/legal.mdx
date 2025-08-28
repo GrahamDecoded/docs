@@ -1,0 +1,663 @@
+# Legal Management API
+
+The Legal Management API enables ERP clients to manage contracts, compliance requirements, legal documents, and regulatory obligations. This system integrates with the AAARRR pipeline to ensure legal compliance and risk management.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Contract Management
+
+### Create Contract
+
+Create a new legal contract or agreement.
+
+**Endpoint:** `POST /api/legal/contracts`
+
+**Request Body:**
+```json
+{
+  "title": "Service Agreement",
+  "type": "service_agreement",
+  "parties": [
+    {
+      "name": "Decoded Ventures Ltd",
+      "type": "company",
+      "role": "service_provider"
+    },
+    {
+      "name": "Client Corp",
+      "type": "company",
+      "role": "client"
+    }
+  ],
+  "terms": {
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2024-12-31T23:59:59.000Z",
+    "autoRenewal": true,
+    "renewalPeriod": "12 months"
+  },
+  "financialTerms": {
+    "currency": "USD",
+    "amount": 50000.00,
+    "paymentSchedule": "monthly",
+    "latePaymentPenalty": 5.0
+  },
+  "legalTerms": {
+    "governingLaw": "California",
+    "disputeResolution": "arbitration",
+    "confidentiality": true,
+    "nonCompete": false
+  },
+  "attachments": [
+    {
+      "name": "contract_template.pdf",
+      "url": "https://example.com/contracts/template.pdf"
+    }
+  ],
+  "status": "draft"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "contract": {
+    "id": "contract_123",
+    "title": "Service Agreement",
+    "type": "service_agreement",
+    "parties": [
+      {
+        "name": "Decoded Ventures Ltd",
+        "type": "company",
+        "role": "service_provider"
+      },
+      {
+        "name": "Client Corp",
+        "type": "company",
+        "role": "client"
+      }
+    ],
+    "terms": {
+      "startDate": "2024-01-01T00:00:00.000Z",
+      "endDate": "2024-12-31T23:59:59.000Z",
+      "autoRenewal": true,
+      "renewalPeriod": "12 months"
+    },
+    "financialTerms": {
+      "currency": "USD",
+      "amount": 50000.00,
+      "paymentSchedule": "monthly",
+      "latePaymentPenalty": 5.0
+    },
+    "legalTerms": {
+      "governingLaw": "California",
+      "disputeResolution": "arbitration",
+      "confidentiality": true,
+      "nonCompete": false
+    },
+    "attachments": [
+      {
+        "name": "contract_template.pdf",
+        "url": "https://example.com/contracts/template.pdf"
+      }
+    ],
+    "status": "draft",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Contracts
+
+Retrieve contracts with filtering and pagination.
+
+**Endpoint:** `GET /api/legal/contracts`
+
+**Query Parameters:**
+- `status` (optional): Filter by contract status
+- `type` (optional): Filter by contract type
+- `party` (optional): Filter by party name
+- `startDate` (optional): Filter by start date
+- `endDate` (optional): Filter by end date
+- `limit` (optional): Number of contracts to return (default: 50)
+- `offset` (optional): Number of contracts to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "contracts": [
+    {
+      "id": "contract_123",
+      "title": "Service Agreement",
+      "type": "service_agreement",
+      "parties": [
+        {
+          "name": "Decoded Ventures Ltd",
+          "type": "company",
+          "role": "service_provider"
+        },
+        {
+          "name": "Client Corp",
+          "type": "company",
+          "role": "client"
+        }
+      ],
+      "terms": {
+        "startDate": "2024-01-01T00:00:00.000Z",
+        "endDate": "2024-12-31T23:59:59.000Z",
+        "autoRenewal": true,
+        "renewalPeriod": "12 months"
+      },
+      "status": "active",
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+### Update Contract Status
+
+Update the status of a contract (draft, active, expired, terminated).
+
+**Endpoint:** `PUT /api/legal/contracts/:contractId/status`
+
+**Request Body:**
+```json
+{
+  "status": "active",
+  "effectiveDate": "2024-01-15T00:00:00.000Z",
+  "notes": "Contract signed and activated",
+  "signatures": [
+    {
+      "party": "Decoded Ventures Ltd",
+      "signature": "John Smith",
+      "date": "2024-01-15T10:00:00.000Z"
+    },
+    {
+      "party": "Client Corp",
+      "signature": "Jane Doe",
+      "date": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "contract": {
+    "id": "contract_123",
+    "status": "active",
+    "effectiveDate": "2024-01-15T00:00:00.000Z",
+    "notes": "Contract signed and activated",
+    "signatures": [
+      {
+        "party": "Decoded Ventures Ltd",
+        "signature": "John Smith",
+        "date": "2024-01-15T10:00:00.000Z"
+      },
+      {
+        "party": "Client Corp",
+        "signature": "Jane Doe",
+        "date": "2024-01-15T10:30:00.000Z"
+      }
+    ],
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+## Compliance Management
+
+### Create Compliance Record
+
+Create a new compliance record for regulatory requirements.
+
+**Endpoint:** `POST /api/legal/compliance`
+
+**Request Body:**
+```json
+{
+  "title": "GDPR Compliance",
+  "type": "data_protection",
+  "jurisdiction": "EU",
+  "requirements": [
+    {
+      "requirement": "Data Processing Agreement",
+      "status": "completed",
+      "dueDate": "2024-01-31T00:00:00.000Z",
+      "completionDate": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "requirement": "Privacy Policy Update",
+      "status": "pending",
+      "dueDate": "2024-02-15T00:00:00.000Z"
+    }
+  ],
+  "riskLevel": "medium",
+  "responsibleParty": "legal_team",
+  "attachments": [
+    {
+      "name": "gdpr_audit_report.pdf",
+      "url": "https://example.com/compliance/gdpr_audit.pdf"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "compliance": {
+    "id": "compliance_456",
+    "title": "GDPR Compliance",
+    "type": "data_protection",
+    "jurisdiction": "EU",
+    "requirements": [
+      {
+        "id": "req_1",
+        "requirement": "Data Processing Agreement",
+        "status": "completed",
+        "dueDate": "2024-01-31T00:00:00.000Z",
+        "completionDate": "2024-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "req_2",
+        "requirement": "Privacy Policy Update",
+        "status": "pending",
+        "dueDate": "2024-02-15T00:00:00.000Z"
+      }
+    ],
+    "riskLevel": "medium",
+    "responsibleParty": "legal_team",
+    "attachments": [
+      {
+        "name": "gdpr_audit_report.pdf",
+        "url": "https://example.com/compliance/gdpr_audit.pdf"
+      }
+    ],
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Compliance Records
+
+Retrieve compliance records with filtering.
+
+**Endpoint:** `GET /api/legal/compliance`
+
+**Query Parameters:**
+- `type` (optional): Filter by compliance type
+- `jurisdiction` (optional): Filter by jurisdiction
+- `status` (optional): Filter by overall status
+- `riskLevel` (optional): Filter by risk level
+- `dueDate` (optional): Filter by due date
+- `limit` (optional): Number of records to return (default: 50)
+- `offset` (optional): Number of records to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "compliance": [
+    {
+      "id": "compliance_456",
+      "title": "GDPR Compliance",
+      "type": "data_protection",
+      "jurisdiction": "EU",
+      "status": "in_progress",
+      "riskLevel": "medium",
+      "responsibleParty": "legal_team",
+      "dueDate": "2024-02-15T00:00:00.000Z",
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+## Legal Document Management
+
+### Create Legal Document
+
+Create a new legal document template or record.
+
+**Endpoint:** `POST /api/legal/documents`
+
+**Request Body:**
+```json
+{
+  "title": "Terms of Service",
+  "type": "terms_of_service",
+  "version": "2.1",
+  "content": "These terms of service govern the use of our platform...",
+  "jurisdiction": "California",
+  "effectiveDate": "2024-01-01T00:00:00.000Z",
+  "isActive": true,
+  "requiresConsent": true,
+  "attachments": [
+    {
+      "name": "terms_of_service_v2.1.pdf",
+      "url": "https://example.com/documents/terms_v2.1.pdf"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "document": {
+    "id": "doc_789",
+    "title": "Terms of Service",
+    "type": "terms_of_service",
+    "version": "2.1",
+    "content": "These terms of service govern the use of our platform...",
+    "jurisdiction": "California",
+    "effectiveDate": "2024-01-01T00:00:00.000Z",
+    "isActive": true,
+    "requiresConsent": true,
+    "attachments": [
+      {
+        "name": "terms_of_service_v2.1.pdf",
+        "url": "https://example.com/documents/terms_v2.1.pdf"
+      }
+    ],
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Legal Documents
+
+Retrieve legal documents with filtering.
+
+**Endpoint:** `GET /api/legal/documents`
+
+**Query Parameters:**
+- `type` (optional): Filter by document type
+- `jurisdiction` (optional): Filter by jurisdiction
+- `isActive` (optional): Filter by active status
+- `version` (optional): Filter by version
+- `limit` (optional): Number of documents to return (default: 50)
+- `offset` (optional): Number of documents to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "documents": [
+    {
+      "id": "doc_789",
+      "title": "Terms of Service",
+      "type": "terms_of_service",
+      "version": "2.1",
+      "jurisdiction": "California",
+      "effectiveDate": "2024-01-01T00:00:00.000Z",
+      "isActive": true,
+      "requiresConsent": true,
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+## Risk Management
+
+### Create Risk Assessment
+
+Create a new legal risk assessment.
+
+**Endpoint:** `POST /api/legal/risk-assessments`
+
+**Request Body:**
+```json
+{
+  "title": "Data Privacy Risk Assessment",
+  "type": "data_privacy",
+  "riskFactors": [
+    {
+      "factor": "Data Breach",
+      "probability": "low",
+      "impact": "high",
+      "mitigation": "Encryption and access controls",
+      "status": "mitigated"
+    },
+    {
+      "factor": "Regulatory Non-compliance",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "Regular compliance audits",
+      "status": "monitoring"
+    }
+  ],
+  "overallRisk": "medium",
+  "recommendations": [
+    "Implement additional data encryption",
+    "Conduct quarterly compliance reviews"
+  ],
+  "nextReviewDate": "2024-04-15T00:00:00.000Z"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "riskAssessment": {
+    "id": "risk_123",
+    "title": "Data Privacy Risk Assessment",
+    "type": "data_privacy",
+    "riskFactors": [
+      {
+        "id": "factor_1",
+        "factor": "Data Breach",
+        "probability": "low",
+        "impact": "high",
+        "mitigation": "Encryption and access controls",
+        "status": "mitigated"
+      },
+      {
+        "id": "factor_2",
+        "factor": "Regulatory Non-compliance",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Regular compliance audits",
+        "status": "monitoring"
+      }
+    ],
+    "overallRisk": "medium",
+    "recommendations": [
+      "Implement additional data encryption",
+      "Conduct quarterly compliance reviews"
+    ],
+    "nextReviewDate": "2024-04-15T00:00:00.000Z",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Legal Analytics
+
+### Get Legal Analytics
+
+Retrieve comprehensive legal analytics and metrics.
+
+**Endpoint:** `GET /api/legal/analytics`
+
+**Query Parameters:**
+- `startDate` (optional): Start date for analytics (ISO 8601)
+- `endDate` (optional): End date for analytics (ISO 8601)
+- `type` (optional): Filter by legal type
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "contracts": {
+      "totalContracts": 150,
+      "activeContracts": 120,
+      "expiredContracts": 25,
+      "pendingRenewal": 5,
+      "averageContractValue": 75000.00,
+      "contractsByType": {
+        "service_agreement": 80,
+        "partnership": 30,
+        "employment": 25,
+        "vendor": 15
+      }
+    },
+    "compliance": {
+      "totalRequirements": 45,
+      "completedRequirements": 35,
+      "pendingRequirements": 8,
+      "overdueRequirements": 2,
+      "complianceRate": 77.8,
+      "requirementsByJurisdiction": {
+        "EU": 20,
+        "US": 15,
+        "California": 10
+      }
+    },
+    "risk": {
+      "highRiskItems": 5,
+      "mediumRiskItems": 15,
+      "lowRiskItems": 25,
+      "mitigatedRisks": 30,
+      "averageRiskScore": 2.3
+    },
+    "documents": {
+      "totalDocuments": 25,
+      "activeDocuments": 20,
+      "pendingReview": 3,
+      "documentsByType": {
+        "terms_of_service": 5,
+        "privacy_policy": 5,
+        "contract_templates": 10,
+        "compliance_reports": 5
+      }
+    },
+    "timeRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+  }
+}
+```
+
+## Integration with AAARRR Pipeline
+
+The Legal Management system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track legal compliance and risk metrics
+- Monitor contract performance and obligations
+- Identify legal trends and requirements
+
+### Acquisition
+- Ensure legal compliance during onboarding
+- Provide clear terms and conditions
+- Build trust through transparency
+
+### Activation
+- Streamline legal processes for new customers
+- Ensure proper documentation and consent
+- Minimize legal friction points
+
+### Retention
+- Maintain compliance throughout customer lifecycle
+- Proactively address legal concerns
+- Ensure contract renewals and compliance
+
+### Revenue
+- Protect revenue through proper contracts
+- Minimize legal risks and liabilities
+- Ensure payment terms and obligations
+
+### Referral
+- Build trust through legal compliance
+- Share positive legal experiences
+- Demonstrate commitment to legal standards
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["title", "type", "parties"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Contract not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to create contract",
+  "message": "Document storage error"
+}
+```
+
+## Rate Limits
+
+- **Contract Operations**: 50 operations per minute per client
+- **Compliance Operations**: 100 operations per minute per client
+- **Document Operations**: 200 operations per minute per client
+- **Analytics**: 100 requests per minute per client
+
+## Best Practices
+
+1. **Regular Reviews**: Conduct regular contract and compliance reviews
+2. **Document Versioning**: Maintain proper version control for legal documents
+3. **Risk Monitoring**: Continuously monitor and assess legal risks
+4. **Compliance Tracking**: Track compliance requirements and deadlines
+5. **Legal Automation**: Automate routine legal processes where possible
+6. **Expert Consultation**: Consult legal experts for complex matters
+7. **Audit Trails**: Maintain comprehensive audit trails for all legal activities
+8. **Training**: Ensure staff are trained on legal requirements and procedures

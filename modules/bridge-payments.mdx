@@ -1,0 +1,446 @@
+# Bridge Payments API
+
+The Bridge Payments API enables ERP clients to integrate [Bridge.xyz](https://apidocs.bridge.xyz/get-started/guides/move-money/virtualaccounts) virtual accounts for fiat-to-crypto payment processing. This system provides permanent, reusable fiat deposit addresses that automatically convert incoming fiat into crypto and deliver it to specified destinations.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Supported Features
+
+- **USD Virtual Accounts**: U.S. bank account and routing numbers for ACH/wire transfers
+- **SEPA Virtual IBAN**: Euro-denominated IBANs for SEPA payments
+- **MXN Virtual Accounts**: CLABE account numbers for SPEI (Mexico) payments
+- **Multi-Network Support**: Ethereum, Polygon, Arbitrum, Optimism, Base
+- **Automatic Conversion**: Fiat-to-crypto conversion with real-time rates
+- **Webhook Integration**: Real-time payment event notifications
+- **Developer Fees**: Configurable fee structure for ERP clients
+
+## Bridge Integration Setup
+
+### Setup Bridge Integration
+
+Configure Bridge.xyz API integration for fiat-to-crypto payments.
+
+**Endpoint:** `POST /api/bridge/setup`
+
+**Request Body:**
+```json
+{
+  "apiKey": "your_bridge_api_key",
+  "webhookSecret": "optional_webhook_secret",
+  "baseUrl": "https://api.bridge.xyz"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "integration": {
+    "type": "bridge",
+    "status": "active",
+    "webhookSecret": "generated_webhook_secret"
+  },
+  "message": "Bridge integration setup successfully"
+}
+```
+
+## Virtual Account Management
+
+### Create Virtual Account
+
+Create a permanent fiat deposit address for a customer with automatic crypto conversion.
+
+**Endpoint:** `POST /api/bridge/virtual-accounts`
+
+**Request Body:**
+```json
+{
+  "customerId": "customer_123",
+  "sourceCurrency": "usd",
+  "destinationCurrency": "usdc",
+  "destinationNetwork": "ethereum",
+  "destinationAddress": "0x3f5CE5FBFe3E9af3971dD833D26BA9b5C936f0bE",
+  "developerFeePercent": 1.0
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "virtualAccount": {
+    "id": "1a400dae-f7fc-4f75-8105-212a14d4132d",
+    "status": "activated",
+    "depositInstructions": {
+      "currency": "usd",
+      "bank_name": "Lead Bank",
+      "bank_address": "1801 Main St., Kansas City, MO 64108",
+      "bank_routing_number": "101019644",
+      "bank_account_number": "215268120000",
+      "bank_beneficiary_name": "Ada Lovelace",
+      "bank_beneficiary_address": "923 Folsom Street, 302, San Francisco, California 941070000, US",
+      "payment_rail": "ach_push",
+      "payment_rails": ["ach_push", "wire"]
+    },
+    "destination": {
+      "currency": "usdc",
+      "payment_rail": "ethereum",
+      "address": "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be"
+    }
+  },
+  "message": "Virtual account created successfully"
+}
+```
+
+### Get Virtual Accounts
+
+Retrieve all virtual accounts for an ERP client.
+
+**Endpoint:** `GET /api/bridge/virtual-accounts`
+
+**Query Parameters:**
+- `status` (optional): Filter by account status
+- `type` (optional): Filter by account type (usd, sepa, mxn)
+- `customerId` (optional): Filter by customer ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "virtualAccounts": [
+    {
+      "id": "1a400dae-f7fc-4f75-8105-212a14d4132d",
+      "customerId": "customer_123",
+      "type": "usd",
+      "status": "activated",
+      "sourceCurrency": "usd",
+      "destinationCurrency": "usdc",
+      "destinationNetwork": "ethereum",
+      "destinationAddress": "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
+      "developerFeePercent": 1.0,
+      "depositInstructions": {
+        "bankName": "Lead Bank",
+        "bankRoutingNumber": "101019644",
+        "bankAccountNumber": "215268120000",
+        "paymentRail": "ach_push"
+      },
+      "createdAt": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+### Get Virtual Account History
+
+Retrieve transaction history for a specific virtual account.
+
+**Endpoint:** `GET /api/bridge/virtual-accounts/:customerId/:virtualAccountId/history`
+
+**Query Parameters:**
+- `limit` (optional): Number of events to return (default: 50)
+- `offset` (optional): Number of events to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "history": {
+    "count": 10,
+    "events": [
+      {
+        "id": "3686be0e-468c-e3ad-1dcd-b4a41b8b7632",
+        "type": "payment_processed",
+        "currency": "usd",
+        "created_at": "2024-01-15T12:00:00Z",
+        "customer_id": "customer_123",
+        "virtual_account_id": "1a400dae-f7fc-4f75-8105-212a14d4132d",
+        "amount": "1500.0",
+        "developer_fee_amount": "15.0",
+        "exchange_fee_amount": "0.0",
+        "subtotal_amount": "1485.0",
+        "gas_fee": "5.0",
+        "deposit_id": "ce898006-6347-f8b5-4e52-45185ba66e65",
+        "source": {
+          "payment_rail": "ach_push",
+          "description": "Mock ACH Description 00",
+          "sender_name": "Sender 00",
+          "sender_bank_routing_number": "00000000",
+          "trace_number": "000000000000000"
+        },
+        "destination_tx_hash": "0xabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd0",
+        "receipt": {
+          "initial_amount": "1500.0",
+          "developer_fee": "15.0",
+          "exchange_fee": "0.0",
+          "subtotal_amount": "1485.0",
+          "url": "https://dashboard.bridge.xyz/transaction/mock_tx_0/receipt/mock_receipt_0",
+          "gas_fee": "5.0",
+          "final_amount": "1480.0",
+          "destination_tx_hash": "0xabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd0"
+        }
+      }
+    ],
+    "pagination": {
+      "limit": 50,
+      "offset": 0
+    }
+  }
+}
+```
+
+### Deactivate Virtual Account
+
+Deactivate a virtual account to stop accepting new deposits.
+
+**Endpoint:** `DELETE /api/bridge/virtual-accounts/:customerId/:virtualAccountId/deactivate`
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Virtual account deactivated successfully"
+}
+```
+
+## Payment Analytics
+
+### Get Bridge Payment Analytics
+
+Retrieve comprehensive analytics for Bridge payments.
+
+**Endpoint:** `GET /api/bridge/analytics`
+
+**Query Parameters:**
+- `startDate` (optional): Start date for analytics (ISO 8601)
+- `endDate` (optional): End date for analytics (ISO 8601)
+- `currency` (optional): Filter by currency
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "totalPayments": 150,
+    "totalAmount": 75000.0,
+    "successfulPayments": 145,
+    "pendingPayments": 3,
+    "refundedPayments": 2,
+    "successRate": 96.67,
+    "currencyBreakdown": {
+      "usd": 50000.0,
+      "eur": 25000.0
+    },
+    "timeRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+  }
+}
+```
+
+## Webhook Integration
+
+### Bridge Webhook
+
+Handle real-time payment events from Bridge.xyz.
+
+**Endpoint:** `POST /api/bridge/webhooks/:clientId`
+
+**Webhook Event Types:**
+
+| Type | Description |
+|------|-------------|
+| `funds_received` | Bridge received funds via ACH or wire |
+| `payment_submitted` | Bridge submitted the crypto payment |
+| `payment_processed` | Payment confirmed on-chain (Final state) |
+| `funds_scheduled` | (ACH only) Incoming funds are in transit |
+| `in_review` | Transaction is under manual review |
+| `refunded` | Funds could not be delivered and were refunded |
+| `account_update` | Virtual Account was updated |
+| `deactivation` | Virtual Account was deactivated |
+| `reactivation` | Virtual Account was reactivated |
+| `microdeposit` | Microdeposit verification detected |
+
+**Webhook Payload Example:**
+```json
+{
+  "id": "3686be0e-468c-e3ad-1dcd-b4a41b8b7632",
+  "type": "payment_processed",
+  "currency": "usd",
+  "created_at": "2024-01-15T12:00:00Z",
+  "customer_id": "customer_123",
+  "virtual_account_id": "1a400dae-f7fc-4f75-8105-212a14d4132d",
+  "amount": "1500.0",
+  "developer_fee_amount": "15.0",
+  "exchange_fee_amount": "0.0",
+  "subtotal_amount": "1485.0",
+  "gas_fee": "5.0",
+  "deposit_id": "ce898006-6347-f8b5-4e52-45185ba66e65",
+  "source": {
+    "payment_rail": "ach_push",
+    "description": "Mock ACH Description 00",
+    "sender_name": "Sender 00",
+    "sender_bank_routing_number": "00000000",
+    "trace_number": "000000000000000"
+  },
+  "destination_tx_hash": "0xabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd0",
+  "receipt": {
+    "initial_amount": "1500.0",
+    "developer_fee": "15.0",
+    "exchange_fee": "0.0",
+    "subtotal_amount": "1485.0",
+    "url": "https://dashboard.bridge.xyz/transaction/mock_tx_0/receipt/mock_receipt_0",
+    "gas_fee": "5.0",
+    "final_amount": "1480.0",
+    "destination_tx_hash": "0xabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd0"
+  }
+}
+```
+
+## Supported Currencies and Networks
+
+### Source Currencies (Fiat)
+- **USD**: U.S. Dollar (ACH, Wire)
+- **EUR**: Euro (SEPA)
+- **MXN**: Mexican Peso (SPEI)
+
+### Destination Currencies (Crypto)
+- **USDC**: USD Coin
+- **USDT**: Tether
+- **DAI**: Dai Stablecoin
+- **EURC**: Euro Coin
+
+### Supported Networks
+- **Ethereum**: Mainnet
+- **Polygon**: Polygon PoS
+- **Arbitrum**: Arbitrum One
+- **Optimism**: Optimism
+- **Base**: Coinbase Base
+
+## Payment Rails
+
+### USD Virtual Accounts
+- **ACH Push**: Automated Clearing House transfers
+- **Wire**: Wire transfers
+
+### SEPA Virtual IBAN
+- **SEPA**: Single Euro Payments Area transfers
+
+### MXN Virtual Accounts
+- **SPEI**: Sistema de Pagos Electrónicos Interbancarios
+
+## Integration with AAARRR Pipeline
+
+The Bridge payments system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track payment conversion rates across different currencies
+- Monitor virtual account performance and adoption
+
+### Acquisition
+- Convert fiat payments to crypto for new customers
+- Enable global payment acceptance
+
+### Activation
+- Onboard customers with their preferred payment method
+- Provide seamless fiat-to-crypto conversion
+
+### Retention
+- Maintain customer payment preferences
+- Offer competitive exchange rates
+
+### Revenue
+- Generate revenue through developer fees
+- Enable cross-border payments and crypto adoption
+
+### Referral
+- Share payment success stories
+- Encourage crypto adoption through easy onboarding
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["customerId", "sourceCurrency", "destinationCurrency", "destinationNetwork", "destinationAddress"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Virtual account not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to create virtual account",
+  "message": "Invalid Bridge API credentials"
+}
+```
+
+## Rate Limits
+
+- **Virtual Account Creation**: 100 accounts per minute per client
+- **History Retrieval**: 1000 requests per minute per client
+- **Webhook Processing**: 1000 webhooks per minute per client
+
+## Best Practices
+
+1. **Customer Onboarding**: Ensure customers are KYC/KYB-approved before creating virtual accounts
+2. **Webhook Security**: Verify webhook signatures for security
+3. **Error Handling**: Implement proper error handling for failed payments
+4. **Monitoring**: Track payment success rates and conversion times
+5. **Fee Management**: Set appropriate developer fees based on your business model
+6. **Currency Selection**: Choose appropriate source and destination currencies
+7. **Network Selection**: Consider gas fees and confirmation times when selecting networks
+8. **Receipt Management**: Store and provide payment receipts to customers
+
+## Use Cases
+
+### E-commerce
+- Accept global payments in local currencies
+- Convert to stablecoins for inventory purchases
+- Reduce payment processing fees
+
+### SaaS Subscriptions
+- Accept recurring payments in customer's local currency
+- Convert to crypto for treasury management
+- Enable global subscription services
+
+### Freelancer Payments
+- Pay international contractors in their local currency
+- Convert to crypto for instant settlement
+- Reduce cross-border transfer fees
+
+### Investment Platforms
+- Accept fiat deposits for crypto investments
+- Enable automated DCA (Dollar Cost Averaging)
+- Provide seamless onboarding experience
+
+### Gaming and NFTs
+- Accept payments for in-game purchases
+- Convert to crypto for NFT transactions
+- Enable global gaming monetization
+
+### Remittances
+- Send money internationally with lower fees
+- Convert to stablecoins for instant settlement
+- Provide transparent exchange rates

@@ -1,0 +1,449 @@
+# Email & Calendar Management API
+
+The Email & Calendar Management API enables ERP clients to integrate their Gmail accounts, create meeting booking links, manage emails, and use AI agents for automated email processing. This system supports the AAARRR pipeline by facilitating customer communication and meeting scheduling.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Gmail Integration
+
+### Setup Gmail Integration
+
+Connect an ERP client's Gmail account to enable email and calendar functionality.
+
+**Endpoint:** `POST /api/gmail/setup`
+
+**Request Body:**
+```json
+{
+  "clientId": "gmail_client_id",
+  "clientSecret": "gmail_client_secret", 
+  "refreshToken": "gmail_refresh_token",
+  "email": "client@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "gmailAccount": {
+    "id": "gmail_1234567890",
+    "email": "client@example.com",
+    "isActive": true
+  },
+  "message": "Gmail integration setup successfully"
+}
+```
+
+## Meeting Booking System
+
+### Create Meeting Booking Link
+
+Create a shareable booking link that customers can use to schedule meetings.
+
+**Endpoint:** `POST /api/meetings/booking-links`
+
+**Request Body:**
+```json
+{
+  "gmailAccountId": "gmail_1234567890",
+  "title": "Product Demo",
+  "description": "Schedule a personalized product demonstration",
+  "duration": 30,
+  "timezone": "Africa/Nairobi",
+  "availableSlots": [
+    {
+      "dayOfWeek": 1,
+      "startTime": "09:00",
+      "endTime": "17:00"
+    },
+    {
+      "dayOfWeek": 2,
+      "startTime": "09:00", 
+      "endTime": "17:00"
+    }
+  ],
+  "meetingTypes": [
+    {
+      "type": "Product Demo",
+      "duration": 30,
+      "description": "Interactive product demonstration"
+    },
+    {
+      "type": "Consultation",
+      "duration": 60,
+      "description": "In-depth consultation session"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "bookingLink": {
+    "id": "booking_1234567890",
+    "title": "Product Demo",
+    "bookingUrl": "https://api.decoded.africa/booking/booking_1234567890",
+    "isActive": true
+  },
+  "message": "Meeting booking link created successfully"
+}
+```
+
+### Book Meeting
+
+Allow customers to book meetings through the booking link.
+
+**Endpoint:** `POST /api/meetings/book/:bookingLinkId`
+
+**Request Body:**
+```json
+{
+  "customerName": "John Doe",
+  "customerEmail": "john@example.com",
+  "meetingType": "Product Demo",
+  "preferredDate": "2024-01-15",
+  "preferredTime": "14:00",
+  "notes": "Interested in the enterprise features"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "event": {
+    "id": "event_1234567890",
+    "title": "Product Demo - John Doe",
+    "startTime": "2024-01-15T14:00:00.000Z",
+    "endTime": "2024-01-15T14:30:00.000Z",
+    "meetingLink": "https://meet.google.com/abc-defg-hij",
+    "status": "scheduled"
+  },
+  "message": "Meeting booked successfully"
+}
+```
+
+## Email Management
+
+### Get Emails
+
+Retrieve emails for an ERP client's Gmail account.
+
+**Endpoint:** `GET /api/emails`
+
+**Query Parameters:**
+- `gmailAccountId` (required): Gmail account ID
+- `label` (optional): Filter by Gmail label
+- `limit` (optional): Number of emails to return (default: 20)
+- `offset` (optional): Number of emails to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "emails": [
+    {
+      "id": "email_1234567890",
+      "subject": "Product Inquiry",
+      "from": "customer@example.com",
+      "to": ["sales@company.com"],
+      "isRead": false,
+      "isReplied": false,
+      "labels": ["INBOX"],
+      "category": "sales",
+      "priority": "medium",
+      "receivedAt": "2024-01-15T10:30:00.000Z",
+      "processedByAgent": "email_agent"
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "total": 1
+  }
+}
+```
+
+### Get Email Details
+
+Get detailed information about a specific email.
+
+**Endpoint:** `GET /api/emails/:emailId`
+
+**Response:**
+```json
+{
+  "success": true,
+  "email": {
+    "id": "email_1234567890",
+    "subject": "Product Inquiry",
+    "from": "customer@example.com",
+    "to": ["sales@company.com"],
+    "cc": [],
+    "bcc": [],
+    "body": "I'm interested in your product...",
+    "htmlBody": "<p>I'm interested in your product...</p>",
+    "attachments": [],
+    "labels": ["INBOX"],
+    "isRead": false,
+    "isReplied": false,
+    "isForwarded": false,
+    "receivedAt": "2024-01-15T10:30:00.000Z",
+    "processedByAgent": "email_agent",
+    "agentResponse": "Auto-reply sent",
+    "ticketId": "ticket_1234567890",
+    "category": "sales",
+    "priority": "medium"
+  }
+}
+```
+
+### Send Email
+
+Send emails through the connected Gmail account.
+
+**Endpoint:** `POST /api/emails/send`
+
+**Request Body:**
+```json
+{
+  "gmailAccountId": "gmail_1234567890",
+  "to": ["customer@example.com"],
+  "cc": ["manager@company.com"],
+  "bcc": [],
+  "subject": "Thank you for your inquiry",
+  "body": "Thank you for reaching out...",
+  "htmlBody": "<p>Thank you for reaching out...</p>",
+  "replyToMessageId": "email_1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": {
+    "id": "email_1234567891",
+    "gmailMessageId": "18c1234567890abcdef",
+    "subject": "Thank you for your inquiry",
+    "to": ["customer@example.com"],
+    "sentAt": "2024-01-15T11:00:00.000Z"
+  },
+  "message": "Email sent successfully"
+}
+```
+
+### Process Email with AI Agent
+
+Use AI to analyze and process incoming emails automatically.
+
+**Endpoint:** `POST /api/emails/:emailId/process-agent`
+
+**Response:**
+```json
+{
+  "success": true,
+  "agentResponse": {
+    "action": "create_ticket",
+    "response": "Support ticket created",
+    "confidence": 0.85,
+    "reasoning": "Email contains support-related keywords",
+    "ticketId": "ticket_1234567890"
+  },
+  "message": "Email processed by AI agent successfully"
+}
+```
+
+**AI Agent Actions:**
+- `create_ticket`: Create a support ticket for customer issues
+- `auto_reply`: Send an automated response
+- `forward_to_agent`: Forward to human agent for review
+- `no_action`: No action required
+
+## Calendar Management
+
+### Get Calendar Events
+
+Retrieve calendar events for an ERP client.
+
+**Endpoint:** `GET /api/calendar/events`
+
+**Query Parameters:**
+- `gmailAccountId` (required): Gmail account ID
+- `startDate` (optional): Filter events from this date
+- `endDate` (optional): Filter events until this date
+- `status` (optional): Filter by event status
+
+**Response:**
+```json
+{
+  "success": true,
+  "events": [
+    {
+      "id": "event_1234567890",
+      "title": "Product Demo - John Doe",
+      "startTime": "2024-01-15T14:00:00.000Z",
+      "endTime": "2024-01-15T14:30:00.000Z",
+      "attendees": ["john@example.com", "sales@company.com"],
+      "type": "demo",
+      "status": "scheduled",
+      "meetingLink": "https://meet.google.com/abc-defg-hij",
+      "customerEmail": "john@example.com",
+      "customerName": "John Doe"
+    }
+  ],
+  "total": 1
+}
+```
+
+### Update Calendar Event
+
+Update an existing calendar event.
+
+**Endpoint:** `PUT /api/calendar/events/:eventId`
+
+**Request Body:**
+```json
+{
+  "title": "Updated Product Demo - John Doe",
+  "description": "Updated meeting description",
+  "startTime": "2024-01-15T15:00:00.000Z",
+  "endTime": "2024-01-15T15:30:00.000Z",
+  "status": "confirmed"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Calendar event updated successfully"
+}
+```
+
+## AI Email Agent Features
+
+### Email Classification
+
+The AI agent automatically classifies emails into categories:
+- **Support**: Customer issues, bug reports, technical questions
+- **Sales**: Product inquiries, pricing questions, demo requests
+- **General**: General inquiries, feedback, partnerships
+- **Spam**: Unwanted emails
+- **Unknown**: Emails that require human review
+
+### Priority Assessment
+
+Emails are assigned priority levels:
+- **Urgent**: Critical issues, security concerns
+- **High**: Important customer requests, sales opportunities
+- **Medium**: General inquiries, follow-ups
+- **Low**: Informational emails, newsletters
+
+### Automated Actions
+
+Based on email analysis, the AI agent can:
+1. **Create Support Tickets**: For customer issues and technical problems
+2. **Send Auto-Replies**: For common inquiries with pre-written responses
+3. **Forward to Agents**: For complex issues requiring human intervention
+4. **Schedule Follow-ups**: For sales opportunities and customer nurturing
+
+### Integration with AAARRR Pipeline
+
+The email system integrates with the AAARRR pipeline:
+- **Awareness**: Track email opens and engagement
+- **Acquisition**: Capture leads from email inquiries
+- **Activation**: Schedule demos and onboarding calls
+- **Retention**: Follow up with existing customers
+- **Revenue**: Convert email inquiries to sales
+- **Referral**: Encourage customer referrals via email
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["gmailAccountId", "title", "duration"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Email not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to setup Gmail integration",
+  "message": "Invalid credentials"
+}
+```
+
+## Rate Limits
+
+- **Gmail API**: 1,000 requests per 100 seconds per user
+- **Calendar API**: 1,000 requests per 100 seconds per user
+- **Email Processing**: 100 emails per minute per client
+
+## Webhooks
+
+The system supports webhooks for real-time notifications:
+- Email received
+- Meeting booked
+- Calendar event updated
+- AI agent processed email
+
+## Best Practices
+
+1. **Gmail Setup**: Use OAuth 2.0 for secure authentication
+2. **Meeting Links**: Create specific booking links for different meeting types
+3. **Email Processing**: Review AI agent decisions regularly
+4. **Calendar Sync**: Keep local and Google Calendar in sync
+5. **Data Privacy**: Ensure customer data is handled securely
+6. **Integration**: Connect with CRM and support systems
+
+## Use Cases
+
+### Sales Team
+- Create demo booking links
+- Track email engagement
+- Schedule follow-up meetings
+- Convert leads to customers
+
+### Support Team
+- Automatically create tickets from emails
+- Route issues to appropriate agents
+- Send automated acknowledgments
+- Track resolution times
+
+### Marketing Team
+- Send promotional emails
+- Track campaign performance
+- Schedule content demos
+- Nurture leads through email
+
+### Customer Success
+- Schedule onboarding calls
+- Send product updates
+- Collect feedback
+- Reduce churn through proactive communication

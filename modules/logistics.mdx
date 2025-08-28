@@ -1,0 +1,591 @@
+# Logistics Management API
+
+The Logistics Management API enables ERP clients to manage shipping, delivery, warehouse operations, and supply chain logistics. This system integrates with the AAARRR pipeline to optimize delivery processes and enhance customer satisfaction.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Shipping Management
+
+### Create Shipping Order
+
+Create a new shipping order for product delivery.
+
+**Endpoint:** `POST /api/logistics/shipping-orders`
+
+**Request Body:**
+```json
+{
+  "orderId": "order_123",
+  "customerId": "customer_456",
+  "items": [
+    {
+      "productId": "product_789",
+      "quantity": 2,
+      "weight": 1.5,
+      "dimensions": {
+        "length": 20,
+        "width": 15,
+        "height": 10
+      }
+    }
+  ],
+  "shippingAddress": {
+    "name": "John Doe",
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "US",
+    "phone": "+1234567890"
+  },
+  "shippingMethod": "express",
+  "carrier": "fedex",
+  "insurance": true,
+  "trackingRequired": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "shippingOrder": {
+    "id": "ship_456",
+    "orderId": "order_123",
+    "customerId": "customer_456",
+    "status": "pending",
+    "trackingNumber": "794658123456",
+    "carrier": "fedex",
+    "shippingMethod": "express",
+    "estimatedDelivery": "2024-01-18T14:00:00.000Z",
+    "shippingCost": 25.99,
+    "insuranceCost": 5.00,
+    "totalCost": 30.99,
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+### Get Shipping Orders
+
+Retrieve shipping orders with filtering and pagination.
+
+**Endpoint:** `GET /api/logistics/shipping-orders`
+
+**Query Parameters:**
+- `status` (optional): Filter by shipping status
+- `carrier` (optional): Filter by shipping carrier
+- `customerId` (optional): Filter by customer
+- `orderId` (optional): Filter by order ID
+- `startDate` (optional): Filter by creation date
+- `endDate` (optional): Filter by creation date
+- `limit` (optional): Number of orders to return (default: 50)
+- `offset` (optional): Number of orders to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "shippingOrders": [
+    {
+      "id": "ship_456",
+      "orderId": "order_123",
+      "customerId": "customer_456",
+      "status": "in_transit",
+      "trackingNumber": "794658123456",
+      "carrier": "fedex",
+      "shippingMethod": "express",
+      "estimatedDelivery": "2024-01-18T14:00:00.000Z",
+      "shippingCost": 25.99,
+      "insuranceCost": 5.00,
+      "totalCost": 30.99,
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+### Update Shipping Status
+
+Update the status of a shipping order.
+
+**Endpoint:** `PUT /api/logistics/shipping-orders/:shippingOrderId/status`
+
+**Request Body:**
+```json
+{
+  "status": "delivered",
+  "deliveryDate": "2024-01-17T14:30:00.000Z",
+  "notes": "Delivered to customer",
+  "signature": "John Doe"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "shippingOrder": {
+    "id": "ship_456",
+    "status": "delivered",
+    "deliveryDate": "2024-01-17T14:30:00.000Z",
+    "notes": "Delivered to customer",
+    "signature": "John Doe",
+    "updatedAt": "2024-01-17T14:30:00.000Z"
+  }
+}
+```
+
+## Warehouse Management
+
+### Create Warehouse
+
+Create a new warehouse for inventory storage.
+
+**Endpoint:** `POST /api/logistics/warehouses`
+
+**Request Body:**
+```json
+{
+  "name": "Main Distribution Center",
+  "address": {
+    "street": "456 Warehouse Blvd",
+    "city": "Chicago",
+    "state": "IL",
+    "zipCode": "60601",
+    "country": "US"
+  },
+  "capacity": {
+    "totalSpace": 50000,
+    "usedSpace": 25000,
+    "unit": "sqft"
+  },
+  "zones": [
+    {
+      "name": "Zone A",
+      "type": "fast_moving",
+      "capacity": 10000
+    },
+    {
+      "name": "Zone B",
+      "type": "slow_moving",
+      "capacity": 15000
+    }
+  ],
+  "operatingHours": {
+    "monday": "08:00-18:00",
+    "tuesday": "08:00-18:00",
+    "wednesday": "08:00-18:00",
+    "thursday": "08:00-18:00",
+    "friday": "08:00-18:00"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "warehouse": {
+    "id": "warehouse_123",
+    "name": "Main Distribution Center",
+    "address": {
+      "street": "456 Warehouse Blvd",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "60601",
+      "country": "US"
+    },
+    "capacity": {
+      "totalSpace": 50000,
+      "usedSpace": 25000,
+      "unit": "sqft"
+    },
+    "zones": [
+      {
+        "id": "zone_a",
+        "name": "Zone A",
+        "type": "fast_moving",
+        "capacity": 10000
+      },
+      {
+        "id": "zone_b",
+        "name": "Zone B",
+        "type": "slow_moving",
+        "capacity": 15000
+      }
+    ],
+    "operatingHours": {
+      "monday": "08:00-18:00",
+      "tuesday": "08:00-18:00",
+      "wednesday": "08:00-18:00",
+      "thursday": "08:00-18:00",
+      "friday": "08:00-18:00"
+    },
+    "status": "active",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Warehouse Inventory
+
+Retrieve inventory levels for a specific warehouse.
+
+**Endpoint:** `GET /api/logistics/warehouses/:warehouseId/inventory`
+
+**Query Parameters:**
+- `zone` (optional): Filter by warehouse zone
+- `category` (optional): Filter by product category
+- `lowStock` (optional): Filter for low stock items
+- `limit` (optional): Number of items to return (default: 100)
+- `offset` (optional): Number of items to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "warehouse": {
+    "id": "warehouse_123",
+    "name": "Main Distribution Center"
+  },
+  "inventory": [
+    {
+      "productId": "product_789",
+      "productName": "Widget Pro",
+      "sku": "WP-001",
+      "zone": "Zone A",
+      "location": "A1-B2-C3",
+      "quantity": 150,
+      "reserved": 25,
+      "available": 125,
+      "minStock": 50,
+      "maxStock": 200,
+      "lastUpdated": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "summary": {
+    "totalItems": 500,
+    "totalValue": 75000.00,
+    "lowStockItems": 15,
+    "outOfStockItems": 3
+  }
+}
+```
+
+## Delivery Management
+
+### Create Delivery Route
+
+Create an optimized delivery route for multiple orders.
+
+**Endpoint:** `POST /api/logistics/delivery-routes`
+
+**Request Body:**
+```json
+{
+  "name": "Downtown Delivery Route",
+  "driverId": "driver_123",
+  "vehicleId": "vehicle_456",
+  "orders": [
+    {
+      "orderId": "order_123",
+      "customerId": "customer_456",
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001"
+      },
+      "priority": "high",
+      "timeWindow": {
+        "start": "09:00",
+        "end": "12:00"
+      }
+    }
+  ],
+  "startLocation": {
+    "warehouseId": "warehouse_123",
+    "address": "456 Warehouse Blvd, Chicago, IL"
+  },
+  "optimizationPreferences": {
+    "minimizeDistance": true,
+    "respectTimeWindows": true,
+    "avoidTraffic": true
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "deliveryRoute": {
+    "id": "route_789",
+    "name": "Downtown Delivery Route",
+    "driverId": "driver_123",
+    "vehicleId": "vehicle_456",
+    "status": "planned",
+    "estimatedDuration": "4 hours",
+    "totalDistance": 45.5,
+    "totalOrders": 8,
+    "route": [
+      {
+        "order": 1,
+        "orderId": "order_123",
+        "address": "123 Main St, New York, NY 10001",
+        "estimatedArrival": "09:30",
+        "estimatedDeparture": "09:45"
+      }
+    ],
+    "createdAt": "2024-01-15T08:00:00.000Z",
+    "updatedAt": "2024-01-15T08:00:00.000Z"
+  }
+}
+```
+
+### Update Delivery Status
+
+Update the status of deliveries in a route.
+
+**Endpoint:** `PUT /api/logistics/delivery-routes/:routeId/status`
+
+**Request Body:**
+```json
+{
+  "status": "in_progress",
+  "currentLocation": {
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "timestamp": "2024-01-15T09:30:00.000Z"
+  },
+  "completedDeliveries": ["order_123"],
+  "notes": "Route started on time"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "deliveryRoute": {
+    "id": "route_789",
+    "status": "in_progress",
+    "currentLocation": {
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "timestamp": "2024-01-15T09:30:00.000Z"
+    },
+    "completedDeliveries": ["order_123"],
+    "notes": "Route started on time",
+    "updatedAt": "2024-01-15T09:30:00.000Z"
+  }
+}
+```
+
+## Supply Chain Management
+
+### Create Purchase Order
+
+Create a purchase order for inventory replenishment.
+
+**Endpoint:** `POST /api/logistics/purchase-orders`
+
+**Request Body:**
+```json
+{
+  "supplierId": "supplier_123",
+  "warehouseId": "warehouse_123",
+  "items": [
+    {
+      "productId": "product_789",
+      "quantity": 500,
+      "unitPrice": 10.50,
+      "expectedDelivery": "2024-01-25T00:00:00.000Z"
+    }
+  ],
+  "shippingMethod": "ground",
+  "paymentTerms": "net_30",
+  "notes": "Regular monthly order"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "purchaseOrder": {
+    "id": "po_456",
+    "supplierId": "supplier_123",
+    "warehouseId": "warehouse_123",
+    "status": "pending",
+    "totalAmount": 5250.00,
+    "items": [
+      {
+        "productId": "product_789",
+        "quantity": 500,
+        "unitPrice": 10.50,
+        "totalPrice": 5250.00,
+        "expectedDelivery": "2024-01-25T00:00:00.000Z"
+      }
+    ],
+    "shippingMethod": "ground",
+    "paymentTerms": "net_30",
+    "notes": "Regular monthly order",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Supply Chain Analytics
+
+Retrieve comprehensive supply chain analytics and metrics.
+
+**Endpoint:** `GET /api/logistics/analytics`
+
+**Query Parameters:**
+- `startDate` (optional): Start date for analytics (ISO 8601)
+- `endDate` (optional): End date for analytics (ISO 8601)
+- `warehouseId` (optional): Filter by warehouse
+- `carrier` (optional): Filter by shipping carrier
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "shipping": {
+      "totalOrders": 1250,
+      "deliveredOrders": 1200,
+      "inTransitOrders": 45,
+      "delayedOrders": 5,
+      "averageDeliveryTime": "2.3 days",
+      "onTimeDeliveryRate": 96.0
+    },
+    "warehouse": {
+      "totalWarehouses": 3,
+      "totalInventory": 15000,
+      "inventoryValue": 250000.00,
+      "lowStockItems": 25,
+      "outOfStockItems": 5,
+      "spaceUtilization": 75.5
+    },
+    "supplyChain": {
+      "totalPurchaseOrders": 45,
+      "pendingOrders": 12,
+      "completedOrders": 33,
+      "averageLeadTime": "5.2 days",
+      "supplierPerformance": 4.8
+    },
+    "costs": {
+      "totalShippingCost": 15000.00,
+      "totalWarehouseCost": 8000.00,
+      "totalInventoryCost": 250000.00,
+      "costPerOrder": 12.00
+    },
+    "timeRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+  }
+}
+```
+
+## Integration with AAARRR Pipeline
+
+The Logistics Management system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track delivery performance and customer satisfaction
+- Monitor shipping costs and efficiency
+- Identify logistics bottlenecks and opportunities
+
+### Acquisition
+- Offer competitive shipping options
+- Provide transparent delivery tracking
+- Use logistics data to optimize pricing
+
+### Activation
+- Ensure smooth order fulfillment
+- Provide real-time delivery updates
+- Optimize delivery speed and reliability
+
+### Retention
+- Maintain high delivery satisfaction
+- Proactively address delivery issues
+- Provide flexible delivery options
+
+### Revenue
+- Optimize shipping costs and margins
+- Offer premium delivery services
+- Reduce delivery-related returns
+
+### Referral
+- Create satisfied customers through excellent delivery
+- Share positive delivery experiences
+- Build trust through reliable logistics
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["orderId", "customerId", "shippingAddress"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Shipping order not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to create shipping order",
+  "message": "Carrier API connection error"
+}
+```
+
+## Rate Limits
+
+- **Shipping Orders**: 100 orders per minute per client
+- **Warehouse Operations**: 200 operations per minute per client
+- **Delivery Routes**: 50 routes per minute per client
+- **Analytics**: 100 requests per minute per client
+
+## Best Practices
+
+1. **Route Optimization**: Use algorithms to minimize delivery time and cost
+2. **Real-time Tracking**: Provide customers with live delivery updates
+3. **Inventory Management**: Maintain optimal stock levels to prevent stockouts
+4. **Supplier Relationships**: Build strong relationships with reliable suppliers
+5. **Cost Optimization**: Balance speed and cost for different customer segments
+6. **Quality Control**: Implement quality checks at warehouse and delivery points
+7. **Customer Communication**: Keep customers informed about delivery status
+8. **Performance Monitoring**: Regularly review logistics metrics and KPIs

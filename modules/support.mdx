@@ -1,0 +1,458 @@
+# Support Management API
+
+The Support Management API enables ERP clients to manage customer support tickets, knowledge base articles, and support workflows. This system integrates with the AAARRR pipeline to provide comprehensive customer support capabilities.
+
+## Authentication
+
+All endpoints require authentication using Firebase ID tokens in the Authorization header:
+
+```
+Authorization: Bearer <firebase_id_token>
+```
+
+## Support Ticket Management
+
+### Create Support Ticket
+
+Create a new support ticket for customer assistance.
+
+**Endpoint:** `POST /api/support/tickets`
+
+**Request Body:**
+```json
+{
+  "customerId": "customer_123",
+  "subject": "Payment Issue",
+  "description": "Unable to process payment for order #12345",
+  "priority": "high",
+  "category": "payments",
+  "assignedTo": "agent_456",
+  "tags": ["payment", "urgent"]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "ticket": {
+    "id": "ticket_789",
+    "customerId": "customer_123",
+    "subject": "Payment Issue",
+    "description": "Unable to process payment for order #12345",
+    "priority": "high",
+    "category": "payments",
+    "status": "open",
+    "assignedTo": "agent_456",
+    "tags": ["payment", "urgent"],
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+### Get Support Tickets
+
+Retrieve support tickets with filtering and pagination.
+
+**Endpoint:** `GET /api/support/tickets`
+
+**Query Parameters:**
+- `status` (optional): Filter by ticket status
+- `priority` (optional): Filter by priority level
+- `category` (optional): Filter by category
+- `assignedTo` (optional): Filter by assigned agent
+- `customerId` (optional): Filter by customer
+- `limit` (optional): Number of tickets to return (default: 50)
+- `offset` (optional): Number of tickets to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "tickets": [
+    {
+      "id": "ticket_789",
+      "customerId": "customer_123",
+      "subject": "Payment Issue",
+      "description": "Unable to process payment for order #12345",
+      "priority": "high",
+      "category": "payments",
+      "status": "open",
+      "assignedTo": "agent_456",
+      "tags": ["payment", "urgent"],
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+### Update Support Ticket
+
+Update ticket status, assignment, or other details.
+
+**Endpoint:** `PUT /api/support/tickets/:ticketId`
+
+**Request Body:**
+```json
+{
+  "status": "in_progress",
+  "assignedTo": "agent_789",
+  "priority": "medium",
+  "notes": "Investigating payment gateway issue"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "ticket": {
+    "id": "ticket_789",
+    "status": "in_progress",
+    "assignedTo": "agent_789",
+    "priority": "medium",
+    "notes": "Investigating payment gateway issue",
+    "updatedAt": "2024-01-15T11:00:00.000Z"
+  }
+}
+```
+
+### Add Ticket Response
+
+Add a response or comment to a support ticket.
+
+**Endpoint:** `POST /api/support/tickets/:ticketId/responses`
+
+**Request Body:**
+```json
+{
+  "message": "We have identified the issue with your payment. Please try again in 5 minutes.",
+  "isInternal": false,
+  "attachments": [
+    {
+      "name": "payment_log.png",
+      "url": "https://example.com/attachments/payment_log.png"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "response": {
+    "id": "response_456",
+    "ticketId": "ticket_789",
+    "message": "We have identified the issue with your payment. Please try again in 5 minutes.",
+    "isInternal": false,
+    "attachments": [
+      {
+        "name": "payment_log.png",
+        "url": "https://example.com/attachments/payment_log.png"
+      }
+    ],
+    "createdBy": "agent_789",
+    "createdAt": "2024-01-15T11:30:00.000Z"
+  }
+}
+```
+
+## Knowledge Base Management
+
+### Create Knowledge Base Article
+
+Create a new knowledge base article for customer self-service.
+
+**Endpoint:** `POST /api/support/knowledge-base`
+
+**Request Body:**
+```json
+{
+  "title": "How to Reset Your Password",
+  "content": "Follow these steps to reset your password...",
+  "category": "account",
+  "tags": ["password", "security", "account"],
+  "isPublished": true,
+  "metaDescription": "Learn how to reset your account password"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "article": {
+    "id": "kb_123",
+    "title": "How to Reset Your Password",
+    "content": "Follow these steps to reset your password...",
+    "category": "account",
+    "tags": ["password", "security", "account"],
+    "isPublished": true,
+    "metaDescription": "Learn how to reset your account password",
+    "viewCount": 0,
+    "helpfulCount": 0,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+### Get Knowledge Base Articles
+
+Retrieve knowledge base articles with search and filtering.
+
+**Endpoint:** `GET /api/support/knowledge-base`
+
+**Query Parameters:**
+- `search` (optional): Search in title and content
+- `category` (optional): Filter by category
+- `tags` (optional): Filter by tags (comma-separated)
+- `isPublished` (optional): Filter by publication status
+- `limit` (optional): Number of articles to return (default: 20)
+- `offset` (optional): Number of articles to skip (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "articles": [
+    {
+      "id": "kb_123",
+      "title": "How to Reset Your Password",
+      "content": "Follow these steps to reset your password...",
+      "category": "account",
+      "tags": ["password", "security", "account"],
+      "isPublished": true,
+      "metaDescription": "Learn how to reset your account password",
+      "viewCount": 150,
+      "helpfulCount": 45,
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
+
+## Support Analytics
+
+### Get Support Analytics
+
+Retrieve comprehensive support analytics and metrics.
+
+**Endpoint:** `GET /api/support/analytics`
+
+**Query Parameters:**
+- `startDate` (optional): Start date for analytics (ISO 8601)
+- `endDate` (optional): End date for analytics (ISO 8601)
+- `category` (optional): Filter by ticket category
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "totalTickets": 1250,
+    "openTickets": 45,
+    "resolvedTickets": 1200,
+    "averageResolutionTime": "2.5 hours",
+    "customerSatisfaction": 4.8,
+    "ticketsByCategory": {
+      "payments": 300,
+      "account": 250,
+      "technical": 200,
+      "billing": 150,
+      "other": 350
+    },
+    "ticketsByPriority": {
+      "high": 100,
+      "medium": 400,
+      "low": 750
+    },
+    "responseTimeMetrics": {
+      "averageFirstResponse": "15 minutes",
+      "averageResolution": "2.5 hours"
+    },
+    "timeRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+  }
+}
+```
+
+## Support Workflows
+
+### Create Support Workflow
+
+Create an automated support workflow for ticket routing and processing.
+
+**Endpoint:** `POST /api/support/workflows`
+
+**Request Body:**
+```json
+{
+  "name": "Payment Issue Workflow",
+  "description": "Automated workflow for payment-related tickets",
+  "triggers": [
+    {
+      "type": "ticket_created",
+      "conditions": {
+        "category": "payments",
+        "priority": "high"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "type": "assign_agent",
+      "parameters": {
+        "agentId": "payment_specialist_123"
+      }
+    },
+    {
+      "type": "send_notification",
+      "parameters": {
+        "channel": "email",
+        "template": "payment_issue_alert"
+      }
+    }
+  ],
+  "isActive": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "workflow": {
+    "id": "workflow_456",
+    "name": "Payment Issue Workflow",
+    "description": "Automated workflow for payment-related tickets",
+    "triggers": [
+      {
+        "type": "ticket_created",
+        "conditions": {
+          "category": "payments",
+          "priority": "high"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "assign_agent",
+        "parameters": {
+          "agentId": "payment_specialist_123"
+        }
+      },
+      {
+        "type": "send_notification",
+        "parameters": {
+          "channel": "email",
+          "template": "payment_issue_alert"
+        }
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+## Integration with AAARRR Pipeline
+
+The Support Management system integrates with the AAARRR pipeline:
+
+### Awareness
+- Track support ticket trends and common issues
+- Monitor customer satisfaction scores
+- Identify areas for product improvement
+
+### Acquisition
+- Provide excellent support during onboarding
+- Address concerns that might prevent sign-ups
+- Use support interactions to understand customer needs
+
+### Activation
+- Ensure smooth onboarding with proactive support
+- Address technical issues quickly
+- Provide helpful resources and guidance
+
+### Retention
+- Maintain high customer satisfaction
+- Proactively address potential issues
+- Provide ongoing support and assistance
+
+### Revenue
+- Reduce churn through excellent support
+- Identify upsell opportunities through support interactions
+- Maintain customer relationships
+
+### Referral
+- Create satisfied customers who refer others
+- Share positive support experiences
+- Build trust through excellent service
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "Missing required fields",
+  "required": ["customerId", "subject", "description"]
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": "Authorization header required"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Support ticket not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Failed to create support ticket",
+  "message": "Database connection error"
+}
+```
+
+## Rate Limits
+
+- **Ticket Creation**: 100 tickets per minute per client
+- **Ticket Updates**: 500 updates per minute per client
+- **Knowledge Base**: 50 articles per minute per client
+- **Analytics**: 100 requests per minute per client
+
+## Best Practices
+
+1. **Quick Response**: Respond to high-priority tickets within 1 hour
+2. **Clear Communication**: Use simple, clear language in responses
+3. **Follow-up**: Always follow up on resolved tickets
+4. **Knowledge Base**: Maintain comprehensive self-service resources
+5. **Automation**: Use workflows to automate routine tasks
+6. **Analytics**: Regularly review support metrics and trends
+7. **Training**: Ensure support agents are well-trained
+8. **Escalation**: Have clear escalation procedures for complex issues
