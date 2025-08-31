@@ -1,0 +1,327 @@
+# Voice Agent
+
+The Voice Agent is a comprehensive AI-powered voice interaction system that handles voice communications, call management, and voice analytics. It integrates with multiple voice technologies including SMPP for SMS, SIP for VoIP calls, and WebRTC for web-based communications.
+
+## Overview
+
+The Voice Agent provides intelligent voice communication capabilities through:
+
+- **Multi-Channel Support**: SMS, Voice calls, WebRTC, and SIP trunking
+- **AI-Powered Interactions**: Natural language processing for voice commands
+- **Call Management**: Intelligent call routing and handling
+- **Voice Analytics**: Sentiment analysis and call quality monitoring
+- **Integration**: Twilio, Africa's Talking, and other telecom providers
+
+## Core Features
+
+### 1. SMPP (Short Message Peer-to-Peer) Integration
+
+The agent includes a robust SMPP implementation for SMS messaging:
+
+```json
+{
+  "provider": "string",
+  "systemId": "string",
+  "password": "string",
+  "host": "string",
+  "port": "number",
+  "systemType": "string",
+  "interfaceVersion": "number",
+  "ton": "number",
+  "npi": "number"
+}
+```
+
+**SMPP Capabilities:**
+- **Client Mode**: Send SMS messages to mobile networks
+- **Server Mode**: Receive SMS messages from mobile networks
+- **Session Management**: Maintain persistent connections
+- **Message Routing**: Intelligent message delivery and routing
+- **Status Tracking**: Monitor message delivery status
+
+### 2. Voice Call Management
+
+Handle voice calls with advanced features:
+
+```json
+{
+  "callId": "string",
+  "from": "string",
+  "to": "string",
+  "direction": "inbound|outbound",
+  "status": "ringing|answered|completed|failed",
+  "duration": "number (seconds)",
+  "recordingUrl": "string (optional)",
+  "transcript": "string (optional)"
+}
+```
+
+**Voice Features:**
+- **Call Routing**: Intelligent call distribution
+- **IVR Systems**: Interactive voice response menus
+- **Call Recording**: Automatic call recording and storage
+- **Voice Transcription**: Speech-to-text conversion
+- **Call Analytics**: Performance metrics and insights
+
+### 3. WebRTC Integration
+
+Enable web-based voice communications:
+
+```json
+{
+  "sessionId": "string",
+  "participants": ["array of user IDs"],
+  "mediaType": "audio|video|both",
+  "status": "connecting|connected|disconnected",
+  "quality": "high|medium|low"
+}
+```
+
+**WebRTC Capabilities:**
+- **Browser-Based Calls**: No software installation required
+- **Real-Time Communication**: Low-latency voice and video
+- **Cross-Platform**: Works on desktop and mobile browsers
+- **Quality Adaptation**: Automatic quality adjustment
+- **Security**: Encrypted communications
+
+### 4. SIP Trunk Management
+
+Enterprise-grade SIP trunking capabilities:
+
+```json
+{
+  "trunkId": "string",
+  "provider": "string",
+  "host": "string",
+  "port": "number",
+  "username": "string",
+  "password": "string",
+  "capacity": "number (concurrent calls)",
+  "status": "active|inactive|maintenance"
+}
+```
+
+## AI Capabilities
+
+### Natural Language Processing
+- **Multi-language Support**: English, Swahili, French, and local dialects
+- **Voice Recognition**: High-accuracy speech-to-text conversion
+- **Intent Recognition**: Understand caller intentions and requests
+- **Context Awareness**: Maintain conversation context across sessions
+- **Sentiment Analysis**: Detect caller emotions and satisfaction
+
+### Machine Learning
+- **Call Routing Optimization**: Learn optimal routing patterns
+- **Quality Prediction**: Predict call quality issues
+- **Fraud Detection**: Identify suspicious calling patterns
+- **Customer Behavior Analysis**: Understand calling patterns and preferences
+
+### Predictive Analytics
+- **Call Volume Forecasting**: Predict peak calling times
+- **Resource Planning**: Optimize staffing and infrastructure
+- **Performance Optimization**: Identify areas for improvement
+- **Trend Analysis**: Long-term calling pattern analysis
+
+## Integration Points
+
+### Telecom Providers
+- **Twilio**: SMS, Voice, and WebRTC services
+- **Africa's Talking**: African market SMS and voice
+- **Safaricom**: M-Pesa integration and local services
+- **Airtel**: Pan-African telecom services
+
+### Communication Platforms
+- **Slack**: Team communication integration
+- **Microsoft Teams**: Enterprise communication
+- **WhatsApp Business**: Business messaging
+- **Telegram**: Alternative messaging platform
+
+### CRM Systems
+- **Salesforce**: Customer relationship management
+- **HubSpot**: Marketing and sales automation
+- **Zendesk**: Customer support and ticketing
+- **Freshdesk**: Help desk and support
+
+## API Usage Examples
+
+### Send SMS via SMPP
+
+```bash
+curl -X POST "https://agents-service-xxxxx-uc.a.run.app/api/agents/voice/sms/send" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "provider": "africas_talking",
+    "to": "+254700000000",
+    "from": "DecodedVentures",
+    "message": "Your order has been confirmed. Thank you for choosing us!",
+    "priority": "high"
+  }'
+```
+
+### Initiate Voice Call
+
+```bash
+curl -X POST "https://agents-service-xxxxx-uc.a.run.app/api/agents/voice/calls/initiate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "from": "+254700000000",
+    "to": "+254700000001",
+    "agentId": "voice_agent_123",
+    "callType": "outbound",
+    "script": "welcome_message"
+  }'
+```
+
+### Start WebRTC Session
+
+```bash
+curl -X POST "https://agents-service-xxxxx-uc.a.run.app/api/agents/voice/webrtc/session" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "participants": ["user_123", "agent_456"],
+    "mediaType": "audio",
+    "sessionType": "customer_support",
+    "language": "en"
+  }'
+```
+
+### Get Call Analytics
+
+```bash
+curl -X GET "https://agents-service-xxxxx-uc.a.run.app/api/agents/voice/analytics/calls" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -G \
+  -d "startDate=2024-01-01" \
+  -d "endDate=2024-01-31" \
+  -d "metrics=duration,quality,sentiment"
+```
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Voice Agent Configuration
+AGENT_VOICE_ENABLED=true
+AGENT_VOICE_MODEL=gemini-pro
+AGENT_VOICE_MAX_TOKENS=4000
+
+# SMPP Configuration
+SMPP_ENABLED=true
+SMPP_PROVIDERS=africas_talking,safaricom,airtel
+SMPP_DEFAULT_PROVIDER=africas_talking
+
+# Twilio Integration
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_number
+
+# Africa's Talking Integration
+AFRICAS_TALKING_API_KEY=your_api_key
+AFRICAS_TALKING_USERNAME=your_username
+AFRICAS_TALKING_SENDER_ID=your_sender_id
+
+# FreeSWITCH Configuration
+FREESWITCH_ENABLED=true
+FREESWITCH_HOST=localhost
+FREESWITCH_PORT=5060
+FREESWITCH_PASSWORD=your_password
+```
+
+### Agent Settings
+
+```json
+{
+  "voice": {
+    "enabled": true,
+    "model": "gemini-pro",
+    "maxTokens": 4000,
+    "temperature": 0.7,
+    "language": "en",
+    "providers": {
+      "smpp": {
+        "enabled": true,
+        "defaultProvider": "africas_talking",
+        "retryAttempts": 3,
+        "timeout": 30000
+      },
+      "twilio": {
+        "enabled": true,
+        "webhookUrl": "https://your-domain.com/webhooks/twilio",
+        "recordingEnabled": true
+      },
+      "webrtc": {
+        "enabled": true,
+        "iceServers": ["stun:stun.l.google.com:19302"],
+        "maxParticipants": 10
+      }
+    }
+  }
+}
+```
+
+## Best Practices
+
+### For Developers
+1. **Error Handling**: Implement robust error handling for network failures
+2. **Rate Limiting**: Respect provider rate limits and quotas
+3. **Logging**: Maintain comprehensive logs for debugging
+4. **Monitoring**: Track API performance and success rates
+
+### For Operators
+1. **Quality Monitoring**: Regularly check call quality metrics
+2. **Provider Management**: Monitor multiple provider performance
+3. **Capacity Planning**: Scale infrastructure based on usage patterns
+4. **Security**: Implement proper authentication and encryption
+
+### For Users
+1. **Clear Communication**: Speak clearly and at moderate pace
+2. **Background Noise**: Minimize background noise for better quality
+3. **Network Quality**: Ensure stable internet connection for WebRTC
+4. **Feedback**: Provide feedback to improve service quality
+
+## Troubleshooting
+
+### Common Issues
+
+**SMS Not Delivering**
+- Check provider credentials and balance
+- Verify phone number format and country codes
+- Review provider-specific error messages
+- Check network connectivity
+
+**Voice Call Quality Issues**
+- Verify network bandwidth and stability
+- Check audio device configuration
+- Review call routing settings
+- Monitor server performance
+
+**WebRTC Connection Failures**
+- Check firewall and NAT configuration
+- Verify ICE server availability
+- Review browser compatibility
+- Check network security policies
+
+### Support
+
+For technical support and questions:
+- **Documentation**: [API Reference](https://docs.decodedventures.com)
+- **Support Email**: support@decodedventures.com
+- **Developer Community**: [GitHub Discussions](https://github.com/decodedventures/discussions)
+
+## Future Enhancements
+
+### Planned Features
+- **AI Voice Cloning**: Personalized voice experiences
+- **Real-Time Translation**: Multi-language voice conversations
+- **Advanced Analytics**: Deep learning for call optimization
+- **IoT Integration**: Voice control for smart devices
+
+### Research Areas
+- **Voice Biometrics**: Speaker identification and verification
+- **Emotion Recognition**: Advanced sentiment analysis
+- **Predictive Routing**: AI-powered call routing optimization
+- **Quality Enhancement**: Real-time audio quality improvement

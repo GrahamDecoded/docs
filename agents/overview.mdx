@@ -4,94 +4,230 @@ The Decoded Ventures ERP platform includes a comprehensive suite of AI agents de
 
 ## Available AI Agents
 
-### Voice Agent
-- **Purpose**: Handles voice interactions and call management
-- **Features**: Call routing, voice analytics, sentiment analysis
-- **Integration**: Twilio, Google Speech-to-Text
+### Voice Agent ✅ **IMPLEMENTED**
+- **Purpose**: Handles voice interactions, SMS messaging, and call management
+- **Features**: SMPP integration, call routing, voice analytics, sentiment analysis
+- **Integration**: Twilio, Africa's Talking, Safaricom, FreeSWITCH, WebRTC
+- **Status**: Production ready with SMPP, voice, and WebRTC capabilities
 
-### Sales Agent
+### Agricultural Agent ✅ **IMPLEMENTED**
+- **Purpose**: Optimizes agricultural operations and crop management
+- **Features**: Farmer profiles, crop planning, growth stage tracking, market intelligence
+- **Integration**: Weather APIs, agricultural databases, market data feeds
+- **Status**: Production ready with comprehensive agricultural value chain management
+
+### Sales Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Automates sales processes and lead management
 - **Features**: Lead scoring, follow-up automation, sales analytics
-- **Integration**: CRM systems, email platforms
+- **Integration**: CRM systems, email platforms, payment gateways
+- **Status**: Core framework implemented, features in development
 
-### Finance Agent
+### Finance Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Manages financial operations and reporting
 - **Features**: Expense tracking, budget monitoring, financial forecasting
-- **Integration**: Accounting software, payment processors
+- **Integration**: Accounting software, payment processors, banking APIs
+- **Status**: Core framework implemented, features in development
 
-### HR Agent
+### HR Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Streamlines human resources processes
 - **Features**: Employee onboarding, leave management, performance tracking
-- **Integration**: HRIS systems, payroll platforms
+- **Integration**: HRIS systems, payroll platforms, recruitment tools
+- **Status**: Core framework implemented, features in development
 
-### Support Agent
+### Support Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Provides automated customer support
 - **Features**: Ticket routing, knowledge base integration, escalation management
-- **Integration**: Support platforms, knowledge management systems
+- **Integration**: Support platforms, knowledge management systems, CRM
+- **Status**: Core framework implemented, features in development
 
-### Logistics Agent
+### Logistics Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Optimizes supply chain and logistics operations
 - **Features**: Route optimization, inventory management, delivery tracking
-- **Integration**: Shipping carriers, warehouse management systems
+- **Integration**: Shipping carriers, warehouse management systems, GPS
+- **Status**: Core framework implemented, features in development
 
-### Customer Success Agent
+### Customer Success Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Enhances customer experience and retention
 - **Features**: Customer health monitoring, proactive outreach, success metrics
-- **Integration**: CRM systems, analytics platforms
+- **Integration**: CRM systems, analytics platforms, communication tools
+- **Status**: Core framework implemented, features in development
 
-### Agriculture Agent
-- **Purpose**: Optimizes agricultural operations and crop management
-- **Features**: Weather monitoring, crop planning, yield prediction
-- **Integration**: Weather APIs, agricultural databases
-
-### Manufacturing Agent
+### Manufacturing Agent 🚧 **IN DEVELOPMENT**
 - **Purpose**: Streamlines manufacturing processes and quality control
 - **Features**: Production optimization, quality monitoring, predictive maintenance
-- **Integration**: Manufacturing systems, IoT devices
+- **Integration**: Manufacturing systems, IoT devices, quality control tools
+- **Status**: Core framework implemented, features in development
 
 ## Agent Capabilities
 
 ### Natural Language Processing
-- Multi-language support
-- Context understanding
-- Intent recognition
-- Entity extraction
+- Multi-language support (English, Swahili, French, local dialects)
+- Context understanding and conversation management
+- Intent recognition and entity extraction
+- Sentiment analysis and emotion detection
 
 ### Machine Learning
-- Predictive analytics
-- Pattern recognition
-- Anomaly detection
-- Continuous learning
+- Predictive analytics and forecasting
+- Pattern recognition and anomaly detection
+- Continuous learning and model improvement
+- Personalized recommendations and insights
 
-### Integration
-- API connectivity
-- Webhook support
-- Real-time data processing
-- Multi-platform compatibility
+### Integration & Connectivity
+- API connectivity and webhook support
+- Real-time data processing and streaming
+- Multi-platform compatibility and synchronization
+- Secure authentication and authorization
 
-### Security
-- Data encryption
-- Access control
-- Audit logging
-- Compliance monitoring
+### Security & Compliance
+- Data encryption and secure transmission
+- Role-based access control and permissions
+- Comprehensive audit logging and monitoring
+- GDPR and local compliance standards
+
+## Technical Architecture
+
+### Core Framework
+- **Language**: Scala with Akka Typed Actors
+- **Runtime**: JVM with GraalVM optimization
+- **Database**: Google Firestore for data persistence
+- **AI Models**: Google Gemini Pro for natural language processing
+
+### Communication Protocols
+- **SMPP**: SMS messaging and mobile network integration
+- **SIP**: Voice over IP and telephony systems
+- **WebRTC**: Web-based real-time communications
+- **HTTP/HTTPS**: RESTful API endpoints
+
+### Deployment & Scaling
+- **Platform**: Google Cloud Run for serverless deployment
+- **Build**: Google Cloud Build with SBT
+- **Monitoring**: Cloud Logging and Cloud Monitoring
+- **Scaling**: Automatic scaling based on demand
 
 ## Getting Started
 
-To use AI agents in your ERP implementation:
+### 1. Enable Agents
+Configure agents in your ERP dashboard through the admin interface:
+- Navigate to Settings > AI Agents
+- Select the agents you want to enable
+- Configure provider credentials and settings
+- Set up webhooks and integration endpoints
 
-1. **Enable Agents**: Configure agents in your ERP dashboard
-2. **Set Permissions**: Define agent access and capabilities
-3. **Train Models**: Provide initial data for agent learning
-4. **Monitor Performance**: Track agent effectiveness and metrics
-5. **Optimize**: Continuously improve agent performance
+### 2. Set Permissions
+Define agent access and capabilities:
+- Configure user roles and permissions
+- Set data access boundaries
+- Define agent interaction limits
+- Establish approval workflows
+
+### 3. Train Models
+Provide initial data for agent learning:
+- Upload historical data and examples
+- Configure training parameters
+- Monitor model performance
+- Iterate and improve accuracy
+
+### 4. Monitor Performance
+Track agent effectiveness and metrics:
+- Response time and accuracy
+- User satisfaction scores
+- Error rates and failure modes
+- Resource utilization and costs
+
+### 5. Optimize & Scale
+Continuously improve agent performance:
+- Analyze usage patterns and feedback
+- Optimize prompts and configurations
+- Scale infrastructure as needed
+- Add new capabilities and integrations
 
 ## Best Practices
 
+### Implementation Strategy
 1. **Start Small**: Begin with one agent and expand gradually
-2. **Monitor Closely**: Track agent performance and user feedback
-3. **Provide Training Data**: Ensure agents have quality data to learn from
-4. **Set Clear Boundaries**: Define what agents can and cannot do
-5. **Maintain Human Oversight**: Keep human supervision for critical decisions
-6. **Regular Updates**: Keep agents updated with latest features and improvements
-7. **User Training**: Train users on how to work effectively with agents
-8. **Documentation**: Maintain clear documentation of agent capabilities and limitations
+2. **Pilot Testing**: Test with a small user group before full deployment
+3. **Iterative Development**: Continuously improve based on feedback
+4. **Documentation**: Maintain comprehensive documentation and guides
+
+### Operational Excellence
+1. **Monitor Closely**: Track agent performance and user feedback
+2. **Provide Training Data**: Ensure agents have quality data to learn from
+3. **Set Clear Boundaries**: Define what agents can and cannot do
+4. **Maintain Human Oversight**: Keep human supervision for critical decisions
+
+### Continuous Improvement
+1. **Regular Updates**: Keep agents updated with latest features
+2. **User Training**: Train users on effective agent interaction
+3. **Performance Metrics**: Track and analyze key performance indicators
+4. **Feedback Loops**: Establish mechanisms for continuous feedback
+
+## Current Status
+
+### Production Ready ✅
+- **Voice Agent**: Full SMPP, voice, and WebRTC capabilities
+- **Agricultural Agent**: Complete agricultural value chain management
+- **Core Infrastructure**: Scalable, production-ready platform
+
+### In Development 🚧
+- **Sales Agent**: Core framework complete, features in development
+- **Finance Agent**: Basic structure implemented, expanding functionality
+- **HR Agent**: Framework ready, adding specialized features
+- **Support Agent**: Core capabilities implemented, enhancing automation
+- **Logistics Agent**: Basic routing and tracking implemented
+- **Customer Success Agent**: Framework ready, building intelligence
+- **Manufacturing Agent**: Core structure implemented, adding ML features
+
+### Planned Features 📋
+- **Advanced Analytics**: Deep learning and predictive modeling
+- **Multi-Modal Support**: Voice, text, and image processing
+- **Real-Time Collaboration**: Multi-agent coordination and workflows
+- **Edge Computing**: Local processing for low-latency applications
+- **Blockchain Integration**: Transparent and secure data sharing
+
+## Support & Resources
+
+### Documentation
+- **API Reference**: Complete API documentation and examples
+- **Integration Guides**: Step-by-step setup instructions
+- **Best Practices**: Implementation recommendations and patterns
+- **Troubleshooting**: Common issues and solutions
+
+### Community
+- **Developer Forum**: Technical discussions and Q&A
+- **GitHub Repository**: Source code and issue tracking
+- **User Groups**: Regional and industry-specific communities
+- **Training Programs**: Workshops and certification courses
+
+### Support Channels
+- **Technical Support**: Email and ticketing system
+- **Developer Relations**: Direct support for integration partners
+- **Emergency Support**: 24/7 critical issue resolution
+- **Consulting Services**: Custom implementation and optimization
+
+## Roadmap
+
+### Q1 2024
+- Complete agricultural agent market intelligence features
+- Enhance voice agent sentiment analysis
+- Implement advanced error handling and retry logic
+
+### Q2 2024
+- Launch sales agent with lead management
+- Deploy finance agent with expense tracking
+- Add multi-language support for all agents
+
+### Q3 2024
+- Release HR agent with employee management
+- Launch support agent with ticket automation
+- Implement advanced analytics and reporting
+
+### Q4 2024
+- Deploy logistics agent with route optimization
+- Launch customer success agent with health monitoring
+- Complete manufacturing agent with quality control
+
+### 2025 & Beyond
+- Advanced AI capabilities and machine learning
+- Multi-agent coordination and workflows
+- Edge computing and IoT integration
+- Blockchain and decentralized features
